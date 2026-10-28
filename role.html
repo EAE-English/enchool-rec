@@ -44,6 +44,14 @@
   .btn{flex:1;border-radius:12px;padding:14px;font-family:var(--ko);font-size:16.5px;cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--ink)}
   .btn.main{background:var(--navy);border-color:var(--navy);color:#fff}
   .btn.recs{background:var(--rec);border-color:var(--rec);color:#fff}
+  .btn.speak{background:var(--rec);border-color:var(--rec);color:#fff;font-size:18px;font-weight:700}
+  .btn.speaking{background:var(--navy);border-color:var(--navy);color:#fff;font-size:18px;font-weight:700;animation:pulse 1.2s ease-in-out infinite}
+  @keyframes pulse{50%{box-shadow:0 0 0 6px #FCE3E4}}
+  @media (prefers-reduced-motion:reduce){.btn.speaking{animation:none}}
+  .timer i{font-style:normal;font-size:12px;vertical-align:3px}
+  .timer b{font-weight:800}
+  .timer.off{color:var(--muted)}
+  .count{position:fixed;inset:0;background:rgba(19,46,94,.82);display:grid;place-items:center;color:#fff;font-family:var(--en);font-weight:800;font-size:120px;z-index:9}
   .btn:disabled{opacity:.5;cursor:default}
   audio{width:100%;margin-top:6px}
   .done{text-align:center;box-shadow:inset 0 4px 0 var(--gold)}
@@ -68,7 +76,7 @@
   <section class="card" id="intro">
     <p class="label" id="unit">대화문</p>
     <h1 id="title">불러오는 중…</h1>
-    <p class="sub">나는 <b id="me">-</b> 역할! 상대 대사는 원어민이 읽어 줘요.<br>내 차례가 오면 <b>소리 내어 말하고 ‘다음’</b>을 눌러요. 처음부터 끝까지 한 번에 녹음돼요.<br>🔈 원어민 목소리도 같이 녹음되게 <b>이어폰은 빼고</b> 스피커로 해요.</p>
+    <p class="sub">나는 <b id="me">-</b> 역할! 상대 대사는 원어민이 읽어 줘요.<br>내 차례가 오면 녹음이 잠깐 멈춰요. 준비되면 <b>🎙 말하기</b>를 누르고 말한 뒤 <b>✓ 다 했어요</b>를 눌러요.<br>🔈 원어민 목소리도 같이 녹음되게 <b>이어폰은 빼고</b> 스피커로 해요.</p>
     <div class="tog"><button id="tShow" class="on">영어 보면서</button><button id="tHide">영어 가리고 (도전!)</button></div>
   </section>
   <section class="card tip" id="tip"><b>🎙 처음 한 번만!</b> 「녹음 시작」을 누르면 <b>“마이크 사용을 허용할까요?”</b> 창이 떠요. 꼭 <b>허용</b>을 눌러요.</section>
@@ -86,8 +94,9 @@
   <div class="err" id="err" hidden></div>
 </div>
 
+<div class="count" id="count" hidden>3</div>
 <div class="bar"><div class="bar-in">
-  <span class="timer" id="timer" hidden>00:00</span>
+  <span class="timer" id="timer" hidden><i id="recdot" hidden>●</i> <b id="tt">00:00</b></span>
   <button class="btn recs" id="go">🎙 녹음 시작</button>
   <button class="btn main" id="next" hidden>다음 ▶</button>
   <button class="btn" id="again" hidden>다시 하기</button>
@@ -163,16 +172,35 @@
     document.querySelectorAll('.ln').forEach(el => { const j = +el.dataset.i; el.classList.toggle('cur', j === k); el.classList.toggle('wait', j > k); });
     const el = document.querySelector(`.ln[data-i="${k}"]`); if (el) el.scrollIntoView({block:'center', behavior:'smooth'});
   }
+  /* 녹음 켜기·멈추기: 내 차례엔 멈춰 있다가 「🎙 말하기」로 켬 */
+  let acc = 0, on = 0, speaking = false;
+  function recOn(){ if (rec.state === 'paused') rec.resume(); if (!on) on = Date.now(); setLive(true); }
+  function recOff(){ if (rec.state === 'recording') rec.pause(); if (on){ acc += Date.now() - on; on = 0; } setLive(false); }
+  function setLive(v){ $('timer').classList.toggle('off', !v); $('recdot').hidden = !v; }
   function step(){
     if (!running) return;
     if (i >= D.L.length){ stop(); return; }
     focus(i);
-    const l = D.L[i];
-    if (l[0] === D.me){ $('next').hidden = false; $('next').disabled = false; $('next').textContent = i === lastMine ? '다 했어요 ✓' : '다음 ▶'; }
-    else { $('next').hidden = true; say(l[1], l[0], () => { i++; step(); }); }
+    const l = D.L[i], nb = $('next');
+    if (l[0] === D.me){
+      recOff(); speaking = false;
+      nb.hidden = false; nb.disabled = false; nb.className = 'btn speak'; nb.textContent = '🎙 말하기';
+    } else {
+      nb.hidden = true; recOn();
+      say(l[1], l[0], () => { i++; step(); });
+    }
   }
   const lastMine = D.L.map((l, k) => l[0] === D.me ? k : -1).filter(k => k > -1).pop();
-  $('next').onclick = () => { $('next').disabled = true; i++; step(); };
+  $('next').onclick = () => {
+    const nb = $('next');
+    if (!speaking){ speaking = true; recOn(); nb.className = 'btn speaking'; nb.textContent = i === lastMine ? '✓ 다 했어요 (끝)' : '✓ 다 했어요'; return; }
+    nb.disabled = true; speaking = false; recOff();
+    setTimeout(() => { i++; step(); }, 250);
+  };
+  function countdown(done){
+    const c = $('count'); let n = 3; c.hidden = false; c.textContent = n;
+    const t = setInterval(() => { n--; if (n > 0) c.textContent = n; else { clearInterval(t); c.hidden = true; done(); } }, 800);
+  }
 
   async function start(){
     $('err').hidden = true;
@@ -191,12 +219,13 @@
       document.querySelectorAll('.ln').forEach(el => el.classList.remove('cur', 'wait'));
       $('after').scrollIntoView({block:'center', behavior:'smooth'});
     };
-    $('tip').hidden = true;
-    rec.start(); running = true; i = 0;
-    t0 = Date.now(); $('timer').hidden = false;
-    tick = setInterval(() => { dur = (Date.now() - t0) / 1000; $('timer').textContent = fmt(dur); if (dur >= 600) stop(); }, 250);
-    $('go').hidden = true;
-    step();
+    $('tip').hidden = true; $('go').hidden = true;
+    countdown(() => {
+      acc = 0; on = 0; rec.start(); running = true; i = 0; recOn();
+      $('timer').hidden = false;
+      tick = setInterval(() => { dur = (acc + (on ? Date.now() - on : 0)) / 1000; $('tt').textContent = fmt(dur); if (dur >= 600) stop(); }, 250);
+      step();
+    });
   }
   function micErr(e){
     if (e && e.name === 'NotAllowedError') showErr('마이크가 막혀 있어요. 주소창 왼쪽 🔒(또는 조절 아이콘) → 권한 → 마이크 → 허용으로 바꾸고 다시 눌러 주세요.');
@@ -204,12 +233,12 @@
     else showErr('마이크를 쓸 수 없어요. (' + (e && e.name) + ')');
   }
   function stop(){
-    running = false; clearInterval(tick);
+    running = false; clearInterval(tick); if (on){ acc += Date.now() - on; on = 0; } dur = acc / 1000;
     if (window.speechSynthesis) speechSynthesis.cancel();
     if (rec && rec.state !== 'inactive') rec.stop();
   }
   function reset(){
-    blob = null; dur = 0; $('timer').textContent = '00:00'; $('timer').hidden = true;
+    blob = null; dur = 0; $('tt').textContent = '00:00'; $('timer').hidden = true;
     $('after').hidden = true; $('send').hidden = true; $('again').hidden = true; $('doneCard').hidden = true;
     $('go').hidden = false; draw(); window.scrollTo({top:0, behavior:'smooth'});
   }
