@@ -215,7 +215,7 @@
       $('rolePick').hidden = false; $('stage').hidden = true; $('bar').hidden = true;
       $('rpUnit').textContent = PACK.unit || ''; $('rpTitle').textContent = x.t + (x.sub ? ' · ' + x.sub : '');
       $('rpRoles').innerHTML = sps.map(s => `<button class="btn main" data-role="${esc(s)}">${esc(s)} 역할 <small>(${x.L.filter(l => l[0] === s).length}줄)</small></button>`).join('');
-    } else start(x, x.kind === 'shadow' ? 'shadow' : 'read', '');
+    } else start(x, 'shadow', '');   // 따라 읽기 · 본문 모두 「듣고 바로 따라 하기」(2026-10-29)
   }
   $('rpRoles').addEventListener('click', e => { const b = e.target.closest('[data-role]'); if (b) start(IT, 'role', b.dataset.role); });
 
@@ -224,7 +224,7 @@
   function start(x, mode, me){
     MODE = mode; ME = me; HIDE = false; heard = {}; blob = null;
     $('rolePick').hidden = true; $('stage').hidden = false; $('bar').hidden = false;
-    $('appName').textContent = mode === 'role' ? '쿨톡 역할극 녹음' : mode === 'shadow' ? '따라 읽기 녹음' : '본문 읽기 녹음';
+    $('appName').textContent = mode === 'role' ? '쿨톡 역할극 녹음' : x.kind === 'body' ? '본문 따라 읽기 녹음' : mode === 'shadow' ? '따라 읽기 녹음' : '본문 읽기 녹음';
     if (mode === 'shadow') loadTrack(x);
     $('unit').textContent = PACK.unit || ''; $('title').textContent = x.t + (x.sub ? ' · ' + x.sub : '');
     $('how').innerHTML = mode === 'role'
@@ -240,10 +240,12 @@
     $('more').hidden = ITEMS.length < 2;
     draw(); window.scrollTo({top:0});
   }
-  function lines(){ if (IT.kind === 'shadow') return (IT.words || []).map(w => [w.w, w.ex || '', w.ko || '']);
+  function lines(){ if (IT.kind === 'body') return bodyLines(IT).map(t => ['', t, '']);
+    if (IT.kind === 'shadow') return (IT.words || []).map(w => [w.w, w.ex || '', w.ko || '']);
     return IT.kind === 'dlg' ? IT.L : (IT.lines || String(IT.text || '').split(/(?<=[.!?])\s+/)).map(t => ['', t, '']); }
   function draw(){
     $('lines').innerHTML = lines().map((l, i) => {
+      if (MODE === 'shadow' && IT.kind === 'body') return `<div class="ln rd" data-i="${i}"><span class="en">${esc(plain(l[1]))}</span></div>`;
       if (MODE === 'shadow') return `<div class="ln rd sh" data-i="${i}"><span class="wd">${esc(l[0])} <small>${esc(l[2])}</small></span>${l[1] ? `<span class="en">${esc(l[1])}</span>` : ''}</div>`;
       if (MODE === 'read') return `<div class="ln rd" data-i="${i}"><span class="en">${esc(plain(l[1]))}</span>${l[2] ? `<span class="ko">${esc(l[2])}</span>` : ''}</div>`;
       const me = l[0] === ME;
@@ -272,25 +274,32 @@
       if (!j.ok) throw 0;
       const by = Uint8Array.from(atob(j.b64), c => c.charCodeAt(0));
       TRK[k] = URL.createObjectURL(new Blob([by], {type:j.mime || 'audio/mpeg'}));
-      SEGS[k] = null; segment(by.buffer.slice(0)).then(sg => { SEGS[k] = sg; }).catch(() => {});
+      SEGS[k] = null; segment(by.buffer.slice(0), wantSegs(x)).then(sg => { SEGS[k] = sg; }).catch(() => {});
       if (IT && IT.audio === k){ AUD = rate(new Audio(TRK[k])); set('✓ 음원 준비 끝'); }
     }).catch(() => { TRK[k] = 'none'; if (IT && IT.audio === k) set('음원이 아직 없어서 원어민 목소리로 읽어 줘요'); });
   }
   /* 따라 말할 틈: 음원을 소리 덩어리(단어·예문)로 나눠서, 하나 끝날 때마다 그 길이만큼 쉬어요 */
   const SEGS = {};
-  async function segment(buf){
+  const wantSegs = x => x.kind === 'shadow' ? (x.words || []).reduce((n, w) => n + 1 + (w.ex ? 1 : 0), 0) : bodyLines(x).length;
+  const bodyLines = x => x.lines || String(x.text || '').split(/(?<=[.!?])\s+/).filter(Boolean);
+  async function segment(buf, want){
     const ctx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 16000, 16000);
     const ab = await new Promise((ok, no) => { const r = ctx.decodeAudioData(buf, ok, no); if (r && r.then) r.then(ok, no); });
     const d = ab.getChannelData(0), sr = ab.sampleRate, hop = Math.round(sr * 0.02), F = [];
     for (let i = 0; i + hop <= d.length; i += hop){ let e = 0; for (let j = i; j < i + hop; j++) e += d[j] * d[j]; F.push(10 * Math.log10(e / hop + 1e-12)); }
     const peak = F.slice().sort((a, b) => b - a)[Math.floor(F.length * 0.05)] || -20, th = Math.max(-50, peak - 30);
-    const segs = []; let st = -1, quiet = 0;
-    F.forEach((v, i) => {
-      if (v > th){ if (st < 0) st = i; quiet = 0; }
-      else if (st >= 0 && ++quiet * 0.02 >= 0.35){ segs.push([st * 0.02, (i - quiet + 1) * 0.02]); st = -1; quiet = 0; }
-    });
-    if (st >= 0) segs.push([st * 0.02, F.length * 0.02]);
-    return segs.filter(([a, b]) => b - a >= 0.2).map(([a, b]) => [Math.max(0, a - 0.05), b + 0.1]);
+    const cut = gap => { const segs = []; let st = -1, quiet = 0;
+      F.forEach((v, i) => {
+        if (v > th){ if (st < 0) st = i; quiet = 0; }
+        else if (st >= 0 && ++quiet * 0.02 >= gap){ segs.push([st * 0.02, (i - quiet + 1) * 0.02]); st = -1; quiet = 0; }
+      });
+      if (st >= 0) segs.push([st * 0.02, F.length * 0.02]);
+      return segs.filter(([a, b]) => b - a >= 0.2).map(([a, b]) => [Math.max(0, a - 0.05), b + 0.1]); };
+    /* 대본의 문장(단어·예문) 수에 가장 가깝게 끊기는 쉼 길이를 골라요 (쉼표에서 안 끊기게) */
+    let best = cut(0.35);
+    if (want){ let bd = Infinity;
+      [0.25, 0.3, 0.35, 0.45, 0.55, 0.7, 0.9, 1.2].forEach(g => { const sg = cut(g), dd = Math.abs(sg.length - want) + (sg.length < want ? 0.5 : 0); if (dd < bd){ bd = dd; best = sg; } }); }
+    return best;
   }
   let sayT = null;
   function showSay(sec){
@@ -299,7 +308,9 @@
     el.hidden = false; const bar = el.querySelector('i'); bar.style.transition = 'none'; bar.style.width = '100%';
     requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transition = `width ${sec}s linear`; bar.style.width = '0'; }));
   }
-  function playWithGaps(onDone){
+  function playWithGaps(onDone, tries){
+    tries = tries || 0;
+    if (SEGS[IT.audio] === null && tries < 40) return setTimeout(() => playWithGaps(onDone, tries + 1), 100);   // 음원 나누는 중이면 잠깐 기다림
     const a = AUD, sg = SEGS[IT.audio];
     if (!sg || !sg.length){ a.currentTime = 0; a.onended = onDone; a.play().catch(() => ttsShadow(onDone)); return; }
     let i = 0;
@@ -441,7 +452,7 @@
   const sentOK = {};
   function refsHeard(){
     if (MODE === 'role'){ const M = mineIdx(); return [M.map(k => plain(IT.L[k][1])), M.map(k => heard[k] || '')]; }
-    if (MODE === 'shadow') return [[lines().map(l => l[0] + ' ' + plain(l[1])).join(' ')], [heard[0] || '']];
+    if (MODE === 'shadow') return [[lines().map(l => (l[0] ? l[0] + ' ' : '') + plain(l[1])).join(' ')], [heard[0] || '']];
     return [[lines().map(l => plain(l[1])).join(' ')], [heard[0] || '']];
   }
   function heardText(){
@@ -457,7 +468,7 @@
       const [R, H] = refsHeard();
       const payload = {
         student: STUDENT, cls: CLS, key: KEY,
-        title: `${PACK.unit || ''} · ${IT.t}${IT.sub ? ' · ' + IT.sub : ''}${MODE === 'role' ? ' · ' + ME + ' 역할' : MODE === 'shadow' ? ' · 따라 읽기' : ' · 본문 읽기'}`,
+        title: `${PACK.unit || ''} · ${IT.t}${IT.sub ? ' · ' + IT.sub : ''}${MODE === 'role' ? ' · ' + ME + ' 역할' : IT.kind === 'body' ? ' · 본문 따라 읽기' : MODE === 'shadow' ? ' · 따라 읽기' : ' · 본문 읽기'}`,
         refList: R, heardList: H, transcript: heardText(),
         base64: String(r.result).split(',')[1], mimeType: mime, durationSec: dur
       };
