@@ -68,7 +68,7 @@
   <section class="card" id="intro">
     <p class="label" id="unit">대화문</p>
     <h1 id="title">불러오는 중…</h1>
-    <p class="sub">나는 <b id="me">-</b> 역할! 상대 대사는 원어민이 읽어 줘요.<br>내 차례가 오면 <b>소리 내어 말하고 ‘다음’</b>을 눌러요. 처음부터 끝까지 한 번에 녹음돼요.</p>
+    <p class="sub">나는 <b id="me">-</b> 역할! 상대 대사는 원어민이 읽어 줘요.<br>내 차례가 오면 <b>소리 내어 말하고 ‘다음’</b>을 눌러요. 처음부터 끝까지 한 번에 녹음돼요.<br>🔈 원어민 목소리도 같이 녹음되게 <b>이어폰은 빼고</b> 스피커로 해요.</p>
     <div class="tog"><button id="tShow" class="on">영어 보면서</button><button id="tHide">영어 가리고 (도전!)</button></div>
   </section>
   <section class="card tip" id="tip"><b>🎙 처음 한 번만!</b> 「녹음 시작」을 누르면 <b>“마이크 사용을 허용할까요?”</b> 창이 떠요. 꼭 <b>허용</b>을 눌러요.</section>
@@ -176,7 +176,7 @@
 
   async function start(){
     $('err').hidden = true;
-    try{ stream = await navigator.mediaDevices.getUserMedia({audio:true}); }
+    try{ stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:true}}); }
     catch(e){ micErr(e); return; }
     mime = pickMime();
     rec = mime ? new MediaRecorder(stream, {mimeType:mime}) : new MediaRecorder(stream);
