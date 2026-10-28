@@ -75,7 +75,12 @@
   .listen{margin-top:12px;width:100%;border:1.5px solid var(--navy);background:#fff;color:var(--navy);border-radius:12px;padding:11px;font-family:var(--ko);font-size:15.5px;cursor:pointer}
   .ln.rd{max-width:100%}
   .ln.sh .wd{font-family:var(--en);font-weight:800;font-size:20px;color:var(--navy)}.ln.sh .wd small{font-family:var(--ko);font-weight:400;font-size:14px;color:var(--muted);margin-left:6px}.ln.sh .en{font-weight:600;font-size:16.5px}
-  .ear{color:var(--rec);font-size:16px}
+  .sub .ear{color:var(--rec);font-size:16.5px}
+  #stage>*+*{margin-top:12px}
+  .best{display:flex;gap:12px;align-items:center;background:var(--navy);color:#fff;border-radius:16px;padding:14px 16px;box-shadow:inset 0 0 0 2px var(--gold)}
+  .best .bi{font-size:34px;line-height:1;flex:none}
+  .best b{display:block;font-size:16.5px;color:var(--gold);font-weight:700;margin-bottom:3px}
+  .best p{margin:0;font-size:14.5px;line-height:1.55;color:#E8EDF6}.best p b{display:inline;color:#fff;font-size:inherit;margin:0}
   .spd{display:flex;gap:6px;align-items:center;margin-top:10px;font-size:14px;color:var(--muted)}.spd button{border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:5px 12px;font-family:var(--ko);font-size:14px;cursor:pointer;color:var(--ink)}.spd button.on{border-color:var(--navy);background:var(--navy);color:#fff}.trk{display:inline-block;margin-top:6px;font-size:13.5px;color:var(--navy);background:var(--navy-soft);border-radius:6px;padding:2px 8px}
   .nmin{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:12px;padding:12px;font-size:17px;font-family:var(--ko)}
 </style>
@@ -105,6 +110,7 @@
 
   <!-- ③ 녹음 -->
   <div id="stage" hidden>
+    <section class="best" id="bestNote"><div class="bi">🏆</div><div><b>이 녹음은 선생님께 그대로 전달돼요!</b><p>매달 말, <b>이달의 최고 녹음</b>을 뽑아요.<br>항상 최선을 다해서 녹음해 주세요 💪</p></div></section>
     <section class="card" id="intro">
       <p class="label" id="unit"></p>
       <h1 id="title"></h1>
@@ -227,7 +233,7 @@
     $('how').innerHTML = mode === 'role'
       ? `나는 <b>${esc(me)}</b> 역할! 상대 대사는 원어민이 읽어 줘요.<br>내 차례가 오면 녹음이 잠깐 멈춰요. 준비되면 <b>🎙 말하기</b>를 누르고 말한 뒤 <b>✓ 다 했어요</b>를 눌러요.<br>🔈 원어민 목소리도 같이 녹음되게 <b>이어폰은 빼고</b> 스피커로 해요.`
       : mode === 'shadow'
-      ? `<b class="ear">🎧 이어폰을 끼고 해요!</b><br><b>🎙 녹음 시작</b>을 누르면 원어민 음원이 나와요. 듣고 <b>바로 따라</b> 말해요.<br>음원이 끝나면 녹음도 저절로 끝나요.<br><span id="trk" class="trk">음원 준비 중…</span>
+      ? `<b class="ear">🎧 가능하면 이어폰을 끼고 진행해 주세요!</b><br><b>🎙 녹음 시작</b>을 누르면 원어민 음원이 나와요. 듣고 <b>바로 따라</b> 말해요.<br>음원이 끝나면 녹음도 저절로 끝나요.<br><span id="trk" class="trk">음원 준비 중…</span>
         <div class="spd" id="spd">속도 ${[0.7,0.8,0.9,1].map(r => `<button data-spd="${r}" class="${r === RATE ? 'on' : ''}">${r === 1 ? '보통' : r + '배'}</button>`).join('')}</div>`
       : `먼저 <b>🔊 원어민 먼저 들어 보기</b>로 들어 봐요.<br>준비되면 <b>🎙 녹음 시작</b>을 누르고 처음부터 끝까지 소리 내어 읽은 뒤 <b>■ 다 읽었어요</b>를 눌러요.`;
     $('tog').hidden = mode !== 'role'; $('listenAll').hidden = mode === 'role';
