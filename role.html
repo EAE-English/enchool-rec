@@ -271,7 +271,9 @@
         student: STUDENT, lessonId: 'roleplay',
         title: `${D.u || '쿨톡'} · ${D.t} · ${D.me} 역할`,
         text: D.L.map(l => l[0] + ': ' + plain(l[1])).join('\n'),
-        base64: String(r.result).split(',')[1], mimeType: mime, transcript: heardText(), durationSec: dur
+        base64: String(r.result).split(',')[1], mimeType: mime, transcript: heardText(), durationSec: dur,
+        refList: D.L.filter(l => l[0] === D.me).map(l => plain(l[1])),
+        heardList: D.L.map((l, k) => [l, k]).filter(([l]) => l[0] === D.me).map(([, k]) => heard[k] || '')
       };
       const ok = () => { $('doneCard').hidden = false; $('send').hidden = true; $('again').disabled = false; $('send').disabled = false; $('send').textContent = '선생님께 보내기'; $('again').textContent = '한 번 더 하기'; $('doneCard').scrollIntoView({block:'center', behavior:'smooth'}); };
       const fail = e => { showErr('보내기가 안 됐어요. 다시 눌러 주세요. (' + e.message + ')'); $('send').disabled = false; $('again').disabled = false; $('send').textContent = '선생님께 보내기'; };
