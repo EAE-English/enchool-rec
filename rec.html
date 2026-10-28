@@ -304,8 +304,9 @@
   /* 받아쓰기(Chrome 내장) */
   const SRC = window.SpeechRecognition || window.webkitSpeechRecognition;
   let sr = null, heard = {}, srLine = -1;
+  const LIVE_SR = false;   // 녹음 중 Chrome 받아쓰기를 같이 켜면 마이크를 뺏어서 녹음에 무음 구간이 생김(2026-10-29) → 끔
   function srStart(k){
-    if (!SRC) return; srLine = k; heard[k] = heard[k] || '';
+    if (!SRC || !LIVE_SR) return; srLine = k; heard[k] = heard[k] || '';
     try{
       sr = new SRC(); sr.lang = 'en-US'; sr.continuous = true; sr.interimResults = false;
       sr.onresult = e => { for (let j = e.resultIndex; j < e.results.length; j++) if (e.results[j].isFinal) heard[srLine] = (heard[srLine] + ' ' + e.results[j][0].transcript).trim(); };
