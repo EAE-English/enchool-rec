@@ -174,6 +174,23 @@
   }
   /* 녹음 켜기·멈추기: 내 차례엔 멈춰 있다가 「🎙 말하기」로 켬 */
   let acc = 0, on = 0, speaking = false;
+  /* 받아쓰기(Chrome 내장): 내 대사 말할 때만 듣고 글자로 → 시트 「인식된 문장(자동)」 */
+  const SRC = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let sr = null, heard = {}, srLine = -1;
+  function srStart(k){
+    if (!SRC) return; srLine = k; heard[k] = heard[k] || '';
+    try{
+      sr = new SRC(); sr.lang = 'en-US'; sr.continuous = true; sr.interimResults = false; sr.maxAlternatives = 1;
+      sr.onresult = e => { for (let j = e.resultIndex; j < e.results.length; j++) if (e.results[j].isFinal) heard[srLine] = (heard[srLine] + ' ' + e.results[j][0].transcript).trim(); };
+      sr.onerror = () => {}; sr.start();
+    }catch(e){ sr = null; }
+  }
+  function srStop(){ if (sr){ try{ sr.stop(); }catch(e){} sr = null; } }
+  function heardText(){
+    const mine = D.L.map((l, k) => [l, k]).filter(([l]) => l[0] === D.me);
+    if (!mine.some(([, k]) => heard[k])) return '';
+    return mine.map(([l, k], n) => `${n + 1}) ${heard[k] || '(못 알아들음)'}  ← ${plain(l[1])}`).join('\n');
+  }
   function recOn(){ if (rec.state === 'paused') rec.resume(); if (!on) on = Date.now(); setLive(true); }
   function recOff(){ if (rec.state === 'recording') rec.pause(); if (on){ acc += Date.now() - on; on = 0; } setLive(false); }
   function setLive(v){ $('timer').classList.toggle('off', !v); $('recdot').hidden = !v; }
@@ -193,8 +210,9 @@
   const lastMine = D.L.map((l, k) => l[0] === D.me ? k : -1).filter(k => k > -1).pop();
   $('next').onclick = () => {
     const nb = $('next');
-    if (!speaking){ speaking = true; recOn(); nb.className = 'btn speaking'; nb.textContent = i === lastMine ? '✓ 다 했어요 (끝)' : '✓ 다 했어요'; return; }
+    if (!speaking){ speaking = true; recOn(); srStart(i); nb.className = 'btn speaking'; nb.textContent = i === lastMine ? '✓ 다 했어요 (끝)' : '✓ 다 했어요'; return; }
     nb.disabled = true; speaking = false; recOff();
+    const k = i; setTimeout(srStop, 600);   // 끝말이 잘리지 않게 조금 더 듣기
     setTimeout(() => { i++; step(); }, 250);
   };
   function countdown(done){
@@ -236,6 +254,7 @@
     if (rec && rec.state !== 'inactive') rec.stop();
   }
   function reset(){
+    heard = {};
     blob = null; dur = 0; $('tt').textContent = '00:00'; $('timer').hidden = true;
     $('after').hidden = true; $('send').hidden = true; $('again').hidden = true; $('doneCard').hidden = true;
     $('go').hidden = false; draw(); window.scrollTo({top:0, behavior:'smooth'});
@@ -252,7 +271,7 @@
         student: STUDENT, lessonId: 'roleplay',
         title: `${D.u || '쿨톡'} · ${D.t} · ${D.me} 역할`,
         text: D.L.map(l => l[0] + ': ' + plain(l[1])).join('\n'),
-        base64: String(r.result).split(',')[1], mimeType: mime, transcript: '', durationSec: dur
+        base64: String(r.result).split(',')[1], mimeType: mime, transcript: heardText(), durationSec: dur
       };
       const ok = () => { $('doneCard').hidden = false; $('send').hidden = true; $('again').disabled = false; $('send').disabled = false; $('send').textContent = '선생님께 보내기'; $('again').textContent = '한 번 더 하기'; $('doneCard').scrollIntoView({block:'center', behavior:'smooth'}); };
       const fail = e => { showErr('보내기가 안 됐어요. 다시 눌러 주세요. (' + e.message + ')'); $('send').disabled = false; $('again').disabled = false; $('send').textContent = '선생님께 보내기'; };
