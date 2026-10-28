@@ -287,6 +287,7 @@
   }
   /* 따라 말할 틈: 음원을 소리 덩어리(단어·예문)로 나눠서, 하나 끝날 때마다 그 길이만큼 쉬어요 */
   const SEGS = {};
+  const PAUSE_PLUS = 2;   // 따라 말할 시간 = 원어민 소리 길이(속도 반영) + 2초
   const wantSegs = x => x.kind === 'shadow' ? (x.words || []).reduce((n, w) => n + 1 + (w.ex ? 1 : 0), 0) : bodyLines(x).length;
   const bodyLines = x => x.lines || String(x.text || '').split(/(?<=[.!?])\s+/).filter(Boolean);
   async function segment(buf, want){
@@ -335,7 +336,7 @@
       (function watch(){
         if (!running){ a.pause(); return; }
         if (a.currentTime >= e0 || a.ended){
-          a.pause(); const gap = (e0 - s0) / RATE + 0.5; i++;
+          a.pause(); const gap = (e0 - s0) / RATE + PAUSE_PLUS; i++;
           showSay(gap); setTimeout(next, gap * 1000);
         } else setTimeout(watch, 30);
       })();
@@ -350,7 +351,10 @@
       if (k >= L.length){ onDone && onDone(); return; }
       focus(k, true); const t = part === 0 ? L[k][0] : L[k][1];
       if (!t){ part = 0; k++; return nx(); }
-      say(t, '', () => setTimeout(() => { if (part === 0 && L[k][1]) part = 1; else { part = 0; k++; } nx(); }, 700 + plain(t).length * 70));
+      const t0 = Date.now();
+      say(t, '', () => { const gap = Math.max(500, Date.now() - t0 - 450) / 1000 + PAUSE_PLUS;   // 원어민이 말한 시간 + 2초
+        if (running) showSay(gap);
+        setTimeout(() => { showSay(0); if (part === 0 && L[k][1]) part = 1; else { part = 0; k++; } nx(); }, gap * 1000); });
     })();
   }
 
@@ -443,7 +447,10 @@
     else if (MODE === 'shadow'){
       $('go').className = 'btn main'; $('go').textContent = '■ 그만하기'; srStart(0);
       const fin = () => setTimeout(stop, 900);
-      if (AUD) playWithGaps(fin); else ttsShadow(fin);
+      /* 마이크를 켜면 블루투스 이어폰이 통화 모드로 바뀌느라 1~2초 동안 소리가 스피커로 새요 → 2초 기다렸다 시작 */
+      const el = $('say'); el.hidden = false; el.querySelector('b').textContent = '🎧 준비 중… 곧 시작해요'; el.querySelector('i').style.width = '0';
+      setTimeout(() => { el.querySelector('b').textContent = '🗣 지금 따라 말해요!'; el.hidden = true; if (!running) return;
+        if (AUD) playWithGaps(fin); else ttsShadow(fin); }, 2000);
     }
     else { $('go').className = 'btn main'; $('go').textContent = '■ 다 읽었어요'; srStart(0); }
   };
