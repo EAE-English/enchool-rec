@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<title>쿨톡 역할극 녹음</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Gowun+Dodum&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* [Claude] 쿨톡 역할극 녹음 · 엔쿨 네이비 + 골드 */
+  :root{--bg:#F3F5F9;--card:#fff;--ink:#1B2433;--muted:#667085;--line:#E1E6EE;--navy:#132E5E;--navy-soft:#E8EDF6;
+    --gold:#D9B45A;--gold-soft:#FBF4E2;--rec:#E5484D;
+    --ko:'Gowun Dodum','Apple SD Gothic Neo','Malgun Gothic',sans-serif;--en:'Nunito','Helvetica Neue',Arial,sans-serif;--serif:'Cinzel',serif}
+  *{box-sizing:border-box}[hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ko);-webkit-font-smoothing:antialiased}
+  .band{background:var(--navy);color:#fff}
+  .band-in{max-width:560px;margin:0 auto;padding:16px;display:flex;align-items:center;gap:12px}
+  .eae{font-family:var(--serif);color:var(--gold);font-size:15px;letter-spacing:.12em}
+  .kr{font-size:17px}
+  .who{margin-left:auto;text-align:right}
+  .who span{display:block;font-size:12px;color:#B9C4DA}
+  .who strong{display:inline-block;margin-top:3px;font-size:16px;font-weight:400;color:var(--navy);background:var(--gold);border-radius:999px;padding:3px 12px}
+  .wrap{max-width:560px;margin:0 auto;padding:16px 16px 120px;display:flex;flex-direction:column;gap:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+  .label{display:inline-block;font-size:12.5px;color:var(--navy);background:var(--navy-soft);border-radius:6px;padding:3px 9px;margin:0 0 8px}
+  h1{font-family:var(--en);font-weight:800;font-size:19px;margin:0 0 6px;color:var(--navy);line-height:1.3}
+  .sub{margin:0;color:var(--muted);font-size:14.5px;line-height:1.55}
+  .sub b{color:var(--navy)}
+  .tog{display:flex;gap:8px;margin-top:12px}
+  .tog button{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:9px;font-family:var(--ko);font-size:14px;color:var(--muted);cursor:pointer}
+  .tog button.on{border-color:var(--navy);color:var(--navy);background:var(--navy-soft)}
+  .ln{display:flex;flex-direction:column;gap:4px;max-width:86%;padding:10px 13px;border-radius:14px;background:#fff;border:1px solid var(--line)}
+  .ln .sp{font-size:12px;color:var(--muted)}
+  .ln .en{font-family:var(--en);font-weight:700;font-size:18px;line-height:1.45}
+  .ln .ko{font-size:14.5px;color:var(--muted)}
+  .ln.me{align-self:flex-end;background:var(--gold-soft);border-color:var(--gold)}
+  .ln.me .sp{color:#8A6A1F}
+  .ln.cur{box-shadow:0 0 0 3px var(--gold)}
+  .ln .peek{align-self:flex-start;border:0;background:none;color:var(--navy);font-family:var(--ko);font-size:13px;padding:2px 0;cursor:pointer;text-decoration:none}
+  .ln.hide .en{filter:blur(6px);user-select:none}
+  .ln.wait{opacity:.35}
+  .bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+  .bar-in{max-width:560px;margin:0 auto;display:flex;gap:10px;align-items:center}
+  .timer{font-family:var(--en);font-weight:800;font-size:20px;color:var(--rec);min-width:64px;font-variant-numeric:tabular-nums}
+  .btn{flex:1;border-radius:12px;padding:14px;font-family:var(--ko);font-size:16.5px;cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--ink)}
+  .btn.main{background:var(--navy);border-color:var(--navy);color:#fff}
+  .btn.recs{background:var(--rec);border-color:var(--rec);color:#fff}
+  .btn:disabled{opacity:.5;cursor:default}
+  audio{width:100%;margin-top:6px}
+  .done{text-align:center;box-shadow:inset 0 4px 0 var(--gold)}
+  .done h2{margin:6px 0;color:var(--navy);font-weight:400;font-size:22px}
+  .done p{margin:0;color:var(--muted)}
+  .err{background:#FDECEC;color:#9B1C1F;border-radius:12px;padding:12px 14px;font-size:15px}
+  .tip{font-size:15px;line-height:1.6;background:var(--gold-soft);border-color:var(--gold)}
+  .tip b{color:var(--navy)}
+  .inapp{text-align:center;border-color:var(--rec)}
+  .inapp p{color:var(--muted);margin:8px 0 12px}.inapp .small{font-size:13.5px}
+  .inapp a.btn{display:block;text-decoration:none}
+  :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+</style>
+</head>
+<body>
+<header class="band"><div class="band-in">
+  <div><div class="eae">E.A.Ǝ</div><div class="kr">쿨톡 역할극 녹음</div></div>
+  <div class="who"><span>오늘의 배우</span><strong id="who">-</strong></div>
+</div></header>
+
+<div class="wrap">
+  <section class="card" id="intro">
+    <p class="label" id="unit">대화문</p>
+    <h1 id="title">불러오는 중…</h1>
+    <p class="sub">나는 <b id="me">-</b> 역할! 상대 대사는 원어민이 읽어 줘요.<br>내 차례가 오면 <b>소리 내어 말하고 ‘다음’</b>을 눌러요. 처음부터 끝까지 한 번에 녹음돼요.</p>
+    <div class="tog"><button id="tShow" class="on">영어 보면서</button><button id="tHide">영어 가리고 (도전!)</button></div>
+  </section>
+  <section class="card tip" id="tip"><b>🎙 처음 한 번만!</b> 「녹음 시작」을 누르면 <b>“마이크 사용을 허용할까요?”</b> 창이 떠요. 꼭 <b>허용</b>을 눌러요.</section>
+  <section class="card inapp" id="inapp" hidden><b>여기서는 녹음이 안 돼요</b><p>카카오톡·네이버 같은 앱 안의 화면이에요. 아래 버튼을 눌러 Chrome으로 열어 주세요.</p><a class="btn main" id="openChrome" href="#">Chrome으로 열기</a><p class="small" id="iosTip" hidden>아이폰: 오른쪽 아래 ⋯ 또는 공유 버튼 → 「Safari로 열기」를 눌러요.</p></section>
+  <div id="lines" style="display:flex;flex-direction:column;gap:10px"></div>
+  <section class="card" id="after" hidden>
+    <p class="label">내 녹음 들어 보기</p>
+    <audio id="mine" controls></audio>
+  </section>
+  <section class="card done" id="doneCard" hidden>
+    <div style="font-size:44px">🎬</div>
+    <h2>멋진 연기였어요!</h2>
+    <p>녹음이 선생님께 잘 전달됐어요.</p>
+  </section>
+  <div class="err" id="err" hidden></div>
+</div>
+
+<div class="bar"><div class="bar-in">
+  <span class="timer" id="timer" hidden>00:00</span>
+  <button class="btn recs" id="go">🎙 녹음 시작</button>
+  <button class="btn main" id="next" hidden>다음 ▶</button>
+  <button class="btn" id="again" hidden>다시 하기</button>
+  <button class="btn main" id="send" hidden>선생님께 보내기</button>
+</div></div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const LOG = 'https://script.google.com/macros/s/AKfycbwdK8492SzMcrc_hmwGWIquliehqASMrSAhbXJ5D-UyygkmwYvO23LWDzU8O44UrGQD/exec';
+  const Q = new URLSearchParams(location.search), STUDENT = (Q.get('s') || '').trim();
+  /* 앱 안의 작은 창(카톡·네이버 등)에서는 마이크가 막혀요 → Chrome으로 */
+  const UA = navigator.userAgent, isAnd = /Android/i.test(UA), isIOS = /iPhone|iPad|iPod/i.test(UA);
+  const inApp = /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line\/|DaumApps|everytimeApp|; wv\)/i.test(UA);
+  if (inApp){
+    $('inapp').hidden = false; $('tip').hidden = true;
+    if (isAnd) $('openChrome').href = 'intent://' + location.href.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end';
+    else { $('openChrome').hidden = true; $('iosTip').hidden = false; }
+  }
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const plain = s => String(s).replace(/[\[\]]/g, '');
+  function showErr(m){ $('err').textContent = m; $('err').hidden = false; }
+  function fmt(s){ return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(Math.floor(s%60)).padStart(2,'0'); }
+
+  let D = null;
+  try{
+    const b = (Q.get('r') || '').replace(/-/g,'+').replace(/_/g,'/');
+    const bin = atob(b + '==='.slice((b.length + 3) % 4));
+    D = JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))));
+  }catch(e){ showErr('대화문을 읽지 못했어요. 쿨톡에서 다시 눌러 주세요.'); return; }
+
+  $('who').textContent = STUDENT || '이름 없음';
+  $('unit').textContent = D.u || '쿨톡';
+  $('title').textContent = D.t || '대화문';
+  $('me').textContent = D.me;
+  if (!STUDENT) showErr('이름이 없어요. 쿨톡에서 이름을 넣고 다시 들어와 주세요.');
+
+  let HIDE = false;
+  function draw(){
+    $('lines').innerHTML = D.L.map((l, i) => {
+      const me = l[0] === D.me;
+      return `<div class="ln${me ? ' me' : ''}${me && HIDE ? ' hide' : ''}" data-i="${i}"><span class="sp">${esc(l[0])}${me ? ' · 나' : ''}</span>
+        <span class="en">${esc(plain(l[1]))}</span>${l[2] ? `<span class="ko">${esc(l[2])}</span>` : ''}
+        ${me && HIDE ? '<button class="peek" data-peek>👀 살짝 보기</button>' : ''}</div>`;
+    }).join('');
+  }
+  draw();
+  $('tShow').onclick = () => { if (running) return; HIDE = false; $('tShow').classList.add('on'); $('tHide').classList.remove('on'); draw(); };
+  $('tHide').onclick = () => { if (running) return; HIDE = true; $('tHide').classList.add('on'); $('tShow').classList.remove('on'); draw(); };
+  $('lines').addEventListener('click', e => { const b = e.target.closest('[data-peek]'); if (b){ b.closest('.ln').classList.remove('hide'); b.remove(); } });
+
+  /* 목소리: 상대 역할마다 다른 원어민 */
+  let VO = [];
+  function loadVoices(){ VO = speechSynthesis.getVoices().filter(v => /^en[-_]/i.test(v.lang)); }
+  if (window.speechSynthesis){ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+  const spk = [...new Set(D.L.map(l => l[0]))];
+  function say(text, who, done){
+    if (!window.speechSynthesis){ setTimeout(done, 1500); return; }
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(plain(text));
+    u.lang = 'en-US'; u.rate = .92;
+    if (VO.length) u.voice = VO[spk.indexOf(who) % VO.length];
+    let fired = false; const fin = () => { if (!fired){ fired = true; setTimeout(done, 450); } };
+    u.onend = fin; u.onerror = fin;
+    setTimeout(fin, 1500 + plain(text).length * 110);   // 소리가 안 끝나도 멈추지 않게
+    speechSynthesis.speak(u);
+  }
+
+  let rec = null, chunks = [], stream = null, mime = '', t0 = 0, tick = null, dur = 0, blob = null, running = false, i = 0;
+  function pickMime(){ for (const m of ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg']) if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m; return ''; }
+
+  function focus(k){
+    document.querySelectorAll('.ln').forEach(el => { const j = +el.dataset.i; el.classList.toggle('cur', j === k); el.classList.toggle('wait', j > k); });
+    const el = document.querySelector(`.ln[data-i="${k}"]`); if (el) el.scrollIntoView({block:'center', behavior:'smooth'});
+  }
+  function step(){
+    if (!running) return;
+    if (i >= D.L.length){ stop(); return; }
+    focus(i);
+    const l = D.L[i];
+    if (l[0] === D.me){ $('next').hidden = false; $('next').disabled = false; $('next').textContent = i === lastMine ? '다 했어요 ✓' : '다음 ▶'; }
+    else { $('next').hidden = true; say(l[1], l[0], () => { i++; step(); }); }
+  }
+  const lastMine = D.L.map((l, k) => l[0] === D.me ? k : -1).filter(k => k > -1).pop();
+  $('next').onclick = () => { $('next').disabled = true; i++; step(); };
+
+  async function start(){
+    $('err').hidden = true;
+    try{ stream = await navigator.mediaDevices.getUserMedia({audio:true}); }
+    catch(e){ micErr(e); return; }
+    mime = pickMime();
+    rec = mime ? new MediaRecorder(stream, {mimeType:mime}) : new MediaRecorder(stream);
+    mime = rec.mimeType || mime || 'audio/webm';
+    chunks = [];
+    rec.ondataavailable = e => e.data.size && chunks.push(e.data);
+    rec.onstop = () => {
+      blob = new Blob(chunks, {type:mime});
+      $('mine').src = URL.createObjectURL(blob); $('after').hidden = false;
+      $('send').hidden = false; $('again').hidden = false; $('next').hidden = true;
+      stream.getTracks().forEach(t => t.stop());
+      document.querySelectorAll('.ln').forEach(el => el.classList.remove('cur', 'wait'));
+      $('after').scrollIntoView({block:'center', behavior:'smooth'});
+    };
+    $('tip').hidden = true;
+    rec.start(); running = true; i = 0;
+    t0 = Date.now(); $('timer').hidden = false;
+    tick = setInterval(() => { dur = (Date.now() - t0) / 1000; $('timer').textContent = fmt(dur); if (dur >= 600) stop(); }, 250);
+    $('go').hidden = true;
+    step();
+  }
+  function micErr(e){
+    if (e && e.name === 'NotAllowedError') showErr('마이크가 막혀 있어요. 주소창 왼쪽 🔒(또는 조절 아이콘) → 권한 → 마이크 → 허용으로 바꾸고 다시 눌러 주세요.');
+    else if (e && e.name === 'NotFoundError') showErr('마이크를 찾지 못했어요. 이어폰·마이크가 연결돼 있는지 봐 주세요.');
+    else showErr('마이크를 쓸 수 없어요. (' + (e && e.name) + ')');
+  }
+  function stop(){
+    running = false; clearInterval(tick);
+    if (window.speechSynthesis) speechSynthesis.cancel();
+    if (rec && rec.state !== 'inactive') rec.stop();
+  }
+  function reset(){
+    blob = null; dur = 0; $('timer').textContent = '00:00'; $('timer').hidden = true;
+    $('after').hidden = true; $('send').hidden = true; $('again').hidden = true; $('doneCard').hidden = true;
+    $('go').hidden = false; draw(); window.scrollTo({top:0, behavior:'smooth'});
+  }
+  $('go').onclick = start;
+  $('again').onclick = reset;
+
+  $('send').onclick = () => {
+    if (!blob) return;
+    $('send').disabled = true; $('again').disabled = true; $('send').textContent = '보내는 중…';
+    const r = new FileReader();
+    r.onload = () => {
+      const payload = {
+        student: STUDENT, lessonId: 'roleplay',
+        title: `${D.u || '쿨톡'} · ${D.t} · ${D.me} 역할`,
+        text: D.L.map(l => l[0] + ': ' + plain(l[1])).join('\n'),
+        base64: String(r.result).split(',')[1], mimeType: mime, transcript: '', durationSec: dur
+      };
+      const ok = () => { $('doneCard').hidden = false; $('send').hidden = true; $('again').disabled = false; $('send').disabled = false; $('send').textContent = '선생님께 보내기'; $('again').textContent = '한 번 더 하기'; $('doneCard').scrollIntoView({block:'center', behavior:'smooth'}); };
+      const fail = e => { showErr('보내기가 안 됐어요. 다시 눌러 주세요. (' + e.message + ')'); $('send').disabled = false; $('again').disabled = false; $('send').textContent = '선생님께 보내기'; };
+      fetch(LOG, {method:'POST', body:JSON.stringify(payload)})   // text/plain: 구글로 바로 보냄
+        .then(r => r.json()).then(j => j && j.ok ? ok() : fail(new Error(j && j.error || '저장 실패')))
+        .catch(fail);
+    };
+    r.readAsDataURL(blob);
+  };
+})();
+</script>
+</body>
+</html>
