@@ -287,7 +287,8 @@
   }
   /* 따라 말할 틈: 음원을 소리 덩어리(단어·예문)로 나눠서, 하나 끝날 때마다 그 길이만큼 쉬어요 */
   const SEGS = {};
-  const PAUSE_PLUS = 2;   // 따라 말할 시간 = 원어민 소리 길이(속도 반영) + 2초
+  /* 따라 말할 시간 = 원어민 소리 길이(속도 반영) + 여유: 짧은 단어는 1초, 문장은 2초 (2026-10-29 선생님 요청) */
+  const plusFor = len => len < 1.4 ? 1 : 2;
   const wantSegs = x => x.kind === 'shadow' ? (x.words || []).reduce((n, w) => n + 1 + (w.ex ? 1 : 0), 0) : bodyLines(x).length;
   const bodyLines = x => x.lines || String(x.text || '').split(/(?<=[.!?])\s+/).filter(Boolean);
   async function segment(buf, want){
@@ -336,7 +337,7 @@
       (function watch(){
         if (!running){ a.pause(); return; }
         if (a.currentTime >= e0 || a.ended){
-          a.pause(); const gap = (e0 - s0) / RATE + PAUSE_PLUS; i++;
+          a.pause(); const len = (e0 - s0) / RATE, gap = len + plusFor(len); i++;
           showSay(gap); setTimeout(next, gap * 1000);
         } else setTimeout(watch, 30);
       })();
@@ -352,7 +353,7 @@
       focus(k, true); const t = part === 0 ? L[k][0] : L[k][1];
       if (!t){ part = 0; k++; return nx(); }
       const t0 = Date.now();
-      say(t, '', () => { const gap = Math.max(500, Date.now() - t0 - 450) / 1000 + PAUSE_PLUS;   // 원어민이 말한 시간 + 2초
+      say(t, '', () => { const len = Math.max(500, Date.now() - t0 - 450) / 1000, gap = len + plusFor(len);   // 원어민이 말한 시간 + (단어 1초 · 문장 2초)
         if (running) showSay(gap);
         setTimeout(() => { showSay(0); if (part === 0 && L[k][1]) part = 1; else { part = 0; k++; } nx(); }, gap * 1000); });
     })();
