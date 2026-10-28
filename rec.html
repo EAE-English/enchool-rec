@@ -75,6 +75,8 @@
   .listen{margin-top:12px;width:100%;border:1.5px solid var(--navy);background:#fff;color:var(--navy);border-radius:12px;padding:11px;font-family:var(--ko);font-size:15.5px;cursor:pointer}
   .ln.rd{max-width:100%}
   .ln.sh .wd{font-family:var(--en);font-weight:800;font-size:20px;color:var(--navy)}.ln.sh .wd small{font-family:var(--ko);font-weight:400;font-size:14px;color:var(--muted);margin-left:6px}.ln.sh .en{font-weight:600;font-size:16.5px}
+  .say{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));width:min(528px,calc(100% - 32px));background:var(--gold);color:var(--navy);border-radius:14px;padding:10px 14px;box-shadow:0 6px 18px rgba(19,46,94,.25);z-index:5}
+  .say b{display:block;font-size:17px;text-align:center}.say span{display:block;height:6px;background:rgba(19,46,94,.18);border-radius:99px;margin-top:6px;overflow:hidden}.say i{display:block;height:100%;width:100%;background:var(--navy)}
   .ear{color:var(--rec);font-size:16px}
   .spd{display:flex;gap:6px;align-items:center;margin-top:10px;font-size:14px;color:var(--muted)}.spd button{border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:5px 12px;font-family:var(--ko);font-size:14px;cursor:pointer;color:var(--ink)}.spd button.on{border-color:var(--navy);background:var(--navy);color:#fff}.trk{display:inline-block;margin-top:6px;font-size:13.5px;color:var(--navy);background:var(--navy-soft);border-radius:6px;padding:2px 8px}
   .nmin{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:12px;padding:12px;font-size:17px;font-family:var(--ko)}
@@ -129,6 +131,7 @@
   <div class="err" id="err" hidden></div>
 </div>
 
+<div class="say" id="say" hidden><b>🗣 지금 따라 말해요!</b><span><i></i></span></div>
 <div class="bar" id="bar" hidden><div class="bar-in">
   <span class="timer" id="timer" hidden><i id="recdot" hidden>●</i> <b id="tt">00:00</b></span>
   <button class="btn recs" id="go">🎙 녹음 시작</button>
@@ -227,7 +230,7 @@
     $('how').innerHTML = mode === 'role'
       ? `나는 <b>${esc(me)}</b> 역할! 상대 대사는 원어민이 읽어 줘요.<br>내 차례가 오면 녹음이 잠깐 멈춰요. 준비되면 <b>🎙 말하기</b>를 누르고 말한 뒤 <b>✓ 다 했어요</b>를 눌러요.<br>🔈 원어민 목소리도 같이 녹음되게 <b>이어폰은 빼고</b> 스피커로 해요.`
       : mode === 'shadow'
-      ? `<b class="ear">🎧 이어폰을 끼고 해요!</b><br><b>🎙 녹음 시작</b>을 누르면 원어민 음원이 나와요. 듣고 <b>바로 따라</b> 말해요.<br>음원이 끝나면 녹음도 저절로 끝나요.<br><span id="trk" class="trk">음원 준비 중…</span>
+      ? `<b class="ear">🎧 이어폰을 끼고 해요!</b><br><b>🎙 녹음 시작</b>을 누르면 원어민 음원이 나와요. 원어민이 하나 말하면 <b>잠깐 멈춰요</b>. 그때 <b>따라 말해요</b>.<br>끝까지 저절로 넘어가고, 음원이 끝나면 녹음도 끝나요.<br><span id="trk" class="trk">음원 준비 중…</span>
         <div class="spd" id="spd">속도 ${[0.7,0.8,0.9,1].map(r => `<button data-spd="${r}" class="${r === RATE ? 'on' : ''}">${r === 1 ? '보통' : r + '배'}</button>`).join('')}</div>`
       : `먼저 <b>🔊 원어민 먼저 들어 보기</b>로 들어 봐요.<br>준비되면 <b>🎙 녹음 시작</b>을 누르고 처음부터 끝까지 소리 내어 읽은 뒤 <b>■ 다 읽었어요</b>를 눌러요.`;
     $('tog').hidden = mode !== 'role'; $('listenAll').hidden = mode === 'role';
@@ -269,9 +272,52 @@
       if (!j.ok) throw 0;
       const by = Uint8Array.from(atob(j.b64), c => c.charCodeAt(0));
       TRK[k] = URL.createObjectURL(new Blob([by], {type:j.mime || 'audio/mpeg'}));
+      SEGS[k] = null; segment(by.buffer.slice(0)).then(sg => { SEGS[k] = sg; }).catch(() => {});
       if (IT && IT.audio === k){ AUD = rate(new Audio(TRK[k])); set('✓ 음원 준비 끝'); }
     }).catch(() => { TRK[k] = 'none'; if (IT && IT.audio === k) set('음원이 아직 없어서 원어민 목소리로 읽어 줘요'); });
   }
+  /* 따라 말할 틈: 음원을 소리 덩어리(단어·예문)로 나눠서, 하나 끝날 때마다 그 길이만큼 쉬어요 */
+  const SEGS = {};
+  async function segment(buf){
+    const ctx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 16000, 16000);
+    const ab = await new Promise((ok, no) => { const r = ctx.decodeAudioData(buf, ok, no); if (r && r.then) r.then(ok, no); });
+    const d = ab.getChannelData(0), sr = ab.sampleRate, hop = Math.round(sr * 0.02), F = [];
+    for (let i = 0; i + hop <= d.length; i += hop){ let e = 0; for (let j = i; j < i + hop; j++) e += d[j] * d[j]; F.push(10 * Math.log10(e / hop + 1e-12)); }
+    const peak = F.slice().sort((a, b) => b - a)[Math.floor(F.length * 0.05)] || -20, th = Math.max(-50, peak - 30);
+    const segs = []; let st = -1, quiet = 0;
+    F.forEach((v, i) => {
+      if (v > th){ if (st < 0) st = i; quiet = 0; }
+      else if (st >= 0 && ++quiet * 0.02 >= 0.35){ segs.push([st * 0.02, (i - quiet + 1) * 0.02]); st = -1; quiet = 0; }
+    });
+    if (st >= 0) segs.push([st * 0.02, F.length * 0.02]);
+    return segs.filter(([a, b]) => b - a >= 0.2).map(([a, b]) => [Math.max(0, a - 0.05), b + 0.1]);
+  }
+  let sayT = null;
+  function showSay(sec){
+    const el = $('say'); clearTimeout(sayT);
+    if (!sec){ el.hidden = true; return; }
+    el.hidden = false; const bar = el.querySelector('i'); bar.style.transition = 'none'; bar.style.width = '100%';
+    requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transition = `width ${sec}s linear`; bar.style.width = '0'; }));
+  }
+  function playWithGaps(onDone){
+    const a = AUD, sg = SEGS[IT.audio];
+    if (!sg || !sg.length){ a.currentTime = 0; a.onended = onDone; a.play().catch(() => ttsShadow(onDone)); return; }
+    let i = 0;
+    (function next(){
+      if (!running) return;
+      if (i >= sg.length){ showSay(0); onDone(); return; }
+      const [s0, e0] = sg[i]; a.onended = null; a.currentTime = s0; showSay(0);
+      a.play().catch(() => {});
+      (function watch(){
+        if (!running){ a.pause(); return; }
+        if (a.currentTime >= e0 || a.ended){
+          a.pause(); const gap = (e0 - s0) / RATE + 0.5; i++;
+          showSay(gap); setTimeout(next, gap * 1000);
+        } else setTimeout(watch, 30);
+      })();
+    })();
+  }
+
   /* 음원이 없을 때: 단어 → (따라 할 틈) → 예문 → (틈) … */
   function ttsShadow(onDone){
     const L = lines(); let k = 0, part = 0;
@@ -377,14 +423,14 @@
     else if (MODE === 'shadow'){
       $('go').className = 'btn main'; $('go').textContent = '■ 그만하기'; srStart(0);
       const fin = () => setTimeout(stop, 900);
-      if (AUD){ AUD.currentTime = 0; AUD.onended = fin; AUD.play().catch(() => ttsShadow(fin)); } else ttsShadow(fin);
+      if (AUD) playWithGaps(fin); else ttsShadow(fin);
     }
     else { $('go').className = 'btn main'; $('go').textContent = '■ 다 읽었어요'; srStart(0); }
   };
   function stop(){
     if (!running) return;
     running = false; clearInterval(tick); if (on){ acc += Date.now() - on; on = 0; } dur = acc / 1000;
-    if (window.speechSynthesis) speechSynthesis.cancel(); if (AUD) AUD.pause();
+    if (window.speechSynthesis) speechSynthesis.cancel(); if (AUD) AUD.pause(); showSay(0);
     setTimeout(srStop, MODE !== 'role' ? 700 : 0);
     if (rec && rec.state !== 'inactive') rec.stop();
   }
