@@ -45,6 +45,7 @@
 <script type="module">
 const LOG = 'https://script.google.com/macros/s/AKfycbwdK8492SzMcrc_hmwGWIquliehqASMrSAhbXJ5D-UyygkmwYvO23LWDzU8O44UrGQD/exec';
 const $ = id => document.getElementById(id);
+const fdt = v => { const d = new Date(v); if (isNaN(d)) return String(v ?? ''); const z = n => String(n).padStart(2, '0'); return `${d.getMonth() + 1}/${d.getDate()} ${z(d.getHours())}:${z(d.getMinutes())}`; };
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const H = new URLSearchParams(location.hash.slice(1));
 let KEY = H.get('k') || ''; try{ if (KEY) localStorage.setItem('enc_grade_key', KEY); else KEY = localStorage.getItem('enc_grade_key') || ''; }catch(e){}
@@ -68,7 +69,7 @@ async function load(){
   $('msg').textContent = n ? `채점할 녹음 ${n}개` : '채점할 녹음이 없어요 ✓'; $('go').disabled = !n;
 }
 function draw(){
-  $('list').innerHTML = ROWS.map((r, i) => `<tr><td class="st">${esc(r.date)}</td><td class="st">${esc(r.name)}</td><td>${esc(r.title)}</td>
+  $('list').innerHTML = ROWS.map((r, i) => `<tr><td class="st">${esc(fdt(r.date))}</td><td class="st">${esc(r.name)}</td><td>${esc(r.title)}</td>
     <td class="st" id="s${i}">${r.todo ? '대기' : r.score != null ? '✓ 채점됨' : (r.ref || []).length ? '' : '대본 없음'}</td>
     <td class="sc ${r.score >= 80 ? 'ok' : r.score != null ? 'bad' : ''}">${r.score != null ? r.score + '점' : ''}</td>
     <td class="hd">${esc(r.weak || '')}${r.heard ? `<br>“${esc(String(r.heard).slice(0, 160))}”` : ''}</td></tr>`).join('');
