@@ -74,6 +74,8 @@
   .back{align-self:flex-start;border:0;background:none;color:var(--navy);font-family:var(--ko);font-size:14.5px;cursor:pointer;padding:6px 2px;margin-top:6px}
   .listen{margin-top:12px;width:100%;border:1.5px solid var(--navy);background:#fff;color:var(--navy);border-radius:12px;padding:11px;font-family:var(--ko);font-size:15.5px;cursor:pointer}
   .ln.rd{max-width:100%}
+  .ln.sh .wd{font-family:var(--en);font-weight:800;font-size:20px;color:var(--navy)}.ln.sh .wd small{font-family:var(--ko);font-weight:400;font-size:14px;color:var(--muted);margin-left:6px}.ln.sh .en{font-weight:600;font-size:16.5px}
+  .ear{color:var(--rec);font-size:16px}.trk{display:inline-block;margin-top:6px;font-size:13.5px;color:var(--navy);background:var(--navy-soft);border-radius:6px;padding:2px 8px}
   .nmin{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:12px;padding:12px;font-size:17px;font-family:var(--ko)}
 </style>
 </head>
@@ -174,7 +176,8 @@
   function init(P){
     PACK = P;
     const dl = (P.dialogs || []).map(d => ({kind:'dlg', ...d})), bd = (P.body || []).map(b => ({kind:'body', st:0, ...b}));
-    let L = dl.concat(bd), m;
+    const sh = (P.shadow || []).map(x => ({kind:'shadow', st:0, ...x}));
+    let L = dl.concat(bd).concat(sh), m;
     if (!SEL) ITEMS = L;
     else if ((m = SEL.match(/^s(\d+)(?:_(\d+))?$/i))) { const a = +m[1], b = +(m[2] || m[1]); ITEMS = dl.filter(d => d.st >= Math.min(a,b) && d.st <= Math.max(a,b)); }
     else if (/^body$/i.test(SEL)) ITEMS = bd;
@@ -187,10 +190,10 @@
     $('pkUnit').textContent = PACK.unit || '녹음 숙제';
     let h = '', last = -1;
     ITEMS.forEach((x, i) => {
-      const g = x.kind === 'body' ? 'b' : (x.st || 0);
-      if (g !== last){ last = g; h += `<div class="pkh">${g === 'b' ? '<b>📖 본문 읽기</b>' : g ? `<b>Step ${g}</b>${PACK.steps && PACK.steps[g] ? ' · ' + esc(PACK.steps[g]) : ''}` : '<b>🎭 대화문 역할극</b>'}</div>`; }
+      const g = x.kind === 'body' ? 'b' : x.kind === 'shadow' ? 'h' : (x.st || 0);
+      if (g !== last){ last = g; h += `<div class="pkh">${g === 'h' ? '<b>🎧 따라 읽기</b>' : g === 'b' ? '<b>📖 본문 읽기</b>' : g ? `<b>Step ${g}</b>${PACK.steps && PACK.steps[g] ? ' · ' + esc(PACK.steps[g]) : ''}` : '<b>🎭 대화문 역할극</b>'}</div>`; }
       const done = sentOK[x.id];
-      h += `<button class="pk${done ? ' done' : ''}" data-it="${i}"><b>${esc(x.t)}</b><small>${esc([x.p, x.sub].filter(Boolean).join(' · '))}</small>${done ? '<span>✓ 보냄</span>' : ''}</button>`;
+      h += `<button class="pk${done ? ' done' : ''}" data-it="${i}"><b>${esc(x.t)}</b><small>${esc(x.kind === 'shadow' ? (x.words || []).map(w => w.w).join(', ') : [x.p, x.sub].filter(Boolean).join(' · '))}</small>${done ? '<span>✓ 보냄</span>' : ''}</button>`;
     });
     $('pkList').innerHTML = h;
   }
@@ -208,7 +211,7 @@
       $('rolePick').hidden = false; $('stage').hidden = true; $('bar').hidden = true;
       $('rpUnit').textContent = PACK.unit || ''; $('rpTitle').textContent = x.t + (x.sub ? ' · ' + x.sub : '');
       $('rpRoles').innerHTML = sps.map(s => `<button class="btn main" data-role="${esc(s)}">${esc(s)} 역할 <small>(${x.L.filter(l => l[0] === s).length}줄)</small></button>`).join('');
-    } else start(x, 'read', '');
+    } else start(x, x.kind === 'shadow' ? 'shadow' : 'read', '');
   }
   $('rpRoles').addEventListener('click', e => { const b = e.target.closest('[data-role]'); if (b) start(IT, 'role', b.dataset.role); });
 
@@ -217,21 +220,26 @@
   function start(x, mode, me){
     MODE = mode; ME = me; HIDE = false; heard = {}; blob = null;
     $('rolePick').hidden = true; $('stage').hidden = false; $('bar').hidden = false;
-    $('appName').textContent = mode === 'role' ? '쿨톡 역할극 녹음' : '본문 읽기 녹음';
+    $('appName').textContent = mode === 'role' ? '쿨톡 역할극 녹음' : mode === 'shadow' ? '따라 읽기 녹음' : '본문 읽기 녹음';
+    if (mode === 'shadow') loadTrack(x);
     $('unit').textContent = PACK.unit || ''; $('title').textContent = x.t + (x.sub ? ' · ' + x.sub : '');
     $('how').innerHTML = mode === 'role'
       ? `나는 <b>${esc(me)}</b> 역할! 상대 대사는 원어민이 읽어 줘요.<br>내 차례가 오면 녹음이 잠깐 멈춰요. 준비되면 <b>🎙 말하기</b>를 누르고 말한 뒤 <b>✓ 다 했어요</b>를 눌러요.<br>🔈 원어민 목소리도 같이 녹음되게 <b>이어폰은 빼고</b> 스피커로 해요.`
+      : mode === 'shadow'
+      ? `<b class="ear">🎧 이어폰을 끼고 해요!</b><br><b>🎙 녹음 시작</b>을 누르면 원어민 음원이 나와요. 듣고 <b>바로 따라</b> 말해요.<br>음원이 끝나면 녹음도 저절로 끝나요.<br><span id="trk" class="trk">음원 준비 중…</span>`
       : `먼저 <b>🔊 원어민 먼저 들어 보기</b>로 들어 봐요.<br>준비되면 <b>🎙 녹음 시작</b>을 누르고 처음부터 끝까지 소리 내어 읽은 뒤 <b>■ 다 읽었어요</b>를 눌러요.`;
-    $('tog').hidden = mode !== 'role'; $('listenAll').hidden = mode !== 'read';
+    $('tog').hidden = mode !== 'role'; $('listenAll').hidden = mode === 'role';
     $('tShow').classList.add('on'); $('tHide').classList.remove('on');
     ['after','doneCard','send','again','next','timer'].forEach(id => $(id).hidden = true);
     $('go').hidden = false; $('go').disabled = false; $('go').className = 'btn recs'; $('go').textContent = '🎙 녹음 시작';
     $('more').hidden = ITEMS.length < 2;
     draw(); window.scrollTo({top:0});
   }
-  function lines(){ return IT.kind === 'dlg' ? IT.L : (IT.lines || String(IT.text || '').split(/(?<=[.!?])\s+/)).map(t => ['', t, '']); }
+  function lines(){ if (IT.kind === 'shadow') return (IT.words || []).map(w => [w.w, w.ex || '', w.ko || '']);
+    return IT.kind === 'dlg' ? IT.L : (IT.lines || String(IT.text || '').split(/(?<=[.!?])\s+/)).map(t => ['', t, '']); }
   function draw(){
     $('lines').innerHTML = lines().map((l, i) => {
+      if (MODE === 'shadow') return `<div class="ln rd sh" data-i="${i}"><span class="wd">${esc(l[0])} <small>${esc(l[2])}</small></span>${l[1] ? `<span class="en">${esc(l[1])}</span>` : ''}</div>`;
       if (MODE === 'read') return `<div class="ln rd" data-i="${i}"><span class="en">${esc(plain(l[1]))}</span>${l[2] ? `<span class="ko">${esc(l[2])}</span>` : ''}</div>`;
       const me = l[0] === ME;
       return `<div class="ln${me ? ' me' : ''}${me && HIDE ? ' hide' : ''}" data-i="${i}"><span class="sp">${esc(l[0])}${me ? ' · 나' : ''}</span>
@@ -242,6 +250,32 @@
   $('tShow').onclick = () => { if (running) return; HIDE = false; $('tShow').classList.add('on'); $('tHide').classList.remove('on'); draw(); };
   $('tHide').onclick = () => { if (running) return; HIDE = true; $('tHide').classList.add('on'); $('tShow').classList.remove('on'); draw(); };
   $('lines').addEventListener('click', e => { const b = e.target.closest('[data-peek]'); if (b){ b.closest('.ln').classList.remove('hide'); b.remove(); } });
+
+  /* 따라 읽기 음원: 선생님 드라이브 → Apps Script → 여기 (없으면 원어민 목소리로) */
+  let AUD = null, TRK = {};
+  function loadTrack(x){
+    AUD = null; const k = x.audio;
+    const set = t => { const el = $('trk'); if (el) el.textContent = t; };
+    if (TRK[k] === 'none'){ set('음원이 아직 없어서 원어민 목소리로 읽어 줘요'); return; }
+    if (TRK[k]){ AUD = new Audio(TRK[k]); set('✓ 음원 준비 끝'); return; }
+    fetch(LOG + '?a=track&k=' + encodeURIComponent(k)).then(r => r.json()).then(j => {
+      if (!j.ok) throw 0;
+      const by = Uint8Array.from(atob(j.b64), c => c.charCodeAt(0));
+      TRK[k] = URL.createObjectURL(new Blob([by], {type:j.mime || 'audio/mpeg'}));
+      if (IT && IT.audio === k){ AUD = new Audio(TRK[k]); set('✓ 음원 준비 끝'); }
+    }).catch(() => { TRK[k] = 'none'; if (IT && IT.audio === k) set('음원이 아직 없어서 원어민 목소리로 읽어 줘요'); });
+  }
+  /* 음원이 없을 때: 단어 → (따라 할 틈) → 예문 → (틈) … */
+  function ttsShadow(onDone){
+    const L = lines(); let k = 0, part = 0;
+    (function nx(){
+      if (!(running || playing)) return;
+      if (k >= L.length){ onDone && onDone(); return; }
+      focus(k, true); const t = part === 0 ? L[k][0] : L[k][1];
+      if (!t){ part = 0; k++; return nx(); }
+      say(t, '', () => setTimeout(() => { if (part === 0 && L[k][1]) part = 1; else { part = 0; k++; } nx(); }, 700 + plain(t).length * 70));
+    })();
+  }
 
   /* 원어민 목소리 */
   let VO = [];
@@ -259,8 +293,11 @@
   }
   let playing = false;
   $('listenAll').onclick = () => {
-    if (playing){ playing = false; speechSynthesis.cancel(); focus(-1); $('listenAll').textContent = '🔊 원어민 먼저 들어 보기'; return; }
-    playing = true; $('listenAll').textContent = '■ 그만 듣기'; const L = lines(); let k = 0;
+    if (playing){ playing = false; speechSynthesis.cancel(); if (AUD) AUD.pause(); focus(-1); $('listenAll').textContent = '🔊 원어민 먼저 들어 보기'; return; }
+    playing = true; $('listenAll').textContent = '■ 그만 듣기';
+    const endL = () => { playing = false; focus(-1); $('listenAll').textContent = '🔊 원어민 먼저 들어 보기'; };
+    if (MODE === 'shadow'){ if (AUD){ AUD.currentTime = 0; AUD.onended = endL; AUD.play().catch(endL); } else ttsShadow(endL); return; }
+    const L = lines(); let k = 0;
     (function nx(){ if (!playing || k >= L.length){ playing = false; focus(-1); $('listenAll').textContent = '🔊 원어민 먼저 들어 보기'; return; } focus(k, true); say(L[k][1], '', () => { k++; nx(); }); })();
   };
 
@@ -273,7 +310,7 @@
       sr = new SRC(); sr.lang = 'en-US'; sr.continuous = true; sr.interimResults = false;
       sr.onresult = e => { for (let j = e.resultIndex; j < e.results.length; j++) if (e.results[j].isFinal) heard[srLine] = (heard[srLine] + ' ' + e.results[j][0].transcript).trim(); };
       sr.onerror = () => {};
-      sr.onend = () => { if (MODE === 'read' && running && sr) try{ sr.start(); }catch(e){} };   // 본문은 길어서 끊기면 다시 듣기
+      sr.onend = () => { if (MODE !== 'role' && running && sr) try{ sr.start(); }catch(e){} };   // 본문은 길어서 끊기면 다시 듣기
       sr.start();
     }catch(e){ sr = null; }
   }
@@ -310,7 +347,7 @@
     else showErr('마이크를 쓸 수 없어요. (' + (e && e.name) + ')');
   }
   $('go').onclick = async () => {
-    if (running && MODE === 'read'){ stop(); return; }
+    if (running && MODE !== 'role'){ stop(); return; }
     if (playing) $('listenAll').click();
     $('err').hidden = true;
     try{ stream = await navigator.mediaDevices.getUserMedia({audio: MODE === 'role' ? {echoCancellation:false, noiseSuppression:false, autoGainControl:true} : true}); }
@@ -329,13 +366,18 @@
     acc = 0; on = 0; rec.start(); running = true; i = 0; recOn(); $('timer').hidden = false;
     tick = setInterval(() => { dur = (acc + (on ? Date.now() - on : 0)) / 1000; $('tt').textContent = fmt(dur); if (dur >= 600) stop(); }, 250);
     if (MODE === 'role'){ $('go').hidden = true; step(); }
+    else if (MODE === 'shadow'){
+      $('go').className = 'btn main'; $('go').textContent = '■ 그만하기'; srStart(0);
+      const fin = () => setTimeout(stop, 900);
+      if (AUD){ AUD.currentTime = 0; AUD.onended = fin; AUD.play().catch(() => ttsShadow(fin)); } else ttsShadow(fin);
+    }
     else { $('go').className = 'btn main'; $('go').textContent = '■ 다 읽었어요'; srStart(0); }
   };
   function stop(){
     if (!running) return;
     running = false; clearInterval(tick); if (on){ acc += Date.now() - on; on = 0; } dur = acc / 1000;
-    if (window.speechSynthesis) speechSynthesis.cancel();
-    setTimeout(srStop, MODE === 'read' ? 700 : 0);
+    if (window.speechSynthesis) speechSynthesis.cancel(); if (AUD) AUD.pause();
+    setTimeout(srStop, MODE !== 'role' ? 700 : 0);
     if (rec && rec.state !== 'inactive') rec.stop();
   }
   function stopAll(){ playing = false; if (window.speechSynthesis) speechSynthesis.cancel(); stop(); }
@@ -345,6 +387,7 @@
   const sentOK = {};
   function refsHeard(){
     if (MODE === 'role'){ const M = mineIdx(); return [M.map(k => plain(IT.L[k][1])), M.map(k => heard[k] || '')]; }
+    if (MODE === 'shadow') return [[lines().map(l => l[0] + ' ' + plain(l[1])).join(' ')], [heard[0] || '']];
     return [[lines().map(l => plain(l[1])).join(' ')], [heard[0] || '']];
   }
   function heardText(){
@@ -360,13 +403,13 @@
       const [R, H] = refsHeard();
       const payload = {
         student: STUDENT, cls: CLS, key: KEY,
-        title: `${PACK.unit || ''} · ${IT.t}${IT.sub ? ' · ' + IT.sub : ''}${MODE === 'role' ? ' · ' + ME + ' 역할' : ' · 본문 읽기'}`,
+        title: `${PACK.unit || ''} · ${IT.t}${IT.sub ? ' · ' + IT.sub : ''}${MODE === 'role' ? ' · ' + ME + ' 역할' : MODE === 'shadow' ? ' · 따라 읽기' : ' · 본문 읽기'}`,
         refList: R, heardList: H, transcript: heardText(),
         base64: String(r.result).split(',')[1], mimeType: mime, durationSec: dur
       };
       const reset = () => { $('send').disabled = false; $('again').disabled = false; $('send').textContent = '선생님께 보내기'; };
       const ok = () => { reset(); sentOK[IT.id] = 1; $('doneCard').hidden = false; $('send').hidden = true; $('again').textContent = '한 번 더 하기';
-        $('doneIc').textContent = MODE === 'role' ? '🎬' : '📖'; $('doneT').textContent = MODE === 'role' ? '멋진 연기였어요!' : '또박또박 잘 읽었어요!';
+        $('doneIc').textContent = MODE === 'role' ? '🎬' : MODE === 'shadow' ? '🎧' : '📖'; $('doneT').textContent = MODE === 'role' ? '멋진 연기였어요!' : MODE === 'shadow' ? '원어민처럼 잘 따라 했어요!' : '또박또박 잘 읽었어요!';
         $('doneCard').scrollIntoView({block:'center', behavior:'smooth'}); };
       const fail = e => { reset(); showErr('보내기가 안 됐어요. 다시 눌러 주세요. (' + e.message + ')'); };
       fetch(LOG, {method:'POST', body:JSON.stringify(payload)})
