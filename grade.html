@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<title>녹음 채점하기</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Gowun+Dodum&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* [Claude] 엔쿨 녹음 채점하기 — 선생님 PC에서 Whisper로 받아쓰기 → 자동 점수 */
+  :root{--bg:#F3F5F9;--card:#fff;--ink:#1B2433;--muted:#667085;--line:#E1E6EE;--navy:#132E5E;--navy-soft:#E8EDF6;--gold:#D9B45A;--gold-soft:#FBF4E2;--ok:#1b7a45;--bad:#b8322a;
+    --ko:'Gowun Dodum','Apple SD Gothic Neo','Malgun Gothic',sans-serif;--en:'Nunito',Arial,sans-serif;--serif:'Cinzel',serif}
+  *{box-sizing:border-box}[hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ko)}
+  .band{background:var(--navy);color:#fff}.band-in{max-width:860px;margin:0 auto;padding:16px;display:flex;align-items:center;gap:12px}
+  .eae{font-family:var(--serif);color:var(--gold);letter-spacing:.12em}.kr{font-size:18px}
+  .wrap{max-width:860px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+  h2{margin:0 0 6px;color:var(--navy);font-size:18px}.sub{margin:0;color:var(--muted);font-size:14.5px;line-height:1.6}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{border-radius:12px;padding:11px 18px;font-family:var(--ko);font-size:15.5px;cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--ink)}
+  .btn.main{background:var(--navy);border-color:var(--navy);color:#fff}.btn:disabled{opacity:.5;cursor:default}
+  select,input{font-family:var(--ko);font-size:15px;border:1.5px solid var(--line);border-radius:10px;padding:9px 10px}
+  .bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:10px}.bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .3s}
+  table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:400}
+  .st{white-space:nowrap}.sc{font-family:var(--en);font-weight:800}.sc.ok{color:var(--ok)}.sc.bad{color:var(--bad)}
+  .hd{color:var(--muted);font-size:13px;max-width:360px}
+  .err{background:#FDECEC;color:#9B1C1F;border-radius:12px;padding:12px 14px}
+</style>
+</head>
+<body>
+<header class="band"><div class="band-in"><div><div class="eae">E.A.Ǝ</div><div class="kr">녹음 채점하기</div></div></div></header>
+<div class="wrap">
+  <section class="card">
+    <h2>🎧 받아쓰기 → 자동 점수</h2>
+    <p class="sub">아직 점수가 없는 녹음을 이 컴퓨터 안의 받아쓰기 AI(Whisper)가 하나씩 듣고 적어요. 대본과 비교한 <b>자동 점수 · 약한 단어</b>가 녹음 관리 시트와 학습관리실 녹음함에 들어가요.<br>
+    처음 한 번은 AI 파일(약 150MB)을 내려받느라 1~2분 걸려요. PC Chrome에서 해 주세요.</p>
+    <div class="row" style="margin-top:12px"><select id="month"></select><button class="btn" id="reload">↻ 목록</button><button class="btn main" id="go" disabled>▶ 채점 시작</button><span id="msg" class="sub"></span></div>
+    <div class="bar"><i id="prog"></i></div>
+  </section>
+  <section class="card" id="keyCard" hidden><h2>열쇠가 필요해요</h2><p class="sub">학습관리실 녹음함의 「채점하기」 버튼으로 들어와 주세요.</p></section>
+  <div class="err" id="err" hidden></div>
+  <section class="card"><table><thead><tr><th>날짜</th><th>이름</th><th>숙제</th><th>상태</th><th>점수</th><th>약한 단어 · 받아쓰기</th></tr></thead><tbody id="list"></tbody></table></section>
+</div>
+<script type="module">
+const LOG = 'https://script.google.com/macros/s/AKfycbwdK8492SzMcrc_hmwGWIquliehqASMrSAhbXJ5D-UyygkmwYvO23LWDzU8O44UrGQD/exec';
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const H = new URLSearchParams(location.hash.slice(1));
+let KEY = H.get('k') || ''; try{ if (KEY) localStorage.setItem('enc_grade_key', KEY); else KEY = localStorage.getItem('enc_grade_key') || ''; }catch(e){}
+if (H.get('k')) history.replaceState(null, '', location.pathname + (H.get('m') ? '#m=' + H.get('m') : ''));
+const showErr = m => { $('err').textContent = m; $('err').hidden = false; };
+if (!KEY){ $('keyCard').hidden = false; }
+
+const get = q => fetch(LOG + '?' + new URLSearchParams({...q, key: KEY})).then(r => r.json());
+let ROWS = [], RUN = false;
+
+async function months(){
+  const j = await get({a:'months'}); if (!j.ok) throw new Error(j.error);
+  const ms = (j.months || []).sort().reverse(), want = H.get('m');
+  $('month').innerHTML = ms.map(m => `<option ${m === want ? 'selected' : ''}>${m}</option>`).join('');
+}
+async function load(){
+  $('msg').textContent = '불러오는 중…';
+  const j = await get({a:'recs', m:$('month').value}); if (!j.ok) throw new Error(j.error);
+  ROWS = (j.rows || []).map(r => ({...r, todo: r.score == null && (r.ref || []).length > 0}));
+  draw(); const n = ROWS.filter(r => r.todo).length;
+  $('msg').textContent = n ? `채점할 녹음 ${n}개` : '채점할 녹음이 없어요 ✓'; $('go').disabled = !n;
+}
+function draw(){
+  $('list').innerHTML = ROWS.map((r, i) => `<tr><td class="st">${esc(r.date)}</td><td class="st">${esc(r.name)}</td><td>${esc(r.title)}</td>
+    <td class="st" id="s${i}">${r.todo ? '대기' : r.score != null ? '✓ 채점됨' : (r.ref || []).length ? '' : '대본 없음'}</td>
+    <td class="sc ${r.score >= 80 ? 'ok' : r.score != null ? 'bad' : ''}">${r.score != null ? r.score + '점' : ''}</td>
+    <td class="hd">${esc(r.weak || '')}${r.heard ? `<br>“${esc(String(r.heard).slice(0, 160))}”` : ''}</td></tr>`).join('');
+}
+
+/* Whisper (브라우저 안에서) */
+let ASR = null;
+async function model(){
+  if (ASR) return ASR;
+  $('msg').textContent = '받아쓰기 AI 준비 중… (처음 한 번은 1~2분)';
+  const { pipeline, env } = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2');
+  env.allowLocalModels = false;
+  const opt = { progress_callback: p => { if (p.status === 'progress' && p.total) $('prog').style.width = Math.round(p.loaded / p.total * 100) + '%'; } };
+  try{ ASR = await pipeline('automatic-speech-recognition', 'Xenova/whisper-base.en', {...opt, device:'webgpu', dtype:'fp32'}); }
+  catch(e){ ASR = await pipeline('automatic-speech-recognition', 'Xenova/whisper-base.en', {...opt, dtype:'q8'}); }
+  $('prog').style.width = '0';
+  return ASR;
+}
+async function pcm(b64, mime){
+  const by = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  const ctx = new AudioContext({sampleRate:16000});
+  const buf = await ctx.decodeAudioData(by.buffer.slice(0));
+  const ch = buf.numberOfChannels, n = buf.length, out = new Float32Array(n);
+  for (let c = 0; c < ch; c++){ const d = buf.getChannelData(c); for (let i = 0; i < n; i++) out[i] += d[i] / ch; }
+  ctx.close(); return out;
+}
+async function run(){
+  if (RUN) return; RUN = true; $('go').disabled = true; $('err').hidden = true;
+  try{
+    const asr = await model();
+    const todo = ROWS.map((r, i) => [r, i]).filter(([r]) => r.todo);
+    for (let k = 0; k < todo.length; k++){
+      const [r, i] = todo[k]; const cell = $('s' + i);
+      $('msg').textContent = `${k + 1} / ${todo.length} · ${r.name}`; $('prog').style.width = Math.round(k / todo.length * 100) + '%';
+      try{
+        cell.textContent = '듣는 중…';
+        const a = await get({a:'audio', id:r.id}); if (!a.ok) throw new Error(a.error);
+        const audio = await pcm(a.b64, a.mime);
+        cell.textContent = '받아쓰는 중…';
+        const out = await asr(audio, {chunk_length_s:30, stride_length_s:5});
+        const heard = String(out.text || '').trim();
+        cell.textContent = '저장 중…';
+        const u = await fetch(LOG, {method:'POST', body:JSON.stringify({a:'recupd', key:KEY, m:$('month').value, id:r.id, heard})}).then(x => x.json());
+        if (!u.ok) throw new Error(u.error);
+        Object.assign(r, {todo:false, heard, score:u.score, weak:(u.weak || []).join(', ') || (u.score != null ? '모두 OK' : '')});
+      }catch(e){ cell.textContent = '⚠ ' + (e.message || '실패'); continue; }
+      draw();
+    }
+    $('prog').style.width = '100%'; $('msg').textContent = '다 끝났어요 ✓ 학습관리실 녹음함에서 「새로고침」을 눌러 보세요.';
+  }catch(e){ showErr('받아쓰기 AI를 불러오지 못했어요. 인터넷을 확인하고 다시 눌러 주세요. (' + (e.message || e) + ')'); $('go').disabled = false; }
+  RUN = false;
+}
+$('reload').onclick = () => load().catch(e => showErr(e.message));
+$('month').onchange = () => load().catch(e => showErr(e.message));
+$('go').onclick = run;
+if (KEY) months().then(load).catch(e => showErr('목록을 불러오지 못했어요: ' + e.message));
+</script>
+</body>
+</html>
