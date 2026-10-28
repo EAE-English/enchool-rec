@@ -1,66 +1,62 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<title>엔쿨 본문 녹음</title>
+<title>엔쿨 녹음 숙제</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Gowun+Dodum&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
-  /* 엔쿨앤썸 E.A.Ǝ : 네이비 띠 머리글 + 흰 카드, 골드는 포인트만 */
-  :root{
-    --bg:#F3F5F9; --card:#FFFFFF; --ink:#1B2433; --muted:#667085; --line:#E1E6EE;
-    --navy:#132E5E; --navy-deep:#0E2349; --navy-soft:#E8EDF6;
-    --gold:#D9B45A; --gold-ink:#8A6A1F; --gold-soft:#FBF4E2;
-    --rec:#E5484D;
-    --ko:'Gowun Dodum', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-    --en:'Nunito', 'Helvetica Neue', Arial, sans-serif;
-    --serif:'Cinzel', 'Times New Roman', serif;
-  }
-  *{box-sizing:border-box}
-  [hidden]{display:none!important}
+  /* [Claude] 쿨톡 역할극 녹음 · 엔쿨 네이비 + 골드 */
+  :root{--bg:#F3F5F9;--card:#fff;--ink:#1B2433;--muted:#667085;--line:#E1E6EE;--navy:#132E5E;--navy-soft:#E8EDF6;
+    --gold:#D9B45A;--gold-soft:#FBF4E2;--rec:#E5484D;
+    --ko:'Gowun Dodum','Apple SD Gothic Neo','Malgun Gothic',sans-serif;--en:'Nunito','Helvetica Neue',Arial,sans-serif;--serif:'Cinzel',serif}
+  *{box-sizing:border-box}[hidden]{display:none!important}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ko);-webkit-font-smoothing:antialiased}
   .band{background:var(--navy);color:#fff}
-  .band-in{max-width:560px;margin:0 auto;padding:18px 16px 20px;display:flex;align-items:center;gap:14px}
-  .crest{width:58px;height:58px;border-radius:50%;background:#fff;display:grid;place-items:center;flex:none;box-shadow:0 0 0 2px var(--gold)}
-  .crest img{width:46px;height:auto;display:block}
-  .bname{display:flex;flex-direction:column;gap:2px;min-width:0}
-  .bname .eae{font-family:var(--serif);font-weight:700;color:var(--gold);font-size:15px;letter-spacing:.12em}
-  .bname .kr{font-size:18px;color:#fff}
-  .who{margin-left:auto;text-align:right;flex:none}
+  .band-in{max-width:560px;margin:0 auto;padding:16px;display:flex;align-items:center;gap:12px}
+  .eae{font-family:var(--serif);color:var(--gold);font-size:15px;letter-spacing:.12em}
+  .kr{font-size:17px}
+  .who{margin-left:auto;text-align:right}
   .who span{display:block;font-size:12px;color:#B9C4DA}
-  .who strong{display:inline-block;margin-top:3px;font-size:17px;font-weight:400;color:var(--navy);background:var(--gold);border-radius:999px;padding:3px 12px}
-  .wrap{max-width:560px;margin:0 auto;padding:18px 16px 40px;display:flex;flex-direction:column;gap:14px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
-  .label{display:inline-block;font-size:12.5px;color:var(--navy);background:var(--navy-soft);border-radius:6px;padding:3px 9px;margin:0 0 10px}
-  h1{font-family:var(--en);font-weight:800;font-size:20px;margin:0 0 12px;line-height:1.3;color:var(--navy)}
-  .passage{font-family:var(--en);font-weight:600;font-size:21px;line-height:1.75;margin:0;word-break:keep-all}
-  .listen{margin-top:16px;display:flex;align-items:center;gap:10px;width:100%;justify-content:center;
-    border:1.5px solid var(--navy);background:var(--card);color:var(--navy);border-radius:12px;padding:12px;
-    font-family:var(--ko);font-size:16px;cursor:pointer}
-  .listen .pl{width:24px;height:24px;border-radius:50%;background:var(--navy);color:var(--gold);display:grid;place-items:center;font-size:11px}
-  .recbox{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
-  .steps{font-size:15px;color:var(--muted);margin:0}
-  .timer{font-family:var(--en);font-weight:800;font-size:34px;font-variant-numeric:tabular-nums;margin:0;color:var(--navy)}
-  .recbtn{width:96px;height:96px;border-radius:50%;border:0;background:var(--rec);cursor:pointer;
-    display:grid;place-items:center;box-shadow:0 0 0 8px #FCE3E4}
-  .recbtn .dot{width:34px;height:34px;border-radius:50%;background:#fff}
-  .recbtn.on{animation:pulse 1.2s ease-in-out infinite}
-  .recbtn.on .dot{width:30px;height:30px;border-radius:6px}
-  @keyframes pulse{50%{box-shadow:0 0 0 16px #FCE3E4}}
-  @media (prefers-reduced-motion:reduce){.recbtn.on{animation:none}}
-  .rectxt{font-size:16px;margin:0}
-  .row{display:flex;gap:10px;width:100%}
-  .btn{flex:1;border-radius:12px;padding:14px;font-family:var(--ko);font-size:16px;cursor:pointer;border:1.5px solid var(--line);background:var(--card);color:var(--ink)}
+  .who strong{display:inline-block;margin-top:3px;font-size:16px;font-weight:400;color:var(--navy);background:var(--gold);border-radius:999px;padding:3px 12px}
+  .wrap{max-width:560px;margin:0 auto;padding:16px 16px 120px;display:flex;flex-direction:column;gap:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+  .label{display:inline-block;font-size:12.5px;color:var(--navy);background:var(--navy-soft);border-radius:6px;padding:3px 9px;margin:0 0 8px}
+  h1{font-family:var(--en);font-weight:800;font-size:19px;margin:0 0 6px;color:var(--navy);line-height:1.3}
+  .sub{margin:0;color:var(--muted);font-size:14.5px;line-height:1.55}
+  .sub b{color:var(--navy)}
+  .tog{display:flex;gap:8px;margin-top:12px}
+  .tog button{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:9px;font-family:var(--ko);font-size:14px;color:var(--muted);cursor:pointer}
+  .tog button.on{border-color:var(--navy);color:var(--navy);background:var(--navy-soft)}
+  .ln{display:flex;flex-direction:column;gap:4px;max-width:86%;padding:10px 13px;border-radius:14px;background:#fff;border:1px solid var(--line)}
+  .ln .sp{font-size:12px;color:var(--muted)}
+  .ln .en{font-family:var(--en);font-weight:700;font-size:18px;line-height:1.45}
+  .ln .ko{font-size:14.5px;color:var(--muted)}
+  .ln.me{align-self:flex-end;background:var(--gold-soft);border-color:var(--gold)}
+  .ln.me .sp{color:#8A6A1F}
+  .ln.cur{box-shadow:0 0 0 3px var(--gold)}
+  .ln .peek{align-self:flex-start;border:0;background:none;color:var(--navy);font-family:var(--ko);font-size:13px;padding:2px 0;cursor:pointer;text-decoration:none}
+  .ln.hide .en{filter:blur(6px);user-select:none}
+  .ln.wait{opacity:.35}
+  .bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+  .bar-in{max-width:560px;margin:0 auto;display:flex;gap:10px;align-items:center}
+  .timer{font-family:var(--en);font-weight:800;font-size:20px;color:var(--rec);min-width:64px;font-variant-numeric:tabular-nums}
+  .btn{flex:1;border-radius:12px;padding:14px;font-family:var(--ko);font-size:16.5px;cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--ink)}
   .btn.main{background:var(--navy);border-color:var(--navy);color:#fff}
+  .btn.recs{background:var(--rec);border-color:var(--rec);color:#fff}
+  .btn.speak{background:var(--rec);border-color:var(--rec);color:#fff;font-size:18px;font-weight:700}
+  .btn.speaking{background:var(--navy);border-color:var(--navy);color:#fff;font-size:18px;font-weight:700;animation:pulse 1.2s ease-in-out infinite}
+  @keyframes pulse{50%{box-shadow:0 0 0 6px #FCE3E4}}
+  @media (prefers-reduced-motion:reduce){.btn.speaking{animation:none}}
+  .timer i{font-style:normal;font-size:12px;vertical-align:3px}
+  .timer b{font-weight:800}
+  .timer.off{color:var(--muted)}
+  .count{position:fixed;inset:0;background:rgba(19,46,94,.82);display:grid;place-items:center;color:#fff;font-family:var(--en);font-weight:800;font-size:120px;z-index:9}
   .btn:disabled{opacity:.5;cursor:default}
-  audio{width:100%}
-  .done{text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center;box-shadow:inset 0 4px 0 var(--gold)}
-  .badge{width:84px;height:84px;border-radius:50%;background:var(--gold-soft);display:grid;place-items:center;box-shadow:0 0 0 3px var(--gold)}
-  .badge img{width:62px;height:auto}
-  .done h2{margin:8px 0 0;font-size:23px;color:var(--navy);font-weight:400}
-  .done p{margin:0;color:var(--muted);font-size:15px}
-  .done .btn{margin-top:10px;width:100%}
+  audio{width:100%;margin-top:6px}
+  .done{text-align:center;box-shadow:inset 0 4px 0 var(--gold)}
+  .done h2{margin:6px 0;color:var(--navy);font-weight:400;font-size:22px}
+  .done p{margin:0;color:var(--muted)}
   .err{background:#FDECEC;color:#9B1C1F;border-radius:12px;padding:12px 14px;font-size:15px}
   .tip{font-size:15px;line-height:1.6;background:var(--gold-soft);border-color:var(--gold)}
   .tip b{color:var(--navy)}
@@ -68,162 +64,302 @@
   .inapp p{color:var(--muted);margin:8px 0 12px}.inapp .small{font-size:13.5px}
   .inapp a.btn{display:block;text-decoration:none}
   :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+  .pklist{display:flex;flex-direction:column;gap:8px}
+  .pkh{font-size:13.5px;color:var(--muted);margin:8px 2px 0;border-bottom:1px solid var(--line);padding-bottom:4px}.pkh b{color:var(--navy);font-size:15px}
+  .pk{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:13px 15px;cursor:pointer;font-family:var(--ko);position:relative}
+  .pk b{font-family:var(--en);font-size:17px;color:var(--navy)}.pk small{color:var(--muted);font-size:13.5px}
+  .pk span{position:absolute;right:14px;top:13px;font-size:13px;color:#1f9d55;font-weight:700}.pk.done{border-color:#9fd8b5}
+  .roles{display:flex;gap:10px;margin:14px 0 4px}.roles .btn small{opacity:.75;font-size:13px}
+  .back{align-self:flex-start;border:0;background:none;color:var(--navy);font-family:var(--ko);font-size:14.5px;cursor:pointer;padding:6px 2px;margin-top:6px}
+  .listen{margin-top:12px;width:100%;border:1.5px solid var(--navy);background:#fff;color:var(--navy);border-radius:12px;padding:11px;font-family:var(--ko);font-size:15.5px;cursor:pointer}
+  .ln.rd{max-width:100%}
 </style>
 </head>
 <body>
-<header class="band">
-  <div class="band-in">
-    <div class="crest"><img src="logo.png" alt="E.A.Ǝ 엔쿨앤썸 잉글리시 로고"></div>
-    <div class="bname"><span class="eae">E.A.Ǝ</span><span class="kr">엔쿨앤썸 잉글리시</span></div>
-    <div class="who"><span>오늘의 녹음 숙제</span><strong id="who">-</strong></div>
-  </div>
-</header>
+<header class="band"><div class="band-in">
+  <div><div class="eae">E.A.Ǝ</div><div class="kr" id="appName">엔쿨 녹음 숙제</div></div>
+  <div class="who"><span>오늘의 녹음</span><strong id="who">-</strong></div>
+</div></header>
+
 <div class="wrap">
-  <section class="card">
-    <p class="label">오늘 배운 본문</p>
-    <h1 id="title">불러오는 중…</h1>
-    <p class="passage" id="passage"></p>
-    <button class="listen" id="listenBtn" hidden><span class="pl">▶</span>원어민 녹음 듣기</button>
-    <audio id="model" hidden></audio>
-  </section>
-
-  <section class="card recbox" id="recCard">
-    <p class="steps" id="steps">빨간 버튼을 누르고 본문을 소리 내어 읽어요</p>
-    <p class="timer" id="timer">00:00</p>
-    <button class="recbtn" id="recBtn" aria-label="녹음 시작"><span class="dot"></span></button>
-    <p class="rectxt" id="recTxt">녹음 시작</p>
-    <audio id="mine" controls hidden></audio>
-    <div class="row" id="afterRow" hidden>
-      <button class="btn" id="againBtn">다시 녹음</button>
-      <button class="btn main" id="sendBtn">제출하기</button>
-    </div>
-  </section>
-
-  <section class="card done" id="doneCard" hidden>
-    <div class="badge"><img src="logo.png" alt=""></div>
-    <h2>오늘도 해냈어요!</h2>
-    <p>녹음이 선생님께 잘 전달됐어요.<br>코멘트를 기다려 주세요.</p>
-    <button class="btn" id="moreBtn">한 번 더 녹음해서 제출하기</button>
-  </section>
-
-  <section class="card tip" id="tip"><b>🎙 처음 한 번만!</b> 빨간 버튼을 누르면 <b>“마이크 사용을 허용할까요?”</b> 창이 떠요. 꼭 <b>허용</b>을 눌러요.</section>
   <section class="card inapp" id="inapp" hidden><b>여기서는 녹음이 안 돼요</b><p>카카오톡·네이버 같은 앱 안의 화면이에요. 아래 버튼을 눌러 Chrome으로 열어 주세요.</p><a class="btn main" id="openChrome" href="#">Chrome으로 열기</a><p class="small" id="iosTip" hidden>아이폰: 오른쪽 아래 ⋯ 또는 공유 버튼 → 「Safari로 열기」를 눌러요.</p></section>
+
+  <!-- ① 고르기 -->
+  <div id="pick" hidden>
+    <section class="card"><p class="label" id="pkUnit">녹음 숙제</p><h1 id="pkTitle">오늘 녹음할 것을 골라요</h1><p class="sub" id="pkSub">하나 골라서 녹음하고 보내요. 여러 개 해도 돼요.</p></section>
+    <div id="pkList" class="pklist"></div>
+  </div>
+
+  <!-- ② 역할 고르기 -->
+  <section class="card" id="rolePick" hidden>
+    <p class="label" id="rpUnit"></p><h1 id="rpTitle"></h1>
+    <p class="sub">누구 역할로 녹음할까요? 상대 대사는 원어민이 읽어 줘요.</p>
+    <div class="roles" id="rpRoles"></div>
+    <button class="back" data-back>← 다른 것 고르기</button>
+  </section>
+
+  <!-- ③ 녹음 -->
+  <div id="stage" hidden>
+    <section class="card" id="intro">
+      <p class="label" id="unit"></p>
+      <h1 id="title"></h1>
+      <p class="sub" id="how"></p>
+      <div class="tog" id="tog"><button id="tShow" class="on">영어 보면서</button><button id="tHide">영어 가리고 (도전!)</button></div>
+      <button class="listen" id="listenAll" hidden>🔊 원어민 먼저 들어 보기</button>
+    </section>
+    <section class="card tip" id="tip"><b>🎙 처음 한 번만!</b> 「녹음 시작」을 누르면 <b>“마이크 사용을 허용할까요?”</b> 창이 떠요. 꼭 <b>허용</b>을 눌러요.</section>
+    <div id="lines" style="display:flex;flex-direction:column;gap:10px"></div>
+    <section class="card" id="after" hidden>
+      <p class="label">내 녹음 들어 보기</p>
+      <audio id="mine" controls></audio>
+    </section>
+    <section class="card done" id="doneCard" hidden>
+      <div style="font-size:44px" id="doneIc">🎬</div>
+      <h2 id="doneT">멋진 연기였어요!</h2>
+      <p>녹음이 선생님께 잘 전달됐어요.</p>
+      <button class="btn main" id="more" style="margin-top:14px;width:100%" hidden>다른 것도 녹음하기</button>
+    </section>
+    <button class="back" data-back id="backStage">← 다른 것 고르기</button>
+  </div>
   <div class="err" id="err" hidden></div>
 </div>
 
+<div class="bar" id="bar" hidden><div class="bar-in">
+  <span class="timer" id="timer" hidden><i id="recdot" hidden>●</i> <b id="tt">00:00</b></span>
+  <button class="btn recs" id="go">🎙 녹음 시작</button>
+  <button class="btn main" id="next" hidden>다음 ▶</button>
+  <button class="btn" id="again" hidden>다시 하기</button>
+  <button class="btn main" id="send" hidden>선생님께 보내기</button>
+</div></div>
+
 <script>
 (function(){
-  const $ = id => document.getElementById(id);
   const LOG = 'https://script.google.com/macros/s/AKfycbwdK8492SzMcrc_hmwGWIquliehqASMrSAhbXJ5D-UyygkmwYvO23LWDzU8O44UrGQD/exec';
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const plain = s => String(s).replace(/[\[\]]/g, '');
   const Q = new URLSearchParams(location.search);
-  const STUDENT = (Q.get('s') || '').trim(), LESSON = Q.get('l') || 'test';
+  const STUDENT = (Q.get('s') || '').trim(), CLS = Q.get('c') || '', KEY = (Q.get('k') || '').trim(), ME0 = Q.get('me') || '';
+  function showErr(m){ $('err').textContent = m; $('err').hidden = false; }
+  function fmt(s){ return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(Math.floor(s%60)).padStart(2,'0'); }
+  $('who').textContent = STUDENT || '이름 없음';
+
+  /* 앱 안의 작은 창(카톡·네이버 등)에서는 마이크가 막혀요 → Chrome으로 */
   const UA = navigator.userAgent, isAnd = /Android/i.test(UA);
-  const inApp = /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line\/|DaumApps|everytimeApp|; wv\)/i.test(UA);
-  if (inApp){
-    $('inapp').hidden = false; $('tip').hidden = true;
+  if (/KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line\/|DaumApps|everytimeApp|; wv\)/i.test(UA)){
+    $('inapp').hidden = false;
     if (isAnd) $('openChrome').href = 'intent://' + location.href.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end';
     else { $('openChrome').hidden = true; $('iosTip').hidden = false; }
   }
+  if (!STUDENT) showErr('이름이 없어요. 숙제장의 QR을 다시 찍어 주세요.');
 
-  let rec = null, chunks = [], stream = null, t0 = 0, tick = null, blob = null, mime = '', dur = 0;
-  let sr = null, transcript = '';
+  /* ── 대본 불러오기: k = 책_과 [. 대화문ID | sN | sN_M | body | 본문ID] ── */
+  const [BK, SEL] = [KEY.split('.')[0], KEY.split('.').slice(1).join('.')];
+  let PACK = null, ITEMS = [], IT = null, MODE = '', ME = '';
+  if (!/^[a-z0-9_]+$/i.test(BK)){ showErr('어떤 숙제인지 모르겠어요. 숙제장의 QR을 다시 찍어 주세요.'); return; }
+  fetch('scripts/' + BK + '.json', {cache:'no-cache'}).then(r => { if (!r.ok) throw 0; return r.json(); }).then(init)
+    .catch(() => showErr('아직 이 숙제의 대본이 없어요. 선생님께 알려 주세요.'));
 
-  function showErr(m){ $('err').textContent = m; $('err').hidden = false; }
-  function clearErr(){ $('err').hidden = true; }
-  function fmt(s){ return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(Math.floor(s%60)).padStart(2,'0'); }
-
-  $('who').textContent = STUDENT || '이름 없음';
-  if (!STUDENT) showErr('학생 정보가 없어요. 숙제 종이의 QR을 다시 찍어 주세요.');
-
-  function renderLesson(l){
-    $('title').textContent = l.title;
-    $('passage').textContent = l.text;
-    if (l.audio){ $('model').src = l.audio; $('listenBtn').hidden = false; }
+  function init(P){
+    PACK = P;
+    const dl = (P.dialogs || []).map(d => ({kind:'dlg', ...d})), bd = (P.body || []).map(b => ({kind:'body', st:0, ...b}));
+    let L = dl.concat(bd), m;
+    if (!SEL) ITEMS = L;
+    else if ((m = SEL.match(/^s(\d+)(?:_(\d+))?$/i))) { const a = +m[1], b = +(m[2] || m[1]); ITEMS = dl.filter(d => d.st >= Math.min(a,b) && d.st <= Math.max(a,b)); }
+    else if (/^body$/i.test(SEL)) ITEMS = bd;
+    else ITEMS = L.filter(x => x.id === SEL);
+    if (!ITEMS.length) ITEMS = L;
+    if (ITEMS.length === 1) open(ITEMS[0]); else showPick();
   }
-  fetch(LOG + '?a=lesson&l=' + encodeURIComponent(LESSON)).then(r => r.json())
-    .then(j => j.ok ? renderLesson(j.lesson) : showErr(j.error || '오늘 숙제를 찾을 수 없어요.'))
-    .catch(() => showErr('숙제를 불러오지 못했어요. 인터넷을 확인하고 다시 열어 주세요.'));
-  $('listenBtn').onclick = () => { const a = $('model'); a.paused ? a.play() : a.pause(); };
-
-  function pickMime(){
-    const c = ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg'];
-    for (const m of c) if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m;
-    return '';
+  function showPick(){
+    stopAll(); $('pick').hidden = false; $('rolePick').hidden = true; $('stage').hidden = true; $('bar').hidden = true;
+    $('pkUnit').textContent = PACK.unit || '녹음 숙제';
+    let h = '', last = -1;
+    ITEMS.forEach((x, i) => {
+      const g = x.kind === 'body' ? 'b' : (x.st || 0);
+      if (g !== last){ last = g; h += `<div class="pkh">${g === 'b' ? '<b>📖 본문 읽기</b>' : g ? `<b>Step ${g}</b>${PACK.steps && PACK.steps[g] ? ' · ' + esc(PACK.steps[g]) : ''}` : '<b>🎭 대화문 역할극</b>'}</div>`; }
+      const done = sentOK[x.id];
+      h += `<button class="pk${done ? ' done' : ''}" data-it="${i}"><b>${esc(x.t)}</b><small>${esc([x.p, x.sub].filter(Boolean).join(' · '))}</small>${done ? '<span>✓ 보냄</span>' : ''}</button>`;
+    });
+    $('pkList').innerHTML = h;
   }
+  $('pkList').addEventListener('click', e => { const b = e.target.closest('[data-it]'); if (b) open(ITEMS[+b.dataset.it]); });
+  document.addEventListener('click', e => { if (e.target.closest('[data-back]')) { if (running && !confirmLeave()) return; showPick(); } });
+  function confirmLeave(){ stop(); return true; }
 
-  function startSpeech(){
-    transcript = '';
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) return;
+  function open(x){
+    IT = x; $('pick').hidden = true; $('err').hidden = true;
+    const many = ITEMS.length > 1;
+    $('backStage').hidden = !many; document.querySelector('#rolePick [data-back]').hidden = !many;
+    if (x.kind === 'dlg'){
+      const sps = [...new Set(x.L.map(l => l[0]))];
+      if (ME0 && sps.includes(ME0)) return start(x, 'role', ME0);
+      $('rolePick').hidden = false; $('stage').hidden = true; $('bar').hidden = true;
+      $('rpUnit').textContent = PACK.unit || ''; $('rpTitle').textContent = x.t + (x.sub ? ' · ' + x.sub : '');
+      $('rpRoles').innerHTML = sps.map(s => `<button class="btn main" data-role="${esc(s)}">${esc(s)} 역할 <small>(${x.L.filter(l => l[0] === s).length}줄)</small></button>`).join('');
+    } else start(x, 'read', '');
+  }
+  $('rpRoles').addEventListener('click', e => { const b = e.target.closest('[data-role]'); if (b) start(IT, 'role', b.dataset.role); });
+
+  /* ── 녹음 화면 ── */
+  let HIDE = false;
+  function start(x, mode, me){
+    MODE = mode; ME = me; HIDE = false; heard = {}; blob = null;
+    $('rolePick').hidden = true; $('stage').hidden = false; $('bar').hidden = false;
+    $('appName').textContent = mode === 'role' ? '쿨톡 역할극 녹음' : '본문 읽기 녹음';
+    $('unit').textContent = PACK.unit || ''; $('title').textContent = x.t + (x.sub ? ' · ' + x.sub : '');
+    $('how').innerHTML = mode === 'role'
+      ? `나는 <b>${esc(me)}</b> 역할! 상대 대사는 원어민이 읽어 줘요.<br>내 차례가 오면 녹음이 잠깐 멈춰요. 준비되면 <b>🎙 말하기</b>를 누르고 말한 뒤 <b>✓ 다 했어요</b>를 눌러요.<br>🔈 원어민 목소리도 같이 녹음되게 <b>이어폰은 빼고</b> 스피커로 해요.`
+      : `먼저 <b>🔊 원어민 먼저 들어 보기</b>로 들어 봐요.<br>준비되면 <b>🎙 녹음 시작</b>을 누르고 처음부터 끝까지 소리 내어 읽은 뒤 <b>■ 다 읽었어요</b>를 눌러요.`;
+    $('tog').hidden = mode !== 'role'; $('listenAll').hidden = mode !== 'read';
+    $('tShow').classList.add('on'); $('tHide').classList.remove('on');
+    ['after','doneCard','send','again','next','timer'].forEach(id => $(id).hidden = true);
+    $('go').hidden = false; $('go').disabled = false; $('go').className = 'btn recs'; $('go').textContent = '🎙 녹음 시작';
+    $('more').hidden = ITEMS.length < 2;
+    draw(); window.scrollTo({top:0});
+  }
+  function lines(){ return IT.kind === 'dlg' ? IT.L : (IT.lines || String(IT.text || '').split(/(?<=[.!?])\s+/)).map(t => ['', t, '']); }
+  function draw(){
+    $('lines').innerHTML = lines().map((l, i) => {
+      if (MODE === 'read') return `<div class="ln rd" data-i="${i}"><span class="en">${esc(plain(l[1]))}</span>${l[2] ? `<span class="ko">${esc(l[2])}</span>` : ''}</div>`;
+      const me = l[0] === ME;
+      return `<div class="ln${me ? ' me' : ''}${me && HIDE ? ' hide' : ''}" data-i="${i}"><span class="sp">${esc(l[0])}${me ? ' · 나' : ''}</span>
+        <span class="en">${esc(plain(l[1]))}</span>${l[2] ? `<span class="ko">${esc(l[2])}</span>` : ''}
+        ${me && HIDE ? '<button class="peek" data-peek>👀 살짝 보기</button>' : ''}</div>`;
+    }).join('');
+  }
+  $('tShow').onclick = () => { if (running) return; HIDE = false; $('tShow').classList.add('on'); $('tHide').classList.remove('on'); draw(); };
+  $('tHide').onclick = () => { if (running) return; HIDE = true; $('tHide').classList.add('on'); $('tShow').classList.remove('on'); draw(); };
+  $('lines').addEventListener('click', e => { const b = e.target.closest('[data-peek]'); if (b){ b.closest('.ln').classList.remove('hide'); b.remove(); } });
+
+  /* 원어민 목소리 */
+  let VO = [];
+  function loadVoices(){ VO = speechSynthesis.getVoices().filter(v => /^en[-_]/i.test(v.lang)); }
+  if (window.speechSynthesis){ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+  function say(text, who, done){
+    if (!window.speechSynthesis){ setTimeout(done, 1500); return; }
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(plain(text)); u.lang = 'en-US'; u.rate = .92;
+    const sps = IT.kind === 'dlg' ? [...new Set(IT.L.map(l => l[0]))] : [''];
+    if (VO.length) u.voice = VO[Math.max(0, sps.indexOf(who)) % VO.length];
+    let fired = false; const fin = () => { if (!fired){ fired = true; setTimeout(done, 450); } };
+    u.onend = fin; u.onerror = fin; setTimeout(fin, 1500 + plain(text).length * 110);
+    speechSynthesis.speak(u);
+  }
+  let playing = false;
+  $('listenAll').onclick = () => {
+    if (playing){ playing = false; speechSynthesis.cancel(); focus(-1); $('listenAll').textContent = '🔊 원어민 먼저 들어 보기'; return; }
+    playing = true; $('listenAll').textContent = '■ 그만 듣기'; const L = lines(); let k = 0;
+    (function nx(){ if (!playing || k >= L.length){ playing = false; focus(-1); $('listenAll').textContent = '🔊 원어민 먼저 들어 보기'; return; } focus(k, true); say(L[k][1], '', () => { k++; nx(); }); })();
+  };
+
+  /* 받아쓰기(Chrome 내장) */
+  const SRC = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let sr = null, heard = {}, srLine = -1;
+  function srStart(k){
+    if (!SRC) return; srLine = k; heard[k] = heard[k] || '';
     try{
-      sr = new SR(); sr.lang = 'en-US'; sr.continuous = true; sr.interimResults = false;
-      sr.onresult = e => { for (let i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) transcript += e.results[i][0].transcript + ' '; };
+      sr = new SRC(); sr.lang = 'en-US'; sr.continuous = true; sr.interimResults = false;
+      sr.onresult = e => { for (let j = e.resultIndex; j < e.results.length; j++) if (e.results[j].isFinal) heard[srLine] = (heard[srLine] + ' ' + e.results[j][0].transcript).trim(); };
       sr.onerror = () => {};
+      sr.onend = () => { if (MODE === 'read' && running && sr) try{ sr.start(); }catch(e){} };   // 본문은 길어서 끊기면 다시 듣기
       sr.start();
     }catch(e){ sr = null; }
   }
+  function srStop(){ const s = sr; sr = null; if (s){ try{ s.stop(); }catch(e){} } }
 
-  async function start(){
-    clearErr();
-    try{
-      stream = await navigator.mediaDevices.getUserMedia({audio:true});
-    }catch(e){
-      showErr(e.name === 'NotAllowedError' ? '마이크가 막혀 있어요. 주소창 왼쪽 🔒(또는 조절 아이콘) → 권한 → 마이크 → 허용으로 바꾸고 다시 눌러 주세요.' : '마이크를 쓸 수 없어요. (' + e.name + ')');
-      return;
-    }
+  /* 녹음 */
+  let rec = null, chunks = [], stream = null, mime = '', tick = null, dur = 0, blob = null, running = false, i = 0, acc = 0, on = 0, speaking = false;
+  function pickMime(){ for (const m of ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg']) if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m; return ''; }
+  function setLive(v){ $('timer').classList.toggle('off', !v); $('recdot').hidden = !v; }
+  function recOn(){ if (rec.state === 'paused') rec.resume(); if (!on) on = Date.now(); setLive(true); }
+  function recOff(){ if (rec.state === 'recording') rec.pause(); if (on){ acc += Date.now() - on; on = 0; } setLive(false); }
+  function focus(k, keep){
+    document.querySelectorAll('.ln').forEach(el => { const j = +el.dataset.i; el.classList.toggle('cur', j === k); el.classList.toggle('wait', !keep && k >= 0 && j > k); });
+    const el = document.querySelector(`.ln[data-i="${k}"]`); if (el) el.scrollIntoView({block:'center', behavior:'smooth'});
+  }
+  const mineIdx = () => IT.L.map((l, k) => l[0] === ME ? k : -1).filter(k => k > -1);
+  function step(){
+    if (!running) return;
+    if (i >= IT.L.length){ stop(); return; }
+    focus(i);
+    const l = IT.L[i], nb = $('next');
+    if (l[0] === ME){ recOff(); speaking = false; nb.hidden = false; nb.disabled = false; nb.className = 'btn speak'; nb.textContent = '🎙 말하기'; }
+    else { nb.hidden = true; recOn(); say(l[1], l[0], () => { i++; step(); }); }
+  }
+  $('next').onclick = () => {
+    const nb = $('next');
+    if (!speaking){ speaking = true; recOn(); srStart(i); nb.className = 'btn speaking'; nb.textContent = i === mineIdx().pop() ? '✓ 다 했어요 (끝)' : '✓ 다 했어요'; return; }
+    nb.disabled = true; speaking = false; recOff(); setTimeout(srStop, 600);
+    setTimeout(() => { i++; step(); }, 250);
+  };
+  function micErr(e){
+    if (e && e.name === 'NotAllowedError') showErr('마이크가 막혀 있어요. 주소창 왼쪽 🔒(또는 조절 아이콘) → 권한 → 마이크 → 허용으로 바꾸고 다시 눌러 주세요.');
+    else if (e && e.name === 'NotFoundError') showErr('마이크를 찾지 못했어요. 이어폰·마이크가 연결돼 있는지 봐 주세요.');
+    else showErr('마이크를 쓸 수 없어요. (' + (e && e.name) + ')');
+  }
+  $('go').onclick = async () => {
+    if (running && MODE === 'read'){ stop(); return; }
+    if (playing) $('listenAll').click();
+    $('err').hidden = true;
+    try{ stream = await navigator.mediaDevices.getUserMedia({audio: MODE === 'role' ? {echoCancellation:false, noiseSuppression:false, autoGainControl:true} : true}); }
+    catch(e){ micErr(e); return; }
     mime = pickMime();
     rec = mime ? new MediaRecorder(stream, {mimeType:mime}) : new MediaRecorder(stream);
-    mime = rec.mimeType || mime || 'audio/webm';
-    chunks = [];
+    mime = rec.mimeType || mime || 'audio/webm'; chunks = [];
     rec.ondataavailable = e => e.data.size && chunks.push(e.data);
     rec.onstop = () => {
-      blob = new Blob(chunks, {type:mime});
-      $('mine').src = URL.createObjectURL(blob);
-      $('mine').hidden = false; $('afterRow').hidden = false;
-      $('recBtn').hidden = true; $('recTxt').hidden = true;
-      $('steps').textContent = '내 녹음을 들어 보고 제출해요';
-      stream.getTracks().forEach(t => t.stop());
+      blob = new Blob(chunks, {type:mime}); $('mine').src = URL.createObjectURL(blob); $('after').hidden = false;
+      $('send').hidden = false; $('again').hidden = false; $('next').hidden = true; $('go').hidden = true;
+      stream.getTracks().forEach(t => t.stop()); focus(-1);
+      $('after').scrollIntoView({block:'center', behavior:'smooth'});
     };
-    $('tip').hidden = true;
-    rec.start();
-    startSpeech();
-    t0 = Date.now();
-    tick = setInterval(() => { dur = (Date.now()-t0)/1000; $('timer').textContent = fmt(dur); if (dur >= 300) stop(); }, 250);
-    $('recBtn').classList.add('on'); $('recBtn').setAttribute('aria-label','녹음 멈추기');
-    $('recTxt').textContent = '녹음 중 · 다 읽으면 눌러요';
-  }
-
+    $('tip').hidden = true; $('listenAll').hidden = true;
+    acc = 0; on = 0; rec.start(); running = true; i = 0; recOn(); $('timer').hidden = false;
+    tick = setInterval(() => { dur = (acc + (on ? Date.now() - on : 0)) / 1000; $('tt').textContent = fmt(dur); if (dur >= 600) stop(); }, 250);
+    if (MODE === 'role'){ $('go').hidden = true; step(); }
+    else { $('go').className = 'btn main'; $('go').textContent = '■ 다 읽었어요'; srStart(0); }
+  };
   function stop(){
-    clearInterval(tick);
-    if (sr) try{ sr.stop(); }catch(e){}
+    if (!running) return;
+    running = false; clearInterval(tick); if (on){ acc += Date.now() - on; on = 0; } dur = acc / 1000;
+    if (window.speechSynthesis) speechSynthesis.cancel();
+    setTimeout(srStop, MODE === 'read' ? 700 : 0);
     if (rec && rec.state !== 'inactive') rec.stop();
-    $('recBtn').classList.remove('on'); $('recBtn').setAttribute('aria-label','녹음 시작');
   }
+  function stopAll(){ playing = false; if (window.speechSynthesis) speechSynthesis.cancel(); stop(); }
+  $('again').onclick = () => start(IT, MODE, ME);
+  $('more').onclick = () => showPick();
 
-  function reset(){
-    blob = null; dur = 0; $('timer').textContent = '00:00';
-    $('mine').hidden = true; $('afterRow').hidden = true;
-    $('recBtn').hidden = false; $('recTxt').hidden = false; $('recTxt').textContent = '녹음 시작';
-    $('steps').textContent = '빨간 버튼을 누르고 본문을 소리 내어 읽어요';
-    $('recCard').hidden = false; $('doneCard').hidden = true;
+  const sentOK = {};
+  function refsHeard(){
+    if (MODE === 'role'){ const M = mineIdx(); return [M.map(k => plain(IT.L[k][1])), M.map(k => heard[k] || '')]; }
+    return [[lines().map(l => plain(l[1])).join(' ')], [heard[0] || '']];
   }
-
-  $('recBtn').onclick = () => (rec && rec.state === 'recording') ? stop() : start();
-  $('againBtn').onclick = reset;
-  $('moreBtn').onclick = reset;
-
-  $('sendBtn').onclick = () => {
+  function heardText(){
+    const [R, H] = refsHeard(); if (!H.some(Boolean)) return '';
+    return MODE === 'role' ? R.map((r, n) => `${n + 1}) ${H[n] || '(못 알아들음)'}  ← ${r}`).join('\n') : H[0];
+  }
+  $('send').onclick = () => {
     if (!blob) return;
-    clearErr();
-    $('sendBtn').disabled = true; $('againBtn').disabled = true; $('sendBtn').textContent = '보내는 중…';
+    $('send').disabled = true; $('again').disabled = true; $('send').textContent = '보내는 중…';
     const r = new FileReader();
     r.onload = () => {
-      const payload = { student:STUDENT, lessonId:LESSON, base64:String(r.result).split(',')[1], mimeType:mime, transcript:transcript.trim(), durationSec:dur };
-      const ok = () => { $('recCard').hidden = true; $('doneCard').hidden = false; $('sendBtn').disabled = false; $('againBtn').disabled = false; $('sendBtn').textContent = '제출하기'; };
-      const fail = e => { showErr('제출이 안 됐어요. 다시 눌러 주세요. (' + e.message + ')'); $('sendBtn').disabled = false; $('againBtn').disabled = false; $('sendBtn').textContent = '제출하기'; };
+      const [R, H] = refsHeard();
+      const payload = {
+        student: STUDENT, cls: CLS, key: KEY,
+        title: `${PACK.unit || ''} · ${IT.t}${IT.sub ? ' · ' + IT.sub : ''}${MODE === 'role' ? ' · ' + ME + ' 역할' : ' · 본문 읽기'}`,
+        refList: R, heardList: H, transcript: heardText(),
+        base64: String(r.result).split(',')[1], mimeType: mime, durationSec: dur
+      };
+      const reset = () => { $('send').disabled = false; $('again').disabled = false; $('send').textContent = '선생님께 보내기'; };
+      const ok = () => { reset(); sentOK[IT.id] = 1; $('doneCard').hidden = false; $('send').hidden = true; $('again').textContent = '한 번 더 하기';
+        $('doneIc').textContent = MODE === 'role' ? '🎬' : '📖'; $('doneT').textContent = MODE === 'role' ? '멋진 연기였어요!' : '또박또박 잘 읽었어요!';
+        $('doneCard').scrollIntoView({block:'center', behavior:'smooth'}); };
+      const fail = e => { reset(); showErr('보내기가 안 됐어요. 다시 눌러 주세요. (' + e.message + ')'); };
       fetch(LOG, {method:'POST', body:JSON.stringify(payload)})
-        .then(r => r.json()).then(j => j && j.ok ? ok() : fail(new Error(j && j.error || '저장 실패')))
-        .catch(fail);
+        .then(x => x.json()).then(j => j && j.ok ? ok() : fail(new Error(j && j.error || '저장 실패'))).catch(fail);
     };
     r.readAsDataURL(blob);
   };
