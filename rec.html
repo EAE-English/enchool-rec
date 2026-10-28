@@ -281,7 +281,11 @@
       if (!j.ok) throw 0;
       const by = Uint8Array.from(atob(j.b64), c => c.charCodeAt(0));
       TRK[k] = URL.createObjectURL(new Blob([by], {type:j.mime || 'audio/mpeg'}));
-      SEGS[k] = null; segment(by.buffer.slice(0), wantSegs(x)).then(sg => { SEGS[k] = sg; }).catch(() => {});
+      SEGS[k] = null;
+      /* 미리 만들어 둔 나누기 계획(plans/…json: 한국어 뜻은 따라 하지 않고 넘어감)이 있으면 그걸 쓰고, 없으면 여기서 나눔 */
+      fetch('plans/' + k + '.json', {cache:'no-cache'}).then(r => r.ok ? r.json() : null).catch(() => null)
+        .then(pl => pl && pl.length ? (SEGS[k] = pl) : segment(by.buffer.slice(0), wantSegs(x)).then(sg => { SEGS[k] = sg; }))
+        .catch(() => { SEGS[k] = []; });
       if (IT && IT.audio === k){ AUD = rate(new Audio(TRK[k])); set('✓ 음원 준비 끝'); }
     }).catch(() => { TRK[k] = 'none'; if (IT && IT.audio === k) set('음원이 아직 없어서 원어민 목소리로 읽어 줘요'); });
   }
@@ -326,7 +330,7 @@
     /* 끊은 개수가 대본과 맞으면 지금 나오는 단어·문장 칸을 따라가며 보여 줌 */
     const map = [];
     if (IT.kind === 'shadow') (IT.words || []).forEach((w, k) => { map.push(k); if (w.ex) map.push(k); }); else lines().forEach((_, k) => map.push(k));
-    const follow = map.length === sg.length || (IT.kind === 'shadow' && map.length + 1 === sg.length);
+    const follow = !sg.some(x => x.length > 2) && (map.length === sg.length || (IT.kind === 'shadow' && map.length + 1 === sg.length));
     const off = sg.length - map.length;   // 맨 앞 책 소개 멘트가 하나 더 있을 때
     (function next(){
       if (!running) return;
@@ -337,7 +341,8 @@
       (function watch(){
         if (!running){ a.pause(); return; }
         if (a.currentTime >= e0 || a.ended){
-          a.pause(); const len = (e0 - s0) / RATE, gap = len + plusFor(len); i++;
+          a.pause(); const len = (e0 - s0) / RATE, rep = sg[i][2] !== 0, gap = rep ? len + plusFor(len) : 0.25; i++;   // 한국어 뜻(0)은 따라 하지 않고 바로 다음
+          if (!rep){ setTimeout(next, gap * 1000); return; }
           showSay(gap); setTimeout(next, gap * 1000);
         } else setTimeout(watch, 30);
       })();
