@@ -33,14 +33,14 @@
 <div class="wrap">
   <section class="card">
     <h2>🎧 받아쓰기 → 자동 점수</h2>
-    <p class="sub">아직 점수가 없는 녹음을 이 컴퓨터 안의 받아쓰기 AI(Whisper)가 하나씩 듣고 적어요. 대본과 비교한 <b>자동 점수 · 약한 단어</b>가 녹음 관리 시트와 학습관리실 녹음함에 들어가요.<br>
+    <p class="sub">아직 점수가 없는 녹음을 이 컴퓨터 안의 받아쓰기 AI(Whisper)가 하나씩 듣고 적어요. 대본과 비교한 <b>자동 점수 · 신경 써야 할 단어</b>가 녹음 관리 시트와 학습관리실 녹음함에 들어가요.<br>
     처음 한 번은 AI 파일(약 150MB)을 내려받느라 1~2분 걸려요. PC Chrome에서 해 주세요.</p>
     <div class="row" style="margin-top:12px"><select id="month"></select><button class="btn" id="reload">↻ 목록</button><button class="btn main" id="go" disabled>▶ 채점 시작</button><span id="msg" class="sub"></span></div>
     <div class="bar"><i id="prog"></i></div>
   </section>
   <section class="card" id="keyCard" hidden><h2>열쇠가 필요해요</h2><p class="sub">학습관리실 녹음함의 「채점하기」 버튼으로 들어와 주세요.</p></section>
   <div class="err" id="err" hidden></div>
-  <section class="card"><table><thead><tr><th>날짜</th><th>이름</th><th>숙제</th><th>상태</th><th>점수</th><th>약한 단어 · 받아쓰기</th></tr></thead><tbody id="list"></tbody></table></section>
+  <section class="card"><table><thead><tr><th>날짜</th><th>이름</th><th>숙제</th><th>상태</th><th>점수</th><th>신경 써야 할 단어 · 받아쓰기</th></tr></thead><tbody id="list"></tbody></table></section>
 </div>
 <script type="module">
 const LOG = 'https://script.google.com/macros/s/AKfycbwdK8492SzMcrc_hmwGWIquliehqASMrSAhbXJ5D-UyygkmwYvO23LWDzU8O44UrGQD/exec';
