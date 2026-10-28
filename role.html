@@ -220,12 +220,10 @@
       $('after').scrollIntoView({block:'center', behavior:'smooth'});
     };
     $('tip').hidden = true; $('go').hidden = true;
-    countdown(() => {
-      acc = 0; on = 0; rec.start(); running = true; i = 0; recOn();
-      $('timer').hidden = false;
-      tick = setInterval(() => { dur = (acc + (on ? Date.now() - on : 0)) / 1000; $('tt').textContent = fmt(dur); if (dur >= 600) stop(); }, 250);
-      step();
-    });
+    acc = 0; on = 0; rec.start(); running = true; i = 0; recOn();
+    $('timer').hidden = false;
+    tick = setInterval(() => { dur = (acc + (on ? Date.now() - on : 0)) / 1000; $('tt').textContent = fmt(dur); if (dur >= 600) stop(); }, 250);
+    step();
   }
   function micErr(e){
     if (e && e.name === 'NotAllowedError') showErr('마이크가 막혀 있어요. 주소창 왼쪽 🔒(또는 조절 아이콘) → 권한 → 마이크 → 허용으로 바꾸고 다시 눌러 주세요.');
