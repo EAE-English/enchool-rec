@@ -74,6 +74,7 @@
   .back{align-self:flex-start;border:0;background:none;color:var(--navy);font-family:var(--ko);font-size:14.5px;cursor:pointer;padding:6px 2px;margin-top:6px}
   .listen{margin-top:12px;width:100%;border:1.5px solid var(--navy);background:#fff;color:var(--navy);border-radius:12px;padding:11px;font-family:var(--ko);font-size:15.5px;cursor:pointer}
   .ln.rd{max-width:100%}
+  .nmin{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:12px;padding:12px;font-size:17px;font-family:var(--ko)}
 </style>
 </head>
 <body>
@@ -140,7 +141,7 @@
   const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const plain = s => String(s).replace(/[\[\]]/g, '');
   const Q = new URLSearchParams(location.search);
-  const STUDENT = (Q.get('s') || '').trim(), CLS = Q.get('c') || '', KEY = (Q.get('k') || '').trim(), ME0 = Q.get('me') || '';
+  let STUDENT = (Q.get('s') || '').trim(); const CLS = Q.get('c') || '', KEY = (Q.get('k') || '').trim(), ME0 = Q.get('me') || '';
   function showErr(m){ $('err').textContent = m; $('err').hidden = false; }
   function fmt(s){ return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(Math.floor(s%60)).padStart(2,'0'); }
   $('who').textContent = STUDENT || '이름 없음';
@@ -152,7 +153,16 @@
     if (isAnd) $('openChrome').href = 'intent://' + location.href.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end';
     else { $('openChrome').hidden = true; $('iosTip').hidden = false; }
   }
-  if (!STUDENT) showErr('이름이 없어요. 숙제장의 QR을 다시 찍어 주세요.');
+  /* 반 숙제장(이름 없는 QR)이면 이름부터 */
+  function askName(){
+    const c = document.createElement('section'); c.className = 'card'; c.id = 'nameCard';
+    c.innerHTML = '<p class="label">처음 한 번만</p><h1>이름을 써 주세요</h1><p class="sub">선생님이 누구 녹음인지 알 수 있게 <b>한글 이름</b>을 써요.</p><div class="roles"><input id="nmIn" class="nmin" placeholder="예: 김예원" autocomplete="off"><button class="btn main" id="nmGo">확인</button></div>';
+    document.querySelector('.wrap').prepend(c);
+    let saved = ''; try{ saved = localStorage.getItem('enc_rec_name') || ''; }catch(e){}
+    $('nmIn').value = saved;
+    $('nmGo').onclick = () => { const v = $('nmIn').value.replace(/\s+/g, ''); if (!v) return; STUDENT = v; try{ localStorage.setItem('enc_rec_name', v); }catch(e){} $('who').textContent = v; c.remove(); };
+  }
+  if (!STUDENT) askName();
 
   /* ── 대본 불러오기: k = 책_과 [. 대화문ID | sN | sN_M | body | 본문ID] ── */
   const [BK, SEL] = [KEY.split('.')[0], KEY.split('.').slice(1).join('.')];
@@ -343,6 +353,7 @@
   }
   $('send').onclick = () => {
     if (!blob) return;
+    if (!STUDENT){ showErr('맨 위에 이름을 먼저 써 주세요.'); window.scrollTo({top:0}); return; }
     $('send').disabled = true; $('again').disabled = true; $('send').textContent = '보내는 중…';
     const r = new FileReader();
     r.onload = () => {
