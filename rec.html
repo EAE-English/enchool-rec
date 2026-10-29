@@ -183,8 +183,11 @@
   /* ── 대본 불러오기: k = 책_과 [. 대화문ID | sN | sN_M | body | 본문ID] ── */
   const [BK, SEL] = [KEY.split('.')[0], KEY.split('.').slice(1).join('.')];
   let PACK = null, ITEMS = [], IT = null, MODE = '', ME = '';
-  if (!/^[a-z0-9_]+$/i.test(BK)){ showErr('어떤 숙제인지 모르겠어요. 숙제장의 QR을 다시 찍어 주세요.'); return; }
-  fetch('scripts/' + BK + '.json', {cache:'no-cache'}).then(r => { if (!r.ok) throw 0; return r.json(); }).then(init)
+  if (!/^[a-z0-9_~]+$/i.test(BK)){ showErr('어떤 숙제인지 모르겠어요. 숙제장의 QR을 다시 찍어 주세요.'); return; }
+  /* 여러 Day를 QR 하나로: 책_11~12~13 → 각 Day 대본을 이어 붙여 목록으로 (2026-10-29) */
+  const MM = BK.match(/^([a-z0-9]+)_(\d+(?:~\d+)+)$/i);
+  const getP = f => fetch('scripts/' + f + '.json', {cache:'no-cache'}).then(r => { if (!r.ok) throw 0; return r.json(); });
+  (MM ? Promise.all(MM[2].split('~').map(n => getP(MM[1] + '_' + n))).then(Ps => ({...Ps[0], unit: String(Ps[0].unit || '').replace(/\d+$/, MM[2].split('~').join('·')), dialogs:[], body:[], shadow: Ps.flatMap(x => x.shadow || [])})) : getP(BK)).then(init)
     .catch(() => showErr('아직 이 숙제의 대본이 없어요. 선생님께 알려 주세요.'));
 
   function init(P){
