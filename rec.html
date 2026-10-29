@@ -59,6 +59,9 @@
   .rb .c{width:56px;height:56px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 3px var(--rec);background:var(--rec);display:flex;align-items:center;justify-content:center}
   .rb .c i{display:none;width:21px;height:21px;border-radius:5px;background:#fff}
   .rb.on .c i{display:block}
+  .rb.talk .c{animation:rbp 1.2s ease-in-out infinite}
+  @keyframes rbp{50%{box-shadow:0 0 0 3px var(--rec),0 0 0 9px #FCE3E4}}
+  @media (prefers-reduced-motion:reduce){.rb.talk .c{animation:none}}
   .rb:disabled{cursor:default;color:var(--muted)}
   .rb:disabled .c{background:#C9CED6;box-shadow:0 0 0 3px #C9CED6}
   .timer.abs{position:absolute;left:0;top:50%;transform:translateY(-50%)}
@@ -292,6 +295,8 @@
   document.addEventListener('click', e => { const b = e.target.closest('[data-spd]'); if (!b || running) return;
     RATE = +b.dataset.spd; try{ localStorage.setItem('enc_rec_rate', RATE); }catch(e){}
     document.querySelectorAll('[data-spd]').forEach(x => x.classList.toggle('on', +x.dataset.spd === RATE)); rate(AUD); });
+  /* 역할극 「말하기」 버튼도 같은 빨간 동그라미 (2026-10-29) */
+  function rbSet(b, lab, on){ b.className = 'rb' + (on ? ' on talk' : ''); b.innerHTML = '<span class="c"><i></i></span><b></b>'; b.querySelector('b').textContent = lab; }
   function goUI(lab, on){ const g = $('go'); g.className = 'rb' + (on ? ' on' : ''); g.querySelector('b').textContent = lab; }
   /* 음원을 다 받기 전에는 녹음 버튼을 막아 둠 (2026-10-29) */
   function trkUI(st){
@@ -450,12 +455,12 @@
     if (i >= IT.L.length){ stop(); return; }
     focus(i);
     const l = IT.L[i], nb = $('next');
-    if (l[0] === ME){ recOff(); speaking = false; nb.hidden = false; nb.disabled = false; nb.className = 'btn speak'; nb.textContent = '🎙 말하기'; }
+    if (l[0] === ME){ recOff(); speaking = false; nb.hidden = false; nb.disabled = false; rbSet(nb, '말하기', false); }
     else { nb.hidden = true; recOn(); say(l[1], l[0], () => { i++; step(); }); }
   }
   $('next').onclick = () => {
     const nb = $('next');
-    if (!speaking){ speaking = true; recOn(); srStart(i); nb.className = 'btn speaking'; nb.textContent = i === mineIdx().pop() ? '✓ 다 했어요 (끝)' : '✓ 다 했어요'; return; }
+    if (!speaking){ speaking = true; recOn(); srStart(i); rbSet(nb, i === mineIdx().pop() ? '다 했어요 (끝)' : '다 했어요', true); return; }
     nb.disabled = true; speaking = false; recOff(); setTimeout(srStop, 600);
     setTimeout(() => { i++; step(); }, 250);
   };
@@ -479,7 +484,7 @@
     $('tip').hidden = true; $('listenAll').hidden = true;
     finished = false; acc = 0; on = 0; rec.start(1000); running = true; i = 0; recOn(); $('timer').hidden = false;
     tick = setInterval(() => { dur = (acc + (on ? Date.now() - on : 0)) / 1000; $('tt').textContent = fmt(dur); if (dur >= 600) stop(); }, 250);
-    if (MODE === 'role'){ $('go').hidden = true; step(); }
+    if (MODE === 'role'){ $('go').hidden = true; $('timer').classList.add('abs'); step(); }
     else if (MODE === 'shadow'){
       goUI('그만하기', true); trkUI(null); $('timer').classList.add('abs'); srStart(0);
       const fin = () => setTimeout(stop, 900);
