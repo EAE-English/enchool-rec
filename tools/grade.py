@@ -23,7 +23,7 @@ def lcs_marks(R, H):
     ok = [False] * n; i = j = 0
     while i < n and j < m:
         if R[i] == H[j]: ok[i] = True; i += 1; j += 1
-        elif d[i + 1][j] >= d[i][j + 1]: i += 1
+        elif d[i + 1][j] > d[i][j + 1]: i += 1
         else: j += 1
     return ok
 
@@ -31,10 +31,15 @@ def score(ref_list, heard):
     R, H = words(' '.join(ref_list)), words(heard)
     if not R or not H: return None, []
     ok = lcs_marks(R, H); weak = []
-    for k, f in enumerate(ok):
+    # 중간에 멈춘 녹음: 마지막으로 맞힌 곳 뒤가 대본의 15% 넘게 남으면, 읽은 데까지만 채점 (2026-10-29)
+    last = max([k for k, f in enumerate(ok) if f] or [-1]); end = len(R); part = False
+    if last >= 0 and (last + 1) < len(R) * 0.85: end = last + 1; part = True
+    for k, f in enumerate(ok[:end]):
         w = R[k]
         if not f and len(w) > 2 and w not in SMALL and w not in weak: weak.append(w)
-    return round(sum(ok) / len(R) * 100), weak[:8]
+    sc = round(sum(ok[:end]) / end * 100) if end else 0
+    if part: weak = ['⏸ 중간에 멈춤 · 대본의 %d%%까지' % round(end / len(R) * 100)] + weak[:7]
+    return sc, weak[:8]
 
 def speech_report(audio, segs, ref_list):
     """속도·멈칫·반복·억양을 한 줄로"""
