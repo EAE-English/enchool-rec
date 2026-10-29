@@ -172,6 +172,7 @@
   const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const plain = s => String(s).replace(/[\[\]]/g, '');
   const Q = new URLSearchParams(location.search);
+  const WONLY = Q.get('w') === '1';   // 단어만 따라 읽기 (예문은 건너뜀 · 2026-10-29)
   let STUDENT = (Q.get('s') || '').trim(); const CLS = Q.get('c') || '', KEY = (Q.get('k') || '').trim(), ME0 = Q.get('me') || '';
   window.addEventListener('error', e => { try{ showErr('화면 오류: ' + (e.message || '') + ' — 이 화면을 캡처해서 선생님께 보내 주세요.'); }catch(_){} });
   function showErr(m){ $('err').textContent = m; $('err').hidden = false; }
@@ -253,7 +254,7 @@
   function start(x, mode, me){
     MODE = mode; ME = me; HIDE = false; heard = {}; blob = null;
     $('rolePick').hidden = true; $('stage').hidden = false; $('bar').hidden = false;
-    $('appName').textContent = mode === 'role' ? '쿨톡 역할극 녹음' : x.kind === 'body' ? '본문 따라 읽기 녹음' : mode === 'shadow' ? '따라 읽기 녹음' : '본문 읽기 녹음';
+    $('appName').textContent = mode === 'role' ? '쿨톡 역할극 녹음' : x.kind === 'body' ? '본문 따라 읽기 녹음' : mode === 'shadow' ? (WONLY ? '단어 따라 읽기 녹음' : '따라 읽기 녹음') : '본문 읽기 녹음';
     $('unit').textContent = PACK.unit || ''; $('title').textContent = x.t + (x.sub ? ' · ' + x.sub : '');
     $('how').innerHTML = mode === 'role'
       ? `나는 <b>${esc(me)}</b> 역할! 상대 대사는 원어민이 읽어 줘요.<br>내 차례가 오면 녹음이 잠깐 멈춰요. 준비되면 <b>🎙 말하기</b>를 누르고 말한 뒤 <b>✓ 다 했어요</b>를 눌러요.<br>🔈 원어민 목소리도 같이 녹음되게 <b>이어폰은 빼고</b> 스피커로 해요.`
@@ -271,7 +272,7 @@
     draw(); window.scrollTo({top:0});
   }
   function lines(){ if (IT.kind === 'body') return bodyLines(IT).map(t => ['', t, '']);
-    if (IT.kind === 'shadow') return (IT.words || []).map(w => [w.w, w.ex || '', w.ko || '']);
+    if (IT.kind === 'shadow') return (IT.words || []).map(w => [w.w, WONLY ? '' : (w.ex || ''), w.ko || '']);
     return IT.kind === 'dlg' ? IT.L : (IT.lines || String(IT.text || '').split(/(?<=[.!?])\s+/)).map(t => ['', t, '']); }
   function draw(){
     $('lines').innerHTML = lines().map((l, i) => {
@@ -319,7 +320,7 @@
       SEGS[k] = null;
       /* 미리 만들어 둔 나누기 계획(plans/…json: 한국어 뜻은 따라 하지 않고 넘어감)이 있으면 그걸 쓰고, 없으면 여기서 나눔 */
       fetch('plans/' + k + '.json', {cache:'no-cache'}).then(r => r.ok ? r.json() : null).catch(() => null)
-        .then(pl => pl && pl.length ? (SEGS[k] = pl) : segment(by.buffer.slice(0), wantSegs(x)).then(sg => { SEGS[k] = sg; }))
+        .then(pl => pl && pl.length ? (SEGS[k] = WONLY ? pl.filter(x => x[3] !== 'e') : pl) : segment(by.buffer.slice(0), wantSegs(x)).then(sg => { SEGS[k] = sg; }))
         .catch(() => { SEGS[k] = []; });
       if (IT && IT.audio === k){ AUD = rate(new Audio(TRK[k])); set('✓ 음원 준비 끝'); }
     }).catch(() => { TRK[k] = 'none'; if (IT && IT.audio === k) set('음원이 아직 없어서 원어민 목소리로 읽어 줘요'); });
@@ -328,7 +329,7 @@
   const SEGS = {};
   /* 따라 말할 시간 = 원어민 소리 길이(속도 반영) + 여유: 짧은 단어는 1초, 문장은 2초 (2026-10-29 선생님 요청) */
   const plusFor = len => len < 1.4 ? 1 : 2;
-  const wantSegs = x => x.kind === 'shadow' ? (x.words || []).reduce((n, w) => n + 1 + (w.ex ? 1 : 0), 0) : bodyLines(x).length;
+  const wantSegs = x => x.kind === 'shadow' ? (x.words || []).reduce((n, w) => n + 1 + (w.ex && !WONLY ? 1 : 0), 0) : bodyLines(x).length;
   const bodyLines = x => x.lines || String(x.text || '').split(/(?<=[.!?])\s+/).filter(Boolean);
   async function segment(buf, want){
     const ctx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 16000, 16000);
@@ -364,7 +365,7 @@
     let i = 0;
     /* 끊은 개수가 대본과 맞으면 지금 나오는 단어·문장 칸을 따라가며 보여 줌 */
     const map = [];
-    if (IT.kind === 'shadow') (IT.words || []).forEach((w, k) => { map.push(k); if (w.ex) map.push(k); }); else lines().forEach((_, k) => map.push(k));
+    if (IT.kind === 'shadow') (IT.words || []).forEach((w, k) => { map.push(k); if (w.ex && !WONLY) map.push(k); }); else lines().forEach((_, k) => map.push(k));
     const follow = !sg.some(x => x.length > 2) && (map.length === sg.length || (IT.kind === 'shadow' && map.length + 1 === sg.length));
     const off = sg.length - map.length;   // 맨 앞 책 소개 멘트가 하나 더 있을 때
     (function next(){
