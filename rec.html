@@ -150,6 +150,7 @@
 
 <script>
 (function(){
+  const BACK = (() => { const b = new URLSearchParams(location.search).get('back') || ''; return /^https:\/\/claude\.ai\//.test(b) ? b : ''; })();
   const LOG = 'https://script.google.com/macros/s/AKfycbwdK8492SzMcrc_hmwGWIquliehqASMrSAhbXJ5D-UyygkmwYvO23LWDzU8O44UrGQD/exec';
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -246,7 +247,7 @@
     $('tShow').classList.add('on'); $('tHide').classList.remove('on');
     ['after','doneCard','send','again','next','timer'].forEach(id => $(id).hidden = true);
     $('go').hidden = false; $('go').disabled = false; $('go').className = 'btn recs'; $('go').textContent = '🎙 녹음 시작';
-    $('more').hidden = ITEMS.length < 2; $('fin').hidden = ITEMS.length > 1; $('finHint').hidden = true;
+    $('more').hidden = ITEMS.length < 2; /* 쿨톡에서 온 경우만 「다음」, QR로 바로 온 경우는 끝 안내만 (2026-10-29) */ $('fin').hidden = ITEMS.length > 1 || !BACK; $('finHint').hidden = ITEMS.length > 1 || !!BACK; $('finHint').innerHTML = '✓ 끝! 이 창은 닫아도 돼요.';
     draw(); window.scrollTo({top:0});
   }
   function lines(){ if (IT.kind === 'body') return bodyLines(IT).map(t => ['', t, '']);
@@ -486,9 +487,8 @@
   $('again').onclick = () => start(IT, MODE, ME);
   $('more').onclick = () => showPick();
   /* 한 개만 녹음하러 들어온 경우(쿨톡 역할극 등): 다 했으면 창을 닫고 원래 화면으로 (2026-10-29) */
-  const BACK = (() => { const b = new URLSearchParams(location.search).get('back') || ''; return /^https:\/\/claude\.ai\//.test(b) ? b : ''; })();
   if (BACK && /\.gowrite\b/.test(BACK)) $('fin').textContent = '다음: ⑦ 통째로 마스터 ▶';
-  $('fin').onclick = () => { if (BACK) { location.href = BACK; return; } try { window.close(); } catch (e) {} setTimeout(() => { if (history.length > 1 && document.referrer) history.back(); else { $('finHint').hidden = false; $('finHint').scrollIntoView({block:'center', behavior:'smooth'}); } }, 350); };
+  $('fin').onclick = () => { if (BACK) { location.href = BACK; return; } try { window.close(); } catch (e) {} setTimeout(() => { { $('finHint').hidden = false; $('finHint').scrollIntoView({block:'center', behavior:'smooth'}); } }, 350); };
 
   const sentOK = {};
   function refsHeard(){
