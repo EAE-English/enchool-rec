@@ -53,6 +53,19 @@
   .timer.off{color:var(--muted)}
   .count{position:fixed;inset:0;background:rgba(19,46,94,.82);display:grid;place-items:center;color:#fff;font-family:var(--en);font-weight:800;font-size:120px;z-index:9}
   .btn:disabled{opacity:.5;cursor:default}
+  /* 녹음 버튼: 빨간 동그라미 (2026-10-29) */
+  .bar-in{position:relative}
+  .rb{flex:0 0 auto;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:7px;background:none;border:0;padding:0;font-family:var(--ko);font-size:14px;font-weight:700;color:var(--ink);cursor:pointer}
+  .rb .c{width:56px;height:56px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 3px var(--rec);background:var(--rec);display:flex;align-items:center;justify-content:center}
+  .rb .c i{display:none;width:21px;height:21px;border-radius:5px;background:#fff}
+  .rb.on .c i{display:block}
+  .rb:disabled{cursor:default;color:var(--muted)}
+  .rb:disabled .c{background:#C9CED6;box-shadow:0 0 0 3px #C9CED6}
+  .timer.abs{position:absolute;left:0;top:50%;transform:translateY(-50%)}
+  .tbox{max-width:560px;margin:0 auto 10px;text-align:center;font-weight:800;font-size:15px;border-radius:10px;padding:7px 10px;font-family:var(--ko)}
+  .tbox.wait{background:#FFF4CC;color:#8A5A00;border:1.5px solid #F2C94C}
+  .tbox.ok{background:#E3F6EA;color:#1E7B45;border:1.5px solid #6FCF97}
+  .tbox.none{background:var(--navy-soft);color:var(--navy);border:1.5px solid var(--line)}
   audio{width:100%;margin-top:6px}
   .done{text-align:center;box-shadow:inset 0 4px 0 var(--gold)}
   .done h2{margin:6px 0;color:var(--navy);font-weight:400;font-size:22px}
@@ -140,9 +153,9 @@
 </div>
 
 <div class="say" id="say" hidden><b>🗣 지금 따라 말해요!</b><span><i></i></span></div>
-<div class="bar" id="bar" hidden><div class="bar-in">
+<div class="bar" id="bar" hidden><div class="tbox" id="tbox" hidden></div><div class="bar-in">
   <span class="timer" id="timer" hidden><i id="recdot" hidden>●</i> <b id="tt">00:00</b></span>
-  <button class="btn recs" id="go">🎙 녹음 시작</button>
+  <button class="rb" id="go"><span class="c"><i></i></span><b>녹음 시작</b></button>
   <button class="btn main" id="next" hidden>다음 ▶</button>
   <button class="btn" id="again" hidden>다시 하기</button>
   <button class="btn main" id="send" hidden>선생님께 보내기</button>
@@ -238,18 +251,19 @@
     MODE = mode; ME = me; HIDE = false; heard = {}; blob = null;
     $('rolePick').hidden = true; $('stage').hidden = false; $('bar').hidden = false;
     $('appName').textContent = mode === 'role' ? '쿨톡 역할극 녹음' : x.kind === 'body' ? '본문 따라 읽기 녹음' : mode === 'shadow' ? '따라 읽기 녹음' : '본문 읽기 녹음';
-    if (mode === 'shadow') loadTrack(x);
     $('unit').textContent = PACK.unit || ''; $('title').textContent = x.t + (x.sub ? ' · ' + x.sub : '');
     $('how').innerHTML = mode === 'role'
       ? `나는 <b>${esc(me)}</b> 역할! 상대 대사는 원어민이 읽어 줘요.<br>내 차례가 오면 녹음이 잠깐 멈춰요. 준비되면 <b>🎙 말하기</b>를 누르고 말한 뒤 <b>✓ 다 했어요</b>를 눌러요.<br>🔈 원어민 목소리도 같이 녹음되게 <b>이어폰은 빼고</b> 스피커로 해요.`
       : mode === 'shadow'
-      ? `<b class="ear">🎧 가능하면 이어폰을 끼고 진행해 주세요!</b><br><b>🎙 녹음 시작</b>을 누르면 원어민 음원이 나와요. 원어민이 하나 말하면 <b>잠깐 멈춰요</b>. 그때 <b>따라 말해요</b>.<br>끝까지 저절로 넘어가고, 음원이 끝나면 녹음도 끝나요.<br><span id="trk" class="trk">음원 준비 중…</span>
+      ? `<b class="ear">🎧 가능하면 이어폰을 끼고 진행해 주세요!</b><br><b>🎙 녹음 시작</b>을 누르면 원어민 음원이 나와요. 원어민이 하나 말하면 <b>잠깐 멈춰요</b>. 그때 <b>따라 말해요</b>.<br>끝까지 저절로 넘어가고, 음원이 끝나면 녹음도 끝나요.
         <div class="spd" id="spd">속도 ${[0.7,0.8,0.9,1].map(r => `<button data-spd="${r}" class="${r === RATE ? 'on' : ''}">${r === 1 ? '보통' : r + '배'}</button>`).join('')}</div>`
       : `먼저 <b>🔊 원어민 먼저 들어 보기</b>로 들어 봐요.<br>준비되면 <b>🎙 녹음 시작</b>을 누르고 처음부터 끝까지 소리 내어 읽은 뒤 <b>■ 다 읽었어요</b>를 눌러요.`;
     $('tog').hidden = mode !== 'role'; $('listenAll').hidden = mode === 'role';
     $('tShow').classList.add('on'); $('tHide').classList.remove('on');
     ['after','doneCard','send','again','next','timer'].forEach(id => $(id).hidden = true);
-    $('go').hidden = false; $('go').disabled = false; $('go').className = 'btn recs'; $('go').textContent = '🎙 녹음 시작';
+    stopMine(); $('timer').classList.remove('abs'); trkUI(null);
+    $('go').hidden = false; $('go').disabled = false; goUI('녹음 시작', false);
+    if (mode === 'shadow') loadTrack(x);
     $('more').hidden = ITEMS.length < 2; /* 쿨톡에서 온 경우만 「다음」, QR로 바로 온 경우는 끝 안내만 (2026-10-29) */ $('fin').hidden = ITEMS.length > 1 || !BACK; $('finHint').hidden = ITEMS.length > 1 || !!BACK; $('finHint').innerHTML = '✓ 끝! 이 창은 닫아도 돼요.';
     draw(); window.scrollTo({top:0});
   }
@@ -278,9 +292,19 @@
   document.addEventListener('click', e => { const b = e.target.closest('[data-spd]'); if (!b || running) return;
     RATE = +b.dataset.spd; try{ localStorage.setItem('enc_rec_rate', RATE); }catch(e){}
     document.querySelectorAll('[data-spd]').forEach(x => x.classList.toggle('on', +x.dataset.spd === RATE)); rate(AUD); });
+  function goUI(lab, on){ const g = $('go'); g.className = 'rb' + (on ? ' on' : ''); g.querySelector('b').textContent = lab; }
+  /* 음원을 다 받기 전에는 녹음 버튼을 막아 둠 (2026-10-29) */
+  function trkUI(st){
+    const b = $('tbox');
+    if (!st){ b.hidden = true; return; }
+    b.hidden = false; b.className = 'tbox ' + st;
+    b.textContent = st === 'wait' ? '⏳ 음원 준비 중… 잠깐만 기다려요' : st === 'ok' ? '✓ 음원 준비 끝! 아래 빨간 버튼을 눌러요' : '음원이 없어서 원어민 목소리로 읽어 줘요';
+    if (!running) $('go').disabled = st === 'wait';
+  }
   function loadTrack(x){
     AUD = null; const k = x.audio;
-    const set = t => { const el = $('trk'); if (el) el.textContent = t; };
+    const set = t => { if (MODE !== 'shadow' || IT !== x || running || !$('after').hidden) return; trkUI(/준비 끝/.test(t) ? 'ok' : /없어서/.test(t) ? 'none' : 'wait'); };
+    set('wait'); setTimeout(() => { if (!TRK[k]) set('음원이 없어서'); }, 30000);   // 30초 넘게 못 받으면 원어민 목소리로라도 하게
     if (TRK[k] === 'none'){ set('음원이 아직 없어서 원어민 목소리로 읽어 줘요'); return; }
     if (TRK[k]){ AUD = rate(new Audio(TRK[k])); set('✓ 음원 준비 끝'); return; }
     fetch(LOG + '?a=track&k=' + encodeURIComponent(k)).then(r => r.json()).then(j => {
@@ -457,23 +481,23 @@
     tick = setInterval(() => { dur = (acc + (on ? Date.now() - on : 0)) / 1000; $('tt').textContent = fmt(dur); if (dur >= 600) stop(); }, 250);
     if (MODE === 'role'){ $('go').hidden = true; step(); }
     else if (MODE === 'shadow'){
-      $('go').className = 'btn main'; $('go').textContent = '■ 그만하기'; srStart(0);
+      goUI('그만하기', true); trkUI(null); $('timer').classList.add('abs'); srStart(0);
       const fin = () => setTimeout(stop, 900);
       /* 마이크를 켜면 블루투스 이어폰이 통화 모드로 바뀌느라 1~2초 동안 소리가 스피커로 새요 → 2초 기다렸다 시작 */
       const el = $('say'); el.hidden = false; el.querySelector('b').textContent = '🎧 준비 중… 곧 시작해요'; el.querySelector('i').style.width = '0';
       setTimeout(() => { el.querySelector('b').textContent = '🗣 지금 따라 말해요!'; el.hidden = true; if (!running) return;
         if (AUD) playWithGaps(fin); else ttsShadow(fin); }, 2000);
     }
-    else { $('go').className = 'btn main'; $('go').textContent = '■ 다 읽었어요'; srStart(0); }
+    else { goUI('다 읽었어요', true); $('timer').classList.add('abs'); srStart(0); }
   };
   /* 녹음이 끝나면: 내 녹음 듣기 + 「선생님께 보내기」 (onstop이 안 와도 2초 뒤 꼭 보여 줌) */
   let finished = false;
   function finishRec(){
     if (finished) return; finished = true;
     try{
-      blob = new Blob(chunks, {type:mime}); $('mine').src = URL.createObjectURL(blob);
+      blob = new Blob(chunks, {type:mime}); setMine(URL.createObjectURL(blob));
     }catch(e){}
-    $('after').hidden = false; $('send').hidden = false; $('send').disabled = false; $('again').hidden = false; $('next').hidden = true; $('go').hidden = true;
+    $('after').hidden = false; $('send').hidden = false; $('send').disabled = false; $('again').hidden = false; $('next').hidden = true; $('go').hidden = true; $('timer').classList.remove('abs'); trkUI(null);
     try{ stream.getTracks().forEach(t => t.stop()); }catch(e){}
     focus(-1); showSay(0); setLive(false);
     $('after').scrollIntoView({block:'center', behavior:'smooth'});
@@ -486,12 +510,19 @@
     if (rec && rec.state !== 'inactive'){ try{ rec.requestData(); }catch(e){} rec.stop(); }
     setTimeout(() => { if (!finished && chunks.length) finishRec(); }, 2000);
   }
-  function stopAll(){ playing = false; if (window.speechSynthesis) speechSynthesis.cancel(); stop(); }
+  /* 내 녹음: 휴대폰 녹음 파일엔 길이 정보가 없어 재생 바가 끝으로 튐 → 길이를 먼저 알아낸 뒤 0으로 (2026-10-29) */
+  function setMine(u){
+    const m = $('mine'); m.src = u;
+    m.onloadedmetadata = () => { if (m.duration !== Infinity && !isNaN(m.duration)) return;
+      m.ontimeupdate = () => { m.ontimeupdate = null; m.currentTime = 0; }; m.currentTime = 1e101; };
+  }
+  function stopMine(){ try{ $('mine').pause(); }catch(e){} }
+  function stopAll(){ stopMine(); playing = false; if (window.speechSynthesis) speechSynthesis.cancel(); stop(); }
   $('again').onclick = () => start(IT, MODE, ME);
   $('more').onclick = () => showPick();
   /* 한 개만 녹음하러 들어온 경우(쿨톡 역할극 등): 다 했으면 창을 닫고 원래 화면으로 (2026-10-29) */
   if (BACK && /\.gowrite\b/.test(BACK)) $('fin').textContent = '다음: ⑦ 통째로 마스터 ▶';
-  $('fin').onclick = () => { if (BACK) { location.href = BACK; return; } try { window.close(); } catch (e) {} setTimeout(() => { { $('finHint').hidden = false; $('finHint').scrollIntoView({block:'center', behavior:'smooth'}); } }, 350); };
+  $('fin').onclick = () => { stopMine(); if (BACK) { location.href = BACK; return; } try { window.close(); } catch (e) {} setTimeout(() => { { $('finHint').hidden = false; $('finHint').scrollIntoView({block:'center', behavior:'smooth'}); } }, 350); };
 
   const sentOK = {};
   function refsHeard(){
