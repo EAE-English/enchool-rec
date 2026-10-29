@@ -131,6 +131,8 @@
       <h2 id="doneT">멋진 연기였어요!</h2>
       <p>녹음이 선생님께 잘 전달됐어요.</p>
       <button class="btn main" id="more" style="margin-top:14px;width:100%" hidden>다른 것도 녹음하기</button>
+      <button class="btn main" id="fin" style="margin-top:14px;width:100%" hidden>✓ 다 했어요 · 돌아가기</button>
+      <p id="finHint" class="sub" style="margin-top:10px;color:#132E5E;font-weight:700" hidden>👆 맨 위 왼쪽 <b>✕</b>를 눌러 창을 닫으면 숙제(쿨톡) 화면으로 돌아가요.</p>
     </section>
     <button class="back" data-back id="backStage">← 다른 것 고르기</button>
   </div>
@@ -244,7 +246,7 @@
     $('tShow').classList.add('on'); $('tHide').classList.remove('on');
     ['after','doneCard','send','again','next','timer'].forEach(id => $(id).hidden = true);
     $('go').hidden = false; $('go').disabled = false; $('go').className = 'btn recs'; $('go').textContent = '🎙 녹음 시작';
-    $('more').hidden = ITEMS.length < 2;
+    $('more').hidden = ITEMS.length < 2; $('fin').hidden = ITEMS.length > 1; $('finHint').hidden = true;
     draw(); window.scrollTo({top:0});
   }
   function lines(){ if (IT.kind === 'body') return bodyLines(IT).map(t => ['', t, '']);
@@ -483,6 +485,8 @@
   function stopAll(){ playing = false; if (window.speechSynthesis) speechSynthesis.cancel(); stop(); }
   $('again').onclick = () => start(IT, MODE, ME);
   $('more').onclick = () => showPick();
+  /* 한 개만 녹음하러 들어온 경우(쿨톡 역할극 등): 다 했으면 창을 닫고 원래 화면으로 (2026-10-29) */
+  $('fin').onclick = () => { try { window.close(); } catch (e) {} setTimeout(() => { if (history.length > 1 && document.referrer) history.back(); else { $('finHint').hidden = false; $('finHint').scrollIntoView({block:'center', behavior:'smooth'}); } }, 350); };
 
   const sentOK = {};
   function refsHeard(){
