@@ -486,7 +486,9 @@
   $('again').onclick = () => start(IT, MODE, ME);
   $('more').onclick = () => showPick();
   /* 한 개만 녹음하러 들어온 경우(쿨톡 역할극 등): 다 했으면 창을 닫고 원래 화면으로 (2026-10-29) */
-  $('fin').onclick = () => { try { window.close(); } catch (e) {} setTimeout(() => { if (history.length > 1 && document.referrer) history.back(); else { $('finHint').hidden = false; $('finHint').scrollIntoView({block:'center', behavior:'smooth'}); } }, 350); };
+  const BACK = (() => { const b = new URLSearchParams(location.search).get('back') || ''; return /^https:\/\/claude\.ai\//.test(b) ? b : ''; })();
+  if (BACK && /\.gowrite\b/.test(BACK)) $('fin').textContent = '✓ 다 했어요 · 다음: ⑦ 통째로 마스터 ▶';
+  $('fin').onclick = () => { if (BACK) { location.href = BACK; return; } try { window.close(); } catch (e) {} setTimeout(() => { if (history.length > 1 && document.referrer) history.back(); else { $('finHint').hidden = false; $('finHint').scrollIntoView({block:'center', behavior:'smooth'}); } }, 350); };
 
   const sentOK = {};
   function refsHeard(){
