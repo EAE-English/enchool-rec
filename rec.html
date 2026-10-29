@@ -267,7 +267,7 @@
     stopMine(); $('timer').classList.remove('abs'); trkUI(null);
     $('go').hidden = false; $('go').disabled = false; goUI('녹음 시작', false);
     if (mode === 'shadow') loadTrack(x);
-    $('more').hidden = ITEMS.length < 2; /* 쿨톡에서 온 경우만 「다음」, QR로 바로 온 경우는 끝 안내만 (2026-10-29) */ $('fin').hidden = ITEMS.length > 1 || !BACK; $('finHint').hidden = ITEMS.length > 1 || !!BACK; $('finHint').innerHTML = '✓ 끝! 이 창은 닫아도 돼요.';
+    $('more').hidden = ITEMS.length < 2; /* 쿨톡에서 온 경우만 「다음」, QR로 바로 온 경우는 끝 안내만 (2026-10-29) */ $('fin').hidden = ITEMS.length > 1 || !BACK; $('finHint').hidden = ITEMS.length > 1 || !!BACK; $('finHint').innerHTML = '✓ 끝! 선생님께 잘 보냈어요.<br>이제 다음 숙제를 하면 돼요.';
     draw(); window.scrollTo({top:0});
   }
   function lines(){ if (IT.kind === 'body') return bodyLines(IT).map(t => ['', t, '']);
