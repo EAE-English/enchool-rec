@@ -101,6 +101,20 @@
   .best p{margin:0;font-size:14.5px;line-height:1.55;color:#E8EDF6}.best p b{display:inline;color:#fff;font-size:inherit;margin:0}
   .spd{display:flex;gap:6px;align-items:center;margin-top:10px;font-size:14px;color:var(--muted)}.spd button{border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:5px 12px;font-family:var(--ko);font-size:14px;cursor:pointer;color:var(--ink)}.spd button.on{border-color:var(--navy);background:var(--navy);color:#fff}.trk{display:inline-block;margin-top:6px;font-size:13.5px;color:var(--navy);background:var(--navy-soft);border-radius:6px;padding:2px 8px}
   .nmin{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:12px;padding:12px;font-size:17px;font-family:var(--ko)}
+/* 🪙 쿨앱 장학금 동전 (2026-10-29 · 동전 그림: 애나쌤) */
+.cc-coin{position:fixed;z-index:99999;width:86px;height:86px;border:0;padding:0;background:none;cursor:pointer;filter:drop-shadow(0 6px 10px rgba(110,70,0,.35));animation:ccIn .45s cubic-bezier(.2,1.6,.4,1) both,ccFloat 1.6s ease-in-out .45s infinite;-webkit-tap-highlight-color:transparent}
+.cc-coin img{width:100%;height:100%;display:block;pointer-events:none}
+.cc-coin.big{width:100px;height:100px;filter:drop-shadow(0 0 12px rgba(255,214,74,.95)) drop-shadow(0 6px 10px rgba(110,70,0,.35))}
+.cc-coin.bye{animation:ccBye .5s ease-in forwards}
+.cc-coin.got{animation:ccGot .55s ease-out forwards;pointer-events:none}
+@keyframes ccIn{from{transform:scale(0) rotate(-40deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+@keyframes ccFloat{50%{transform:translateY(-8px) rotate(6deg)}}
+@keyframes ccBye{to{transform:scale(.2);opacity:0}}
+@keyframes ccGot{40%{transform:scale(1.35)}to{transform:translateY(-90px) scale(.6);opacity:0}}
+.cc-toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:99999;background:#102f5e;color:#fff;border-radius:16px;padding:12px 16px;font-size:15px;font-weight:700;line-height:1.4;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.25);width:max-content;max-width:min(340px,calc(100vw - 32px));animation:ccToast .35s ease-out both}@keyframes ccToast{from{transform:translate(-50%,12px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+.cc-toast em{font-style:normal;color:#ffd54a}
+@media (prefers-reduced-motion:reduce){.cc-coin,.cc-coin.got,.cc-coin.bye{animation:none}}
+.cc-sum{margin:12px 0 0;background:#fff7dc;border:1.5px solid #f2c94c;border-radius:14px;padding:10px;color:#7a5600;font-weight:700;font-size:15px;line-height:1.5}.cc-sum b{font-size:22px;color:#132E5E}
 </style>
 </head>
 <body>
@@ -146,6 +160,7 @@
       <div style="font-size:44px" id="doneIc">🎬</div>
       <h2 id="doneT">멋진 연기였어요!</h2>
       <p>녹음이 선생님께 잘 전달됐어요.</p>
+      <div class="cc-sum" id="ccSum" hidden></div>
       <button class="btn main" id="more" style="margin-top:14px;width:100%" hidden>다른 것도 녹음하기</button>
       <button class="btn main" id="fin" style="margin-top:14px;width:100%" hidden>다음 ▶</button>
       <p id="finHint" class="sub" style="margin-top:10px;color:#132E5E;font-weight:700" hidden>👆 맨 위 왼쪽 <b>✕</b>를 눌러 창을 닫고 쿨톡에서 「다음」을 눌러요.</p>
@@ -168,6 +183,43 @@
 (function(){
   const BACK = (() => { const b = new URLSearchParams(location.search).get('back') || ''; return /^https:\/\/claude\.ai\//.test(b) ? b : ''; })();
   const LOG = 'https://script.google.com/macros/s/AKfycbwdK8492SzMcrc_hmwGWIquliehqASMrSAhbXJ5D-UyygkmwYvO23LWDzU8O44UrGQD/exec';
+const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.webp',200:'coin/coin200.webp',300:'coin/coin300.webp',400:'coin/coin400.webp',500:'coin/coin500.webp'};
+  /* 🪙 쿨앱 장학금: 공부하다 보면 동전이 툭! (하루 최대 2개 · 꾸준히 하면 큰 동전 · 2026-10-29) */
+  const COIN=(()=>{
+    const K='coolapp_coin',kst=t=>new Date(t+9*3600e3).toISOString().slice(0,10),today=()=>kst(Date.now());
+    let S0={};try{S0=JSON.parse(localStorage.getItem(K)||'{}')||{}}catch(e){}
+    const save=()=>{try{localStorage.setItem(K,JSON.stringify(S0))}catch(e){}};
+    const st=()=>{const d=today();if(S0.d!==d)S0={d,shown:0,got:S0.got||[],days:S0.days||[]};return S0};
+    const tier=()=>{const since=kst(Date.now()-13*864e5),n=st().days.filter(x=>x>=since).length;return n>=10?2:n>=5?1:0};
+    /* 잘 안 함(0~4일) 10~100원 · 보통(5~9일) ~300원 · 꾸준함(10일+) ~500원 */
+    const W=[[[10,45],[30,35],[100,20]],[[10,20],[30,25],[100,30],[200,15],[300,10]],[[30,15],[100,30],[200,25],[300,15],[400,10],[500,5]]];
+    const pick=()=>{const L=W[tier()];let r=Math.random()*L.reduce((a,x)=>a+x[1],0);for(const[v,w]of L)if((r-=w)<0)return v;return L[0][0]};
+    let armed=false,hint='「선생님께 보내기」를 누르면 쌓여요';
+    function toast(html,ms){const t=document.createElement('div');t.className='cc-toast';t.innerHTML=html;document.body.appendChild(t);setTimeout(()=>t.remove(),ms||3200)}
+    function show(){
+      if(document.visibilityState!=='visible')return setTimeout(show,4000);
+      const s=st();if(s.shown>=2)return;s.shown++;save();
+      const v=pick(),b=document.createElement('button');b.className='cc-coin'+(v>=400?' big':'');b.type='button';b.setAttribute('aria-label',`동전 ${v}원 줍기`);
+      b.innerHTML=`<img src="${COIN_IMG[v]}" alt="${v}원">`;
+      b.style.left=Math.round(12+Math.random()*(innerWidth-120))+'px';b.style.top=Math.round(innerHeight*(.18+Math.random()*.5))+'px';
+      let done=false;
+      b.onclick=e=>{e.stopPropagation();if(done)return;done=true;const s=st();s.got.push(v);save();b.classList.add('got');setTimeout(()=>b.remove(),600);
+        toast(`${v>=400?'💎 <em>대박! ':'🪙 <em>'}쿨앱 장학금 +${v}원!</em><br><small>${hint}</small>`)};
+      document.body.appendChild(b);
+      setTimeout(()=>{if(done)return;done=true;b.classList.add('bye');setTimeout(()=>b.remove(),550)},8000);
+    }
+    return{
+      arm(ok,h){if(h)hint=h;if(!ok||armed)return;armed=true;if(st().shown>=2||Math.random()>.6)return;setTimeout(show,(15+Math.random()*75)*1000)},
+      markDay(){const s=st();if(!s.days.includes(s.d)){s.days.push(s.d);s.days=s.days.slice(-30);save()}},
+      coins:()=>st().got.join(','),clear(){st().got=[];save()},show,toast
+    };
+  })();
+  
+  const notTest = () => STUDENT && !/^(test|테스트|김정호)$/i.test(STUDENT.replace(/\s/g, ''));
+  /* 보낸 뒤: 주운 동전을 쿨앱 장학금에 쌓고 지금까지 모은 금액을 보여 줌 */
+  function coinSend(){ if (!notTest()) return; const c = COIN.coins(); COIN.markDay();
+    fetch(LOG + '?a=coin&do=add&app=' + encodeURIComponent('녹음') + '&name=' + encodeURIComponent(STUDENT) + '&coins=' + c).then(r => r.json()).then(j => { if (!j || !j.ok) return; COIN.clear(); const el = $('ccSum'); el.hidden = false;
+      el.innerHTML = (j.added ? `🪙 오늘 +${j.added}원 적립!<br>` : '') + `지금까지 모은 쿨앱 장학금 <b>${Number(j.total || 0).toLocaleString()}원</b>`; }).catch(() => {}); }
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const plain = s => String(s).replace(/[\[\]]/g, '');
@@ -252,7 +304,7 @@
   /* ── 녹음 화면 ── */
   let HIDE = false;
   function start(x, mode, me){
-    MODE = mode; ME = me; HIDE = false; heard = {}; blob = null;
+    MODE = mode; ME = me; HIDE = false; heard = {}; blob = null; COIN.arm(notTest(), '「선생님께 보내기」를 누르면 쌓여요'); if ($('ccSum')) $('ccSum').hidden = true;
     $('rolePick').hidden = true; $('stage').hidden = false; $('bar').hidden = false;
     $('appName').textContent = mode === 'role' ? '쿨톡 역할극 녹음' : x.kind === 'body' ? '본문 따라 읽기 녹음' : mode === 'shadow' ? (WONLY ? '단어 따라 읽기 녹음' : '따라 읽기 녹음') : '본문 읽기 녹음';
     $('unit').textContent = PACK.unit || ''; $('title').textContent = x.t + (x.sub ? ' · ' + x.sub : '');
@@ -554,7 +606,7 @@
         base64: String(r.result).split(',')[1], mimeType: mime, durationSec: dur
       };
       const reset = () => { $('send').disabled = false; $('again').disabled = false; $('send').textContent = '선생님께 보내기'; };
-      const ok = () => { reset(); sentOK[IT.id] = 1; $('doneCard').hidden = false; $('send').hidden = true; $('again').textContent = '한 번 더 하기';
+      const ok = () => { reset(); sentOK[IT.id] = 1; coinSend(); $('doneCard').hidden = false; $('send').hidden = true; $('again').textContent = '한 번 더 하기';
         $('doneIc').textContent = MODE === 'role' ? '🎬' : MODE === 'shadow' ? '🎧' : '📖'; $('doneT').textContent = MODE === 'role' ? '멋진 연기였어요!' : MODE === 'shadow' ? '원어민처럼 잘 따라 했어요!' : '또박또박 잘 읽었어요!';
         $('doneCard').scrollIntoView({block:'center', behavior:'smooth'}); };
       const fail = e => { reset(); showErr('보내기가 안 됐어요. 다시 눌러 주세요. (' + e.message + ')'); };
