@@ -359,6 +359,17 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     b.textContent = st === 'wait' ? '⏳ 음원 준비 중… 잠깐만 기다려요' : st === 'ok' ? '✓ 음원 준비 끝! 아래 빨간 버튼을 눌러요' : '음원이 없어서 원어민 목소리로 읽어 줘요';
     if (!running) $('go').disabled = st === 'wait';
   }
+  async function toWav(buf){
+    const C = window.OfflineAudioContext || window.webkitOfflineAudioContext; if (!C) return null;
+    const SR = 22050, ctx = new C(1, SR, SR);
+    const ab = await new Promise((ok, no) => { const r = ctx.decodeAudioData(buf, ok, no); if (r && r.then) r.then(ok, no); });
+    const n = ab.length, ch = ab.numberOfChannels, d = new DataView(new ArrayBuffer(44 + n * 2)), w = (o, t) => { for (let i = 0; i < t.length; i++) d.setUint8(o + i, t.charCodeAt(i)); };
+    w(0, 'RIFF'); d.setUint32(4, 36 + n * 2, true); w(8, 'WAVEfmt '); d.setUint32(16, 16, true); d.setUint16(20, 1, true); d.setUint16(22, 1, true);
+    d.setUint32(24, ab.sampleRate, true); d.setUint32(28, ab.sampleRate * 2, true); d.setUint16(32, 2, true); d.setUint16(34, 16, true); w(36, 'data'); d.setUint32(40, n * 2, true);
+    const cs = []; for (let c = 0; c < ch; c++) cs.push(ab.getChannelData(c));
+    for (let i = 0; i < n; i++){ let v = 0; for (let c = 0; c < ch; c++) v += cs[c][i]; v = Math.max(-1, Math.min(1, v / ch)); d.setInt16(44 + i * 2, v < 0 ? v * 0x8000 : v * 0x7fff, true); }
+    return URL.createObjectURL(new Blob([d], {type:'audio/wav'}));
+  }
   function loadTrack(x){
     AUD = null; const k = x.audio;
     const set = t => { if (MODE !== 'shadow' || IT !== x || running || !$('after').hidden) return; trkUI(/준비 끝/.test(t) ? 'ok' : /없어서/.test(t) ? 'none' : 'wait'); };
@@ -369,12 +380,14 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
       if (!j.ok) throw 0;
       const by = Uint8Array.from(atob(j.b64), c => c.charCodeAt(0));
       TRK[k] = URL.createObjectURL(new Blob([by], {type:j.mime || 'audio/mpeg'}));
+      /* MP3(VBR)는 휴대폰에서 중간으로 건너뛸 때 위치가 어긋나 단어가 잘려요 → WAV로 풀어서 정확한 자리에서 재생 (2026-10-30) */
+      const mp3 = TRK[k];
       SEGS[k] = null;
       /* 미리 만들어 둔 나누기 계획(plans/…json: 한국어 뜻은 따라 하지 않고 넘어감)이 있으면 그걸 쓰고, 없으면 여기서 나눔 */
       fetch('plans/' + k + '.json', {cache:'no-cache'}).then(r => r.ok ? r.json() : null).catch(() => null)
         .then(pl => pl && pl.length ? (SEGS[k] = WONLY ? pl.filter(x => x[3] !== 'e') : pl) : segment(by.buffer.slice(0), wantSegs(x)).then(sg => { SEGS[k] = sg; }))
         .catch(() => { SEGS[k] = []; });
-      if (IT && IT.audio === k){ AUD = rate(new Audio(TRK[k])); set('✓ 음원 준비 끝'); }
+      toWav(by.buffer.slice(0)).catch(() => null).then(u => { TRK[k] = u || mp3; if (IT && IT.audio === k){ AUD = rate(new Audio(TRK[k])); set('✓ 음원 준비 끝'); } });
     }).catch(() => { TRK[k] = 'none'; if (IT && IT.audio === k) set('음원이 아직 없어서 원어민 목소리로 읽어 줘요'); });
   }
   /* 따라 말할 틈: 음원을 소리 덩어리(단어·예문)로 나눠서, 하나 끝날 때마다 그 길이만큼 쉬어요 */
