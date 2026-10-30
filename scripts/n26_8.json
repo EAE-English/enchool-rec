@@ -1,0 +1,108 @@
+{
+ "unit": "심석1 · 8과",
+ "book": "심석1",
+ "steps": null,
+ "dialogs": [],
+ "body": [
+  {
+   "id": "b1",
+   "t": "8-1 본문",
+   "sub": "Perfect Girl ①",
+   "lines": [
+    "For Beatrice, Friday began like any other day.",
+    "She wore the same white socks on both of her feet.",
+    "Then she made a sandwich.",
+    "She put exactly the same amount of peanut butter on each piece of bread.",
+    "On her way to school, her neighbor said, “Good morning, Perfect Girl.”",
+    "People called Beatrice “Perfect Girl” because she never made mistakes."
+   ],
+   "audio": "n26_8_b1"
+  },
+  {
+   "id": "b2",
+   "t": "8-2 본문",
+   "sub": "Perfect Girl ②",
+   "lines": [
+    "“Are you ready for tonight’s talent show?” her neighbor asked.",
+    "Beatrice just smiled.",
+    "She was a juggling champion.",
+    "She won the talent show every year.",
+    "How wonderful she was!"
+   ],
+   "audio": "n26_8_b2"
+  },
+  {
+   "id": "b3",
+   "t": "8-3 본문",
+   "sub": "Cooking Class",
+   "lines": [
+    "At school, Beatrice had a cooking class.",
+    "To make a cake, she carefully took some eggs out of the refrigerator.",
+    "When she turned around, she stepped on something slippery.",
+    "She was about to fall!",
+    "But she didn’t.",
+    "“That was close!” she thought.",
+    "She almost made a mistake.",
+    "Because of this, she began to feel nervous."
+   ],
+   "audio": "n26_8_b3"
+  },
+  {
+   "id": "b4",
+   "t": "8-4 본문",
+   "sub": "Talent Show ①",
+   "lines": [
+    "It was time for the talent show.",
+    "The school gym was full of people.",
+    "They said, “Look! That’s Perfect Girl!”",
+    "Beatrice had butterflies in her stomach.",
+    "“Will I mess up? I’m worried,” she thought.",
+    "Beatrice threw an egg into the air.",
+    "Next, she added a salt shaker.",
+    "Finally, she added a water balloon.",
+    "What a good start!"
+   ],
+   "audio": "n26_8_b4"
+  },
+  {
+   "id": "b5",
+   "t": "8-5 본문",
+   "sub": "Talent Show ②",
+   "lines": [
+    "But then she felt something strange...",
+    "Uh-oh! Beatrice’s nose started to itch.",
+    "The salt shaker was full of... pepper!",
+    "“ACHOO!” Beatrice missed the water balloon, and it fell to the floor.",
+    "Then... OOPS! The egg broke on top of her head.",
+    "For the first time ever, Beatrice made a mistake.",
+    "What a surprise!"
+   ],
+   "audio": "n26_8_b5"
+  },
+  {
+   "id": "b6",
+   "t": "8-6 본문",
+   "sub": "A Mistake",
+   "lines": [
+    "She thought, “What should I do? Cry? Run off the stage?”",
+    "Suddenly, she began to laugh loudly.",
+    "The people looked at each other.",
+    "Then everyone started to laugh together."
+   ],
+   "audio": "n26_8_b6"
+  },
+  {
+   "id": "b7",
+   "t": "8-7 본문",
+   "sub": "The Next Morning",
+   "lines": [
+    "That night, Beatrice had a deep sleep.",
+    "The next morning, she woke up with a smile.",
+    "She put a white sock on her left foot... and a green sock on her right foot!",
+    "Now, people no longer call her “Perfect Girl.”",
+    "They just call her Beatrice."
+   ],
+   "audio": "n26_8_b7"
+  }
+ ]
+}

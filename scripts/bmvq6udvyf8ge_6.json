@@ -1,0 +1,71 @@
+{
+ "unit": "화광3 · 6과",
+ "book": "화광3",
+ "steps": null,
+ "dialogs": [],
+ "body": [
+  {
+   "id": "b1",
+   "t": "6-1 본문",
+   "sub": "Art Imitates Nature",
+   "lines": [
+    "Have you heard of the expression, “Art imitates nature”?",
+    "Many artists get their ideas and inspirations from the world around them.",
+    "This is because the natural world is a beautiful place.",
+    "The shapes in nature are very pleasing to the eye.",
+    "For example, look at the egg on the left. Isn’t it beautiful?",
+    "It is round and delicate, yet strong enough to protect its contents.",
+    "Can you imagine a building that looks like an egg?",
+    "Such a building actually exists in London."
+   ],
+   "audio": "bmvq6udvyf8ge_6_b1"
+  },
+  {
+   "id": "b2",
+   "t": "6-2 본문",
+   "sub": "Sagrada Familia",
+   "lines": [
+    "Nature has inspired many architects around the world.",
+    "This is the Sagrada Familia in Spain.",
+    "It is one of the most famous churches in the world.",
+    "Look at the beautiful tall columns inside the church.",
+    "They look like trees, don’t they?",
+    "The famous architect, Antoni Gaudi, used the shape of trees in the Sagrada Familia.",
+    "That’s how he brought the beauty of nature indoors."
+   ],
+   "audio": "bmvq6udvyf8ge_6_b2"
+  },
+  {
+   "id": "b3",
+   "t": "6-3 본문",
+   "sub": "Sydney Opera House",
+   "lines": [
+    "In the first two examples, we can easily see what inspired the architect.",
+    "But in the next example from Australia, this is not so obvious.",
+    "Jørn Utzon, the architect of the Sydney Opera House, took a shape from nature and added his imagination.",
+    "Can you guess what inspired him?",
+    "Many people think that it is the waves in the ocean or a sailing boat.",
+    "But interestingly, the inspiration came from an orange.",
+    "Look at the roof closely.",
+    "Can you see the peels of an orange?",
+    "When orange lights are shone on the building, you can see the peels more clearly."
+   ],
+   "audio": "bmvq6udvyf8ge_6_b3"
+  },
+  {
+   "id": "b4",
+   "t": "6-4 본문",
+   "sub": "Dongdaemun Design Plaza",
+   "lines": [
+    "What about Korea? Have you ever been to Dongdaemun Design Plaza in Seoul?",
+    "Many people think that the building looks like a giant spaceship.",
+    "But the architect, Zaha Hadid, took the curved lines from nature so that city people could enjoy them.",
+    "Thanks to its special design, it has become a popular tourist attraction in Seoul.",
+    "As you can see, many buildings try to capture the beauty of nature in their design.",
+    "They are perfect examples of “Nature meets city.”",
+    "If you were an architect, what would you choose from nature?"
+   ],
+   "audio": "bmvq6udvyf8ge_6_b4"
+  }
+ ]
+}
