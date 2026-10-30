@@ -29,16 +29,19 @@ def lcs_marks(R, H):
 
 def score(ref_list, heard):
     R, H = words(' '.join(ref_list)), words(heard)
-    if not R or not H: return None, []
+    if not R: return None, []
+    # 녹음된 말이 없으면 0점 (2026-10-30)
+    if not H: return 0, ['끝까지 안 읽음']
     ok = lcs_marks(R, H); weak = []
-    # 중간에 멈춘 녹음: 마지막으로 맞힌 곳 뒤가 대본의 15% 넘게 남으면, 읽은 데까지만 채점 (2026-10-29)
+    # 점수는 언제나 대본 전체 기준 = 녹음에서 맞게 읽은 단어 ÷ 대본 전체 단어 (2026-10-30)
+    # 마지막으로 맞힌 곳 뒤가 대본의 15% 넘게 남으면 「끝까지 안 읽음」 표시, 틀린 단어는 읽은 데까지만
     last = max([k for k, f in enumerate(ok) if f] or [-1]); end = len(R); part = False
-    if last >= 0 and (last + 1) < len(R) * 0.85: end = last + 1; part = True
+    if (last + 1) < len(R) * 0.85: end = last + 1; part = True
     for k, f in enumerate(ok[:end]):
         w = R[k]
         if not f and len(w) > 2 and w not in SMALL and w not in weak: weak.append(w)
-    sc = round(sum(ok[:end]) / end * 100) if end else 0
-    if part: weak = ['⏸ 중간에 멈춤 · 대본의 %d%%까지' % round(end / len(R) * 100)] + weak[:7]
+    sc = round(sum(ok) / len(R) * 100)
+    if part: weak = ['끝까지 안 읽음'] + weak[:7]
     return sc, weak[:8]
 
 def speech_report(audio, segs, ref_list):
