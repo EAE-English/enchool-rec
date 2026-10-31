@@ -8,4 +8,8 @@ for src,out in [('/home/claude/words/단어마스터.html','voca.html'),('/home/
     s=open(src,encoding='utf8').read()
     if not s.lstrip().lower().startswith('<!doctype'): s=SK+s+'</body></html>'
     for a,b in MAP.items(): s=s.replace(a,b)
+    if out=='voca.html':
+        a='on=speechSynthesis.speaking||speechSynthesis.pending'
+        assert s.count(a)==1; s=s.replace(a,a+'||!!window.__audOn')
+        i=s.rfind('</body>'); s=s[:i]+'<script>'+open('/home/claude/enchool-rec/tools/voca_aud.js',encoding='utf8').read()+'</script>'+s[i:]
     open('/home/claude/enchool-rec/kool/'+out,'w',encoding='utf8').write(s);print(out,len(s))
