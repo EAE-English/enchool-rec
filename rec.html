@@ -547,7 +547,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     try{ stream = await navigator.mediaDevices.getUserMedia({audio: MODE === 'role' ? {echoCancellation:false, noiseSuppression:false, autoGainControl:true} : true}); }
     catch(e){ micErr(e); return; }
     mime = pickMime();
-    rec = mime ? new MediaRecorder(stream, {mimeType:mime}) : new MediaRecorder(stream);
+    rec = mime ? new MediaRecorder(stream, {mimeType:mime, audioBitsPerSecond:48000}) : new MediaRecorder(stream, {audioBitsPerSecond:48000});
     mime = rec.mimeType || mime || 'audio/webm'; chunks = [];
     rec.ondataavailable = e => e.data.size && chunks.push(e.data);
     rec.onstop = finishRec;
@@ -555,7 +555,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     $('tip').hidden = true; $('listenAll').hidden = true;
     wakeOn();
     finished = false; acc = 0; on = 0; rec.start(1000); running = true; i = 0; recOn(); $('timer').hidden = false;
-    tick = setInterval(() => { dur = (acc + (on ? Date.now() - on : 0)) / 1000; $('tt').textContent = fmt(dur); if (dur >= 600) stop(); }, 250);
+    tick = setInterval(() => { dur = (acc + (on ? Date.now() - on : 0)) / 1000; $('tt').textContent = fmt(dur); if (dur >= 1500) stop(); }, 250); /* 최대 25분 (능률 고난도 Day 하나가 12분 넘음 · 2026-11-02) */
     if (MODE === 'role'){ $('go').hidden = true; $('timer').classList.add('abs'); step(); }
     else if (MODE === 'shadow'){
       goUI('그만하기', true); trkUI(null); $('timer').classList.add('abs'); srStart(0);
