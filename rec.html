@@ -28,6 +28,7 @@
   .tog{display:flex;gap:8px;margin-top:12px}
   .tog button{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:9px;font-family:var(--ko);font-size:14px;color:var(--muted);cursor:pointer}
   .tog button.on{border-color:var(--navy);color:var(--navy);background:var(--navy-soft)}
+  .sumq{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:26px 16px;border-radius:16px;background:#fff;border:2px solid var(--line);min-height:150px;justify-content:center}.sumq small{font-size:13px;color:#6b7280;font-weight:700}.sumq b{font-size:22px;line-height:1.45;color:#102F5E;word-break:keep-all}.sumq .hint{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.sumq .hint span{border:1.5px solid #102F5E;border-radius:99px;padding:3px 12px;font-size:14px;font-weight:700;color:#102F5E}.sumans{display:flex;flex-direction:column;gap:6px}.sumans div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:14px}.sumans small{display:block;color:#6b7280}
   .ln{display:flex;flex-direction:column;gap:4px;max-width:86%;padding:10px 13px;border-radius:14px;background:#fff;border:1px solid var(--line)}
   .ln .sp{font-size:12px;color:var(--muted)}
   .ln .en{font-family:var(--en);font-weight:700;font-size:18px;line-height:1.45}
@@ -267,6 +268,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     if (!SEL) ITEMS = L;
     else if ((m = SEL.match(/^s(\d+)(?:_(\d+))?$/i))) { const a = +m[1], b = +(m[2] || m[1]); ITEMS = dl.filter(d => d.st >= Math.min(a,b) && d.st <= Math.max(a,b)); }
     else if (/^body$/i.test(SEL)) ITEMS = bd;
+    else if (/^sum$/i.test(SEL)) { ITEMS = bd.map(b => ({...b, kind:'sum'})); }
     else ITEMS = L.filter(x => x.id === SEL);
     if (!ITEMS.length) ITEMS = L;
     if (ITEMS.length === 1) open(ITEMS[0]); else showPick();
@@ -297,7 +299,8 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
       $('rolePick').hidden = false; $('stage').hidden = true; $('bar').hidden = true;
       $('rpUnit').textContent = PACK.unit || ''; $('rpTitle').textContent = x.t + (x.sub ? ' · ' + x.sub : '');
       $('rpRoles').innerHTML = sps.map(s => `<button class="btn main" data-role="${esc(s)}">${esc(s)} 역할 <small>(${x.L.filter(l => l[0] === s).length}줄)</small></button>`).join('');
-    } else start(x, 'shadow', '');   // 따라 읽기 · 본문 모두 「듣고 바로 따라 하기」(2026-10-29)
+    } else if (x.kind === 'sum') start(x, 'sum', '');
+    else start(x, 'shadow', '');   // 따라 읽기 · 본문 모두 「듣고 바로 따라 하기」(2026-10-29)
   }
   $('rpRoles').addEventListener('click', e => { const b = e.target.closest('[data-role]'); if (b) start(IT, 'role', b.dataset.role); });
 
@@ -306,15 +309,17 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   function start(x, mode, me){
     MODE = mode; ME = me; HIDE = false; heard = {}; blob = null; COIN.arm(notTest(), '「선생님께 보내기」를 누르면 쌓여요'); if ($('ccSum')) $('ccSum').hidden = true;
     $('rolePick').hidden = true; $('stage').hidden = false; $('bar').hidden = false;
-    $('appName').textContent = mode === 'role' ? '쿨톡 역할극 녹음' : x.kind === 'body' ? '본문 따라 읽기 녹음' : mode === 'shadow' ? (WONLY ? '단어 따라 읽기 녹음' : '따라 읽기 녹음') : '본문 읽기 녹음';
+    $('appName').textContent = mode === 'sum' ? '쿨요약 녹음' : mode === 'role' ? '쿨톡 역할극 녹음' : x.kind === 'body' ? '본문 따라 읽기 녹음' : mode === 'shadow' ? (WONLY ? '단어 따라 읽기 녹음' : '따라 읽기 녹음') : '본문 읽기 녹음';
     $('unit').textContent = PACK.unit || ''; $('title').textContent = x.t + (x.sub ? ' · ' + x.sub : '');
-    $('how').innerHTML = mode === 'role'
+    $('how').innerHTML = mode === 'sum'
+      ? `<b>🎙 녹음 시작</b>을 누르면 <b>한글 문장</b>이 하나씩 나와요. <b>영어로 말하고</b> <b>다음 ▶</b>을 눌러요.<br>한글 문장이 다 끝나면 <b>요약해서 말해 보세요!</b>가 나와요. 표 내용을 내 말로 이어서 말하고 <b>다 했어요</b>를 눌러요.<br>녹음은 끝까지 쭉 이어져요.`
+      : mode === 'role'
       ? `나는 <b>${esc(me)}</b> 역할! 상대 대사는 원어민이 읽어 줘요.<br>내 차례가 오면 녹음이 잠깐 멈춰요. 준비되면 <b>🎙 말하기</b>를 누르고 말한 뒤 <b>✓ 다 했어요</b>를 눌러요.<br>🔈 원어민 목소리도 같이 녹음되게 <b>이어폰은 빼고</b> 스피커로 해요.`
       : mode === 'shadow'
       ? `<b class="ear">🎧 가능하면 이어폰을 끼고 진행해 주세요!</b><br><b>🎙 녹음 시작</b>을 누르면 원어민 음원이 나와요. 원어민이 하나 말하면 <b>잠깐 멈춰요</b>. 그때 <b>따라 말해요</b>.<br>끝까지 저절로 넘어가고, 음원이 끝나면 녹음도 끝나요.
         <div class="spd" id="spd">속도 ${[0.7,0.8,0.9,1].map(r => `<button data-spd="${r}" class="${r === RATE ? 'on' : ''}">${r === 1 ? '보통' : r + '배'}</button>`).join('')}</div>`
       : `먼저 <b>🔊 원어민 먼저 들어 보기</b>로 들어 봐요.<br>준비되면 <b>🎙 녹음 시작</b>을 누르고 처음부터 끝까지 소리 내어 읽은 뒤 <b>■ 다 읽었어요</b>를 눌러요.`;
-    $('tog').hidden = mode !== 'role'; $('listenAll').hidden = mode === 'role';
+    $('tog').hidden = mode !== 'role'; $('listenAll').hidden = mode === 'role' || mode === 'sum';
     $('tShow').classList.add('on'); $('tHide').classList.remove('on');
     ['after','doneCard','send','again','next','timer'].forEach(id => $(id).hidden = true);
     stopMine(); $('timer').classList.remove('abs'); trkUI(null);
@@ -327,6 +332,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     if (IT.kind === 'shadow') return (IT.words || []).map(w => [w.w, WONLY ? '' : (w.ex || ''), w.ko || '']);
     return IT.kind === 'dlg' ? IT.L : (IT.lines || String(IT.text || '').split(/(?<=[.!?])\s+/)).map(t => ['', t, '']); }
   function draw(){
+    if (MODE === 'sum'){ $('lines').innerHTML = `<div class="sumq" id="sumq"><small>한글 ${(IT.ko || []).length}문장 → 요약하기</small><b>🎙 녹음 시작을 누르면<br>첫 문장이 나와요</b></div>`; return; }
     $('lines').innerHTML = lines().map((l, i) => {
       if (MODE === 'shadow' && IT.kind === 'body') return `<div class="ln rd" data-i="${i}"><span class="en">${esc(plain(l[1]))}</span></div>`;
       if (MODE === 'shadow') return `<div class="ln rd sh" data-i="${i}"><span class="wd">${esc(l[0])} <small>${esc(l[2])}</small></span>${l[1] ? `<span class="en">${esc(l[1])}</span>` : ''}</div>`;
@@ -526,6 +532,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     else { nb.hidden = true; recOn(); say(l[1], l[0], () => { i++; step(); }); }
   }
   $('next').onclick = () => {
+    if (MODE === 'sum'){ sumNext(); return; }
     const nb = $('next');
     if (!speaking){ speaking = true; recOn(); srStart(i); rbSet(nb, i === mineIdx().pop() ? '다 했어요 (끝)' : '다 했어요', true); return; }
     nb.disabled = true; speaking = false; recOff(); setTimeout(srStop, 600);
@@ -558,6 +565,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     finished = false; acc = 0; on = 0; rec.start(1000); running = true; i = 0; recOn(); $('timer').hidden = false;
     tick = setInterval(() => { dur = (acc + (on ? Date.now() - on : 0)) / 1000; $('tt').textContent = fmt(dur); if (dur >= 1500) stop(); }, 250); /* 최대 25분 (능률 고난도 Day 하나가 12분 넘음 · 2026-11-02) */
     if (MODE === 'role'){ $('go').hidden = true; $('timer').classList.add('abs'); step(); }
+    else if (MODE === 'sum'){ goUI('그만하기', true); $('timer').classList.add('abs'); SUMI = 0; sumShow(); }
     else if (MODE === 'shadow'){
       goUI('그만하기', true); trkUI(null); $('timer').classList.add('abs'); srStart(0);
       const fin = () => setTimeout(stop, 900);
@@ -578,8 +586,19 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     $('after').hidden = false; $('send').hidden = false; $('send').disabled = false; $('again').hidden = false; $('next').hidden = true; $('go').hidden = true; $('timer').classList.remove('abs'); trkUI(null);
     try{ stream.getTracks().forEach(t => t.stop()); }catch(e){}
     focus(-1); showSay(0); setLive(false);
+    if (MODE === 'sum'){ const E = bodyLines(IT), K = IT.ko || []; $('lines').innerHTML = `<div class="sumans"><b>✅ 정답 문장 (내 녹음 듣고 맞춰 봐요)</b>${E.map((e, k) => `<div>${esc(e)}<small>${esc(K[k] || '')}</small></div>`).join('')}</div>`; }
     $('after').scrollIntoView({block:'center', behavior:'smooth'});
   }
+  /* 쿨요약 (2026-11-02): 한글 보고 영어로 말하기 → 요약해서 말해 보세요! (녹음은 한 번에 쭉) */
+  let SUMI = 0;
+  function sumShow(){
+    const K = IT.ko || [], n = K.length, q = $('sumq'), nb = $('next'); if (!q) return;
+    nb.hidden = false; nb.disabled = false;
+    if (SUMI < n){ q.innerHTML = `<small>1단계 · 한글 보고 영어로 말해요 · ${SUMI + 1} / ${n}</small><b>${esc(K[SUMI])}</b>`; nb.textContent = SUMI === n - 1 ? '다음 ▶ (요약하기로)' : '다음 ▶'; }
+    else { q.innerHTML = `<small>2단계 · 요약하기</small><b>요약해서 말해 보세요!</b>${(IT.groups || []).length ? `<div class="hint">${IT.groups.map(g => `<span>${esc(g)}</span>`).join('')}</div>` : ''}<small>표 내용을 내 말로 이어서 말하고 「다 했어요」를 눌러요</small>`; nb.textContent = '✓ 다 했어요 (끝)'; }
+    q.scrollIntoView({block:'center', behavior:'smooth'});
+  }
+  function sumNext(){ if (!running) return; const n = (IT.ko || []).length; if (SUMI >= n){ $('next').hidden = true; stop(); return; } SUMI++; $('next').disabled = true; setTimeout(() => { sumShow(); }, 250); }
   function stop(){
     wakeOff();
     if (!running) return;
@@ -622,7 +641,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
       const [R, H] = refsHeard();
       const payload = {
         student: STUDENT, cls: CLS, key: KEY,
-        title: `${PACK.unit || ''}${String(PACK.unit || '').endsWith(IT.t) ? '' : ' · ' + IT.t}${IT.sub ? ' · ' + IT.sub : ''}${MODE === 'role' ? ' · ' + ME + ' 역할' : IT.kind === 'body' ? ' · 본문 따라 읽기' : MODE === 'shadow' ? ' · 따라 읽기' : ' · 본문 읽기'}`,
+        title: `${PACK.unit || ''}${String(PACK.unit || '').endsWith(IT.t) ? '' : ' · ' + IT.t}${IT.sub ? ' · ' + IT.sub : ''}${MODE === 'sum' ? ' · 쿨요약' : MODE === 'role' ? ' · ' + ME + ' 역할' : IT.kind === 'body' ? ' · 본문 따라 읽기' : MODE === 'shadow' ? ' · 따라 읽기' : ' · 본문 읽기'}`,
         refList: R, heardList: H, transcript: heardText(),
         base64: String(r.result).split(',')[1], mimeType: mime, durationSec: dur
       };
