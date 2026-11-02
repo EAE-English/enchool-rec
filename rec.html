@@ -28,7 +28,7 @@
   .tog{display:flex;gap:8px;margin-top:12px}
   .tog button{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:9px;font-family:var(--ko);font-size:14px;color:var(--muted);cursor:pointer}
   .tog button.on{border-color:var(--navy);color:var(--navy);background:var(--navy-soft)}
-  .sumq{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:26px 16px;border-radius:16px;background:#fff;border:2px solid var(--line);min-height:150px;justify-content:center}.sumq small{font-size:13px;color:#6b7280;font-weight:700}.sumq .sumnx{margin-top:8px;width:100%;max-width:320px;font-size:17px;padding:14px}.sumq b{font-size:22px;line-height:1.45;color:#102F5E;word-break:keep-all}.sumq .hint{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.sumq .hint span{border:1.5px solid #102F5E;border-radius:99px;padding:3px 12px;font-size:14px;font-weight:700;color:#102F5E}.sumans{display:flex;flex-direction:column;gap:6px}.sumans div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:14px}.sumans small{display:block;color:#6b7280}
+  .sumq{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:26px 16px;border-radius:16px;background:#fff;border:2px solid var(--line);min-height:150px;justify-content:center}.sumq small{font-size:13px;color:#6b7280;font-weight:700}.bar-in.sumbar{flex-direction:column;gap:2px}.bar-in.sumbar .timer{font-size:16px;min-width:0;text-align:center}.sumq .sumnx{margin-top:8px;width:100%;max-width:320px;font-size:17px;padding:14px}.sumq b{font-size:22px;line-height:1.45;color:#102F5E;word-break:keep-all}.sumq .hint{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.sumq .hint span{border:1.5px solid #102F5E;border-radius:99px;padding:3px 12px;font-size:14px;font-weight:700;color:#102F5E}.sumans{display:flex;flex-direction:column;gap:6px}.sumans div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:14px}.sumans small{display:block;color:#6b7280}
   .ln{display:flex;flex-direction:column;gap:4px;max-width:86%;padding:10px 13px;border-radius:14px;background:#fff;border:1px solid var(--line)}
   .ln .sp{font-size:12px;color:var(--muted)}
   .ln .en{font-family:var(--en);font-weight:700;font-size:18px;line-height:1.45}
@@ -322,7 +322,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     $('tog').hidden = mode !== 'role'; $('listenAll').hidden = mode === 'role' || mode === 'sum';
     $('tShow').classList.add('on'); $('tHide').classList.remove('on');
     ['after','doneCard','send','again','next','timer'].forEach(id => $(id).hidden = true);
-    stopMine(); $('timer').classList.remove('abs'); trkUI(null);
+    stopMine(); $('timer').classList.remove('abs'); document.querySelector('.bar-in').classList.remove('sumbar'); trkUI(null);
     $('go').hidden = false; $('go').disabled = false; goUI('녹음 시작', false);
     if (mode === 'shadow') loadTrack(x);
     $('more').hidden = ITEMS.length < 2; /* 쿨톡에서 온 경우만 「다음」, QR로 바로 온 경우는 끝 안내만 (2026-10-29) */ $('fin').hidden = ITEMS.length > 1 || !BACK; $('finHint').hidden = ITEMS.length > 1 || !!BACK; $('finHint').innerHTML = '✓ 끝! 선생님께 잘 보냈어요.<br>이제 다음 숙제를 하면 돼요.';
@@ -565,7 +565,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     finished = false; acc = 0; on = 0; rec.start(1000); running = true; i = 0; recOn(); $('timer').hidden = false;
     tick = setInterval(() => { dur = (acc + (on ? Date.now() - on : 0)) / 1000; $('tt').textContent = fmt(dur); if (dur >= 1500) stop(); }, 250); /* 최대 25분 (능률 고난도 Day 하나가 12분 넘음 · 2026-11-02) */
     if (MODE === 'role'){ $('go').hidden = true; $('timer').classList.add('abs'); step(); }
-    else if (MODE === 'sum'){ goUI('그만하기', true); $('timer').classList.add('abs'); SUMI = 0; sumShow(); }
+    else if (MODE === 'sum'){ goUI('그만하기', true); $('timer').classList.remove('abs'); document.querySelector('.bar-in').classList.add('sumbar'); SUMI = 0; sumShow(); }   /* 시간은 버튼 위에 따로 (겹치지 않게 · 2026-11-02) */
     else if (MODE === 'shadow'){
       goUI('그만하기', true); trkUI(null); $('timer').classList.add('abs'); srStart(0);
       const fin = () => setTimeout(stop, 900);
@@ -583,7 +583,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     try{
       blob = new Blob(chunks, {type:mime}); setMine(URL.createObjectURL(blob));
     }catch(e){}
-    $('after').hidden = false; $('send').hidden = false; $('send').disabled = false; $('again').hidden = false; $('next').hidden = true; $('go').hidden = true; $('timer').classList.remove('abs'); trkUI(null);
+    $('after').hidden = false; $('send').hidden = false; $('send').disabled = false; $('again').hidden = false; $('next').hidden = true; $('go').hidden = true; $('timer').classList.remove('abs'); document.querySelector('.bar-in').classList.remove('sumbar'); trkUI(null);
     try{ stream.getTracks().forEach(t => t.stop()); }catch(e){}
     focus(-1); showSay(0); setLive(false);
     if (MODE === 'sum'){ const E = bodyLines(IT), K = IT.ko || []; $('lines').innerHTML = `<div class="sumans"><b>✅ 정답 문장 (내 녹음 듣고 맞춰 봐요)</b>${E.map((e, k) => `<div>${esc(e)}<small>${esc(K[k] || '')}</small></div>`).join('')}</div>`; }
