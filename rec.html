@@ -452,7 +452,8 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
 
   /* 음원이 없을 때: 단어 → (따라 할 틈) → 예문 → (틈) … */
   function ttsShadow(onDone){
-    const L = lines(); let k = 0, part = 0;
+    /* 본문(음원 없음)은 문장이 [1]칸에 있어요 → [0]으로 옮겨서 읽어 줘요 (안 그러면 바로 끝나서 「선생님께 보내기」로 넘어감 · 2026-11-02) */
+    const L = lines().map(l => l[0] ? l : [l[1], '', l[2]]); let k = 0, part = 0;
     (function nx(){
       if (!(running || playing)) return;
       if (k >= L.length){ onDone && onDone(); return; }
