@@ -28,7 +28,7 @@
   .tog{display:flex;gap:8px;margin-top:12px}
   .tog button{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:9px;font-family:var(--ko);font-size:14px;color:var(--muted);cursor:pointer}
   .tog button.on{border-color:var(--navy);color:var(--navy);background:var(--navy-soft)}
-  .sumq{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:26px 16px;border-radius:16px;background:#fff;border:2px solid var(--line);min-height:150px;justify-content:center}.sumq small{font-size:13px;color:#6b7280;font-weight:700}.sumq b{font-size:22px;line-height:1.45;color:#102F5E;word-break:keep-all}.sumq .hint{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.sumq .hint span{border:1.5px solid #102F5E;border-radius:99px;padding:3px 12px;font-size:14px;font-weight:700;color:#102F5E}.sumans{display:flex;flex-direction:column;gap:6px}.sumans div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:14px}.sumans small{display:block;color:#6b7280}
+  .sumq{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:26px 16px;border-radius:16px;background:#fff;border:2px solid var(--line);min-height:150px;justify-content:center}.sumq small{font-size:13px;color:#6b7280;font-weight:700}.sumq .sumnx{margin-top:8px;width:100%;max-width:320px;font-size:17px;padding:14px}.sumq b{font-size:22px;line-height:1.45;color:#102F5E;word-break:keep-all}.sumq .hint{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.sumq .hint span{border:1.5px solid #102F5E;border-radius:99px;padding:3px 12px;font-size:14px;font-weight:700;color:#102F5E}.sumans{display:flex;flex-direction:column;gap:6px}.sumans div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:14px}.sumans small{display:block;color:#6b7280}
   .ln{display:flex;flex-direction:column;gap:4px;max-width:86%;padding:10px 13px;border-radius:14px;background:#fff;border:1px solid var(--line)}
   .ln .sp{font-size:12px;color:var(--muted)}
   .ln .en{font-family:var(--en);font-weight:700;font-size:18px;line-height:1.45}
@@ -592,13 +592,15 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   /* 쿨요약 (2026-11-02): 한글 보고 영어로 말하기 → 요약해서 말해 보세요! (녹음은 한 번에 쭉) */
   let SUMI = 0;
   function sumShow(){
-    const K = IT.ko || [], n = K.length, q = $('sumq'), nb = $('next'); if (!q) return;
-    nb.hidden = false; nb.disabled = false;
-    if (SUMI < n){ q.innerHTML = `<small>1단계 · 한글 보고 영어로 말해요 · ${SUMI + 1} / ${n}</small><b>${esc(K[SUMI])}</b>`; nb.textContent = SUMI === n - 1 ? '다음 ▶ (요약하기로)' : '다음 ▶'; }
-    else { q.innerHTML = `<small>2단계 · 요약하기</small><b>요약해서 말해 보세요!</b>${(IT.groups || []).length ? `<div class="hint">${IT.groups.map(g => `<span>${esc(g)}</span>`).join('')}</div>` : ''}<small>표 내용을 내 말로 이어서 말하고 「다 했어요」를 눌러요</small>`; nb.textContent = '✓ 다 했어요 (끝)'; }
+    const K = IT.ko || [], n = K.length, q = $('sumq'); if (!q) return;
+    $('next').hidden = true;   /* 녹음 버튼은 가운데 그대로, 「다음」은 문장 칸 안에 (2026-11-02) */
+    const nbH = t => `<button class="btn main sumnx" data-sumnx>${t}</button>`;
+    if (SUMI < n){ q.innerHTML = `<small>1단계 · 한글 보고 영어로 말해요 · ${SUMI + 1} / ${n}</small><b>${esc(K[SUMI])}</b>${nbH(SUMI === n - 1 ? '다음 ▶ (요약하기로)' : '다음 ▶')}`; }
+    else { q.innerHTML = `<small>2단계 · 요약하기</small><b>요약해서 말해 보세요!</b>${(IT.groups || []).length ? `<div class="hint">${IT.groups.map(g => `<span>${esc(g)}</span>`).join('')}</div>` : ''}<small>표 내용을 내 말로 이어서 말하고 「다 했어요」를 눌러요</small>${nbH('✓ 다 했어요 (끝)')}`; }
     q.scrollIntoView({block:'center', behavior:'smooth'});
   }
-  function sumNext(){ if (!running) return; const n = (IT.ko || []).length; if (SUMI >= n){ $('next').hidden = true; stop(); return; } SUMI++; $('next').disabled = true; setTimeout(() => { sumShow(); }, 250); }
+  function sumNext(){ if (!running) return; const n = (IT.ko || []).length; if (SUMI >= n){ stop(); return; } SUMI++; const b = document.querySelector('[data-sumnx]'); if (b) b.disabled = true; setTimeout(() => { sumShow(); }, 250); }
+  $('lines').addEventListener('click', e => { if (e.target.closest('[data-sumnx]')) sumNext(); });
   function stop(){
     wakeOff();
     if (!running) return;
