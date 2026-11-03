@@ -103,6 +103,7 @@
   <button class="btn main" id="send" hidden>선생님께 보내기</button>
 </div></div>
 
+<script src="https://eae-english.github.io/enchool-rec/tools/tts_aud.js"></script>
 <script>
 (function(){
   const $ = id => document.getElementById(id);
@@ -154,8 +155,10 @@
   if (window.speechSynthesis){ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
   const spk = [...new Set(D.L.map(l => l[0]))];
   function say(text, who, done){
+    /* 쿨톡 목소리: 미리 만든 자연스러운 음성이 있으면 그걸로 (2026-11-04) */
+    if (window.TTSA && TTSA.play(text, who, () => setTimeout(done, 450))) return;
     if (!window.speechSynthesis){ setTimeout(done, 1500); return; }
-    speechSynthesis.cancel();
+    (window.TTSA && TTSA.stop(), speechSynthesis.cancel());
     const u = new SpeechSynthesisUtterance(plain(text));
     u.lang = 'en-US'; u.rate = .92;
     if (VO.length) u.voice = VO[spk.indexOf(who) % VO.length];
@@ -250,7 +253,7 @@
   }
   function stop(){
     running = false; clearInterval(tick); if (on){ acc += Date.now() - on; on = 0; } dur = acc / 1000;
-    if (window.speechSynthesis) speechSynthesis.cancel();
+    if (window.speechSynthesis) (window.TTSA && TTSA.stop(), speechSynthesis.cancel());
     if (rec && rec.state !== 'inactive') rec.stop();
   }
   function reset(){

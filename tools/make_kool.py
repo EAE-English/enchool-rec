@@ -15,4 +15,11 @@ for src,out in [('/home/claude/words/단어마스터.html','voca.html'),('/home/
         assert s.count(a)==1; s=s.replace(a,a+'||!!window.__audOn')
         import hashlib; AJ=hashlib.md5(open('/home/claude/enchool-rec/kool/aud.json','rb').read()).hexdigest()[:8]
         i=s.rfind('</body>'); s=s[:i]+'<script>'+open('/home/claude/enchool-rec/tools/voca_aud.js',encoding='utf8').read().replace('__AUDJ__',AJ)+'</script>'+s[i:]
+    if out=='talk.html':   # 쿨톡: 미리 만든 자연스러운 목소리 (tools/tts_aud.js · 2026-11-04)
+        a1='function speak(text,who,done){'
+        assert s.count(a1)==1; s=s.replace(a1,a1+'if(window.TTSA&&TTSA.play(text,who,done))return;')
+        a2='on=speechSynthesis.speaking||speechSynthesis.pending'
+        assert s.count(a2)==1; s=s.replace(a2,a2+'||!!(window.TTSA&&TTSA.playing())')
+        s=s.replace('speechSynthesis.cancel()','(window.TTSA&&TTSA.stop(),speechSynthesis.cancel())')
+        s=s.replace(KAKAO_JS,KAKAO_JS+'<script src="https://eae-english.github.io/enchool-rec/tools/tts_aud.js"></script>',1)
     open('/home/claude/enchool-rec/kool/'+out,'w',encoding='utf8').write(s);print(out,len(s))

@@ -118,6 +118,7 @@
 .cc-sum{margin:12px 0 0;background:#fff7dc;border:1.5px solid #f2c94c;border-radius:14px;padding:10px;color:#7a5600;font-weight:700;font-size:15px;line-height:1.5}.cc-sum b{font-size:22px;color:#132E5E}
 </style>
 </head>
+<script src="https://eae-english.github.io/enchool-rec/tools/tts_aud.js"></script>
 <script>
 /* 한 번 받은 원어민 음원·음원 위치표는 폰(브라우저)에 저장해 두고 다시 안 받음 (쿨보카·녹음 화면 같이 씀 · 2026-11-03) */
 const TKDB=(()=>{let p=null;const db=()=>p||(p=new Promise((ok,no)=>{try{const r=indexedDB.open('enchool_aud',1);r.onupgradeneeded=()=>r.result.createObjectStore('t');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}}));
@@ -484,8 +485,10 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   function loadVoices(){ VO = speechSynthesis.getVoices().filter(v => /^en[-_]/i.test(v.lang)); }
   if (window.speechSynthesis){ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
   function say(text, who, done){
+    /* 쿨톡 목소리: 미리 만든 자연스러운 음성이 있으면 그걸로 (2026-11-04) */
+    if (window.TTSA && TTSA.play(text, who, () => setTimeout(done, 450), MODE === 'shadow' ? RATE : 1)) return;
     if (!window.speechSynthesis){ setTimeout(done, 1500); return; }
-    speechSynthesis.cancel();
+    (window.TTSA && TTSA.stop(), speechSynthesis.cancel());
     const u = new SpeechSynthesisUtterance(plain(text)); u.lang = 'en-US'; u.rate = MODE === 'shadow' ? .92 * RATE : .92;
     const sps = IT.kind === 'dlg' ? [...new Set(IT.L.map(l => l[0]))] : [''];
     if (VO.length) u.voice = VO[Math.max(0, sps.indexOf(who)) % VO.length];
@@ -495,7 +498,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   }
   let playing = false;
   $('listenAll').onclick = () => {
-    if (playing){ playing = false; speechSynthesis.cancel(); if (AUD) AUD.pause(); focus(-1); $('listenAll').textContent = '🔊 원어민 먼저 들어 보기'; return; }
+    if (playing){ playing = false; (window.TTSA && TTSA.stop(), speechSynthesis.cancel()); if (AUD) AUD.pause(); focus(-1); $('listenAll').textContent = '🔊 원어민 먼저 들어 보기'; return; }
     playing = true; $('listenAll').textContent = '■ 그만 듣기';
     const endL = () => { playing = false; focus(-1); $('listenAll').textContent = '🔊 원어민 먼저 들어 보기'; };
     if (MODE === 'shadow'){ if (AUD){ AUD.currentTime = 0; AUD.onended = endL; AUD.play().catch(endL); } else ttsShadow(endL); return; }
@@ -612,7 +615,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     wakeOff();
     if (!running) return;
     running = false; clearInterval(tick); if (on){ acc += Date.now() - on; on = 0; } dur = acc / 1000;
-    if (window.speechSynthesis) speechSynthesis.cancel(); if (AUD) AUD.pause(); showSay(0);
+    if (window.speechSynthesis) (window.TTSA && TTSA.stop(), speechSynthesis.cancel()); if (AUD) AUD.pause(); showSay(0);
     setTimeout(srStop, MODE !== 'role' ? 700 : 0);
     if (rec && rec.state !== 'inactive'){ try{ rec.requestData(); }catch(e){} rec.stop(); }
     setTimeout(() => { if (!finished && chunks.length) finishRec(); }, 2000);
@@ -624,7 +627,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
       m.ontimeupdate = () => { m.ontimeupdate = null; m.currentTime = 0; }; m.currentTime = 1e101; };
   }
   function stopMine(){ try{ $('mine').pause(); }catch(e){} }
-  function stopAll(){ stopMine(); playing = false; if (window.speechSynthesis) speechSynthesis.cancel(); stop(); }
+  function stopAll(){ stopMine(); playing = false; if (window.speechSynthesis) (window.TTSA && TTSA.stop(), speechSynthesis.cancel()); stop(); }
   $('again').onclick = () => start(IT, MODE, ME);
   $('more').onclick = () => showPick();
   /* 한 개만 녹음하러 들어온 경우(쿨톡 역할극 등): 다 했으면 창을 닫고 원래 화면으로 (2026-10-29) */
