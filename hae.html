@@ -76,7 +76,7 @@
   /* 단어 누르면 뜻 (파란 단어는 빼고 · 2026-11-04) */
   const tapW = s => String(s).split(/(\*.+?\*)/).map(part => /^\*.+\*$/.test(part) ? '<b>' + esc(part.slice(1, -1)) + '</b>' :
     esc(part).replace(/[A-Za-z]+(?:'[a-z]+)?/g, w => { const k = w.toLowerCase(); return P && P.g && P.g[k] && !(P.nog || []).includes(k) ? '<span class="tw" data-w="' + k + '">' + w + '</span>' : w; })).join('');
-  let P = null, ANS = [], RES = null, ONLY = null;   // ONLY: 다시 쓰기 할 문장 번호들
+  let P = null, ANS = [], RES = null, ONLY = null, LOOK = new Set();   // LOOK: 뜻 본 단어   // ONLY: 다시 쓰기 할 문장 번호들
   const dk = () => 'enc_hae_' + K + '_' + NAME;
   const saveDraft = () => { try{ localStorage.setItem(dk(), JSON.stringify(ANS)); }catch(e){} };
   const loadDraft = () => { try{ const a = JSON.parse(localStorage.getItem(dk()) || 'null'); if (Array.isArray(a)) a.forEach((v, i) => { if (i < ANS.length && typeof v === 'string') ANS[i] = v; }); }catch(e){} };
@@ -106,7 +106,7 @@
     const t = e.target.closest && e.target.closest('.tw');
     if (!t){ if (!e.target.closest || !e.target.closest('.wtip')) hideTip(); return; }
     const was = t.classList.contains('on'); hideTip(); if (was) return;
-    t.classList.add('on'); tip.innerHTML = '<b>' + esc(t.textContent) + '</b> ' + esc(P.g[t.dataset.w] || ''); tip.hidden = false;
+    t.classList.add('on'); LOOK.add(t.dataset.w); tip.innerHTML = '<b>' + esc(t.textContent) + '</b> ' + esc(P.g[t.dataset.w] || ''); tip.hidden = false;
     const r = t.getBoundingClientRect(), tw = Math.min(280, window.innerWidth - 24); tip.style.maxWidth = tw + 'px';
     const w = tip.offsetWidth, h = tip.offsetHeight; let x = r.left + r.width / 2 - w / 2; x = Math.max(12, Math.min(x, window.innerWidth - w - 12));
     let y = r.top - h - 8; if (y < 120) y = r.bottom + 8;
@@ -124,7 +124,7 @@
     $('go').disabled = true; $('foot').hidden = true; $('prog').hidden = true;
     main.innerHTML = '<div class="wait"><div class="spin"></div><b>채점하고 있어요…</b><span style="color:var(--muted);font-size:14px">10초쯤 걸려요. 화면을 닫지 말고 기다려요.</span></div>';
     const payload = { a:'kh', k:K, title:P.book + ' · ' + P.unit + ' · ' + P.title, student:NAME, cls:CLS,
-      items:P.s.map((x, i) => ({ en:plain(x.en), ref:x.ref, ko:ANS[i] })), words:P.w || {} };
+      items:P.s.map((x, i) => ({ en:plain(x.en), ref:x.ref, ko:ANS[i] })), words:P.w || {}, looked:[...LOOK] };
     fetch(LOG, {method:'POST', body:JSON.stringify(payload)}).then(r => r.json()).then(j => {
       if (!j || !j.ok) throw new Error(j && j.error || '채점이 안 됐어요');
       RES = j; result();
