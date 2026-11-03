@@ -1,0 +1,68 @@
+{
+ "id": "n06_4",
+ "book": "Word Up 800",
+ "unit": "Unit 4 다음 글",
+ "title": "The Mystery Club",
+ "s": [
+  {
+   "en": "Welcome to the mystery *club*!",
+   "ref": "미스터리 클럽에 온 것을 환영해!"
+  },
+  {
+   "en": "The *goal* of our club is to *collect* clues and *solve* difficult mysteries.",
+   "ref": "우리 클럽의 목표는 단서를 모으고 어려운 미스터리를 푸는 것이야."
+  },
+  {
+   "en": "Each *week*, we *meet* behind the big tree at the *playground*.",
+   "ref": "매주 우리는 놀이터의 큰 나무 뒤에서 만나."
+  },
+  {
+   "en": "We choose a new mystery and start searching for clues.",
+   "ref": "우리는 새로운 미스터리를 고르고 단서를 찾기 시작해."
+  },
+  {
+   "en": "Sometimes the mysteries are about secret *messages*.",
+   "ref": "때때로 미스터리는 비밀 메시지에 관한 거야."
+  },
+  {
+   "en": "Other times, they are about missing items.",
+   "ref": "다른 때에는 사라진 물건에 관한 거야."
+  },
+  {
+   "en": "The clues are hidden in places all around the school, such as behind *curtains*, inside *baskets*, or under desks.",
+   "ref": "단서는 학교 곳곳에 숨겨져 있어. 예를 들면 커튼 뒤, 바구니 안, 또는 책상 아래에."
+  },
+  {
+   "en": "But don't worry, it is not *dangerous* to look for clues.",
+   "ref": "하지만 걱정하지 마. 단서를 찾는 것은 위험하지 않아."
+  },
+  {
+   "en": "Each member of our club has a different *role*, but we all work together.",
+   "ref": "우리 클럽의 회원들은 각자 다른 역할이 있지만, 우리는 모두 함께 일해."
+  },
+  {
+   "en": "When we finish solving a mystery, we have a *party*.",
+   "ref": "미스터리를 다 풀면 우리는 파티를 해."
+  },
+  {
+   "en": "If you love to have fun and use your brain, *join* us!",
+   "ref": "즐겁게 놀고 머리 쓰는 것을 좋아한다면, 우리와 함께해!"
+  }
+ ],
+ "w": {
+  "club": "클럽, 동아리",
+  "goal": "목표",
+  "collect": "모으다",
+  "solve": "풀다, 해결하다",
+  "week": "주, 일주일",
+  "meet": "만나다",
+  "playground": "놀이터",
+  "messages": "메시지",
+  "curtains": "커튼",
+  "baskets": "바구니",
+  "dangerous": "위험한",
+  "role": "역할",
+  "party": "파티",
+  "join": "함께하다, 가입하다"
+ }
+}
