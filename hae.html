@@ -52,6 +52,8 @@
   .spin{width:40px;height:40px;border-radius:50%;border:4px solid var(--navy-soft);border-top-color:var(--navy);animation:sp 1s linear infinite}
   @keyframes sp{to{transform:rotate(360deg)}}
   @media (prefers-reduced-motion:reduce){.spin{animation:none}}
+  .tw{cursor:pointer;border-radius:4px;-webkit-tap-highlight-color:transparent}.tw.on{background:var(--navy-soft);box-shadow:0 0 0 2px var(--navy-soft)}
+  .wtip{position:absolute;z-index:20;background:var(--navy);color:#fff;font-family:var(--ko);font-size:14.5px;line-height:1.45;border-radius:10px;padding:7px 11px;box-shadow:0 6px 18px rgba(19,46,94,.25)}.wtip b{font-family:var(--en);color:var(--gold);margin-right:4px}
   .nmin{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:12px;font:inherit;font-size:17px;margin:10px 0}
 </style>
 </head>
@@ -71,6 +73,9 @@
   const $ = id => document.getElementById(id), main = $('main');
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const bold = s => esc(s).replace(/\*(.+?)\*/g, '<b>$1</b>'), plain = s => String(s).replace(/\*/g, '');
+  /* 단어 누르면 뜻 (파란 단어는 빼고 · 2026-11-04) */
+  const tapW = s => String(s).split(/(\*.+?\*)/).map(part => /^\*.+\*$/.test(part) ? '<b>' + esc(part.slice(1, -1)) + '</b>' :
+    esc(part).replace(/[A-Za-z]+(?:'[a-z]+)?/g, w => { const k = w.toLowerCase(); return P && P.g && P.g[k] && !(P.nog || []).includes(k) ? '<span class="tw" data-w="' + k + '">' + w + '</span>' : w; })).join('');
   let P = null, ANS = [], RES = null, ONLY = null;   // ONLY: 다시 쓰기 할 문장 번호들
   const dk = () => 'enc_hae_' + K + '_' + NAME;
   const saveDraft = () => { try{ localStorage.setItem(dk(), JSON.stringify(ANS)); }catch(e){} };
@@ -90,10 +95,24 @@
     RES = null; $('prog').hidden = false; $('foot').hidden = false; $('warn').hidden = true; $('go').disabled = false;
     $('go').className = 'btn'; $('go').textContent = ONLY ? '고친 문장 다시 제출하기' : '다 썼어요 · 제출하기';
     const L = ONLY || P.s.map((_, i) => i);
-    main.innerHTML = '<div class="tip">' + (ONLY ? '✕ △ 문장만 다시 써요. 맞은 문장은 그대로 같이 제출돼요.' : '영어 문장을 읽고 아래 칸에 <b style="color:var(--ink)">한글 해석</b>을 써요. <b>파란 단어</b>는 Word Up에서 배운 단어예요.') + '</div>' +
-      L.map(i => '<section class="cd' + (ANS[i].trim() ? ' done' : '') + '"><span class="n">' + (i + 1) + '</span><div class="en">' + bold(P.s[i].en) + '</div><textarea data-i="' + i + '" rows="2" placeholder="한글 해석을 써요">' + esc(ANS[i]) + '</textarea></section>').join('');
+    main.innerHTML = '<div class="tip">' + (ONLY ? '✕ △ 문장만 다시 써요. 맞은 문장은 그대로 같이 제출돼요.' : '영어 문장을 읽고 아래 칸에 <b style="color:var(--ink)">한글 해석</b>을 써요. <b>파란 단어</b>는 Word Up에서 배운 단어예요. 모르는 단어는 <b style="color:var(--ink)">눌러서</b> 뜻을 봐요.') + '</div>' +
+      L.map(i => '<section class="cd' + (ANS[i].trim() ? ' done' : '') + '"><span class="n">' + (i + 1) + '</span><div class="en">' + tapW(P.s[i].en) + '</div><textarea data-i="' + i + '" rows="2" placeholder="한글 해석을 써요">' + esc(ANS[i]) + '</textarea></section>').join('');
     prog(); window.scrollTo({top:0});
   }
+  /* 말풍선 */
+  const tip = document.createElement('div'); tip.className = 'wtip'; tip.hidden = true; document.body.appendChild(tip);
+  const hideTip = () => { tip.hidden = true; document.querySelectorAll('.tw.on').forEach(x => x.classList.remove('on')); };
+  document.addEventListener('click', e => {
+    const t = e.target.closest && e.target.closest('.tw');
+    if (!t){ if (!e.target.closest || !e.target.closest('.wtip')) hideTip(); return; }
+    const was = t.classList.contains('on'); hideTip(); if (was) return;
+    t.classList.add('on'); tip.innerHTML = '<b>' + esc(t.textContent) + '</b> ' + esc(P.g[t.dataset.w] || ''); tip.hidden = false;
+    const r = t.getBoundingClientRect(), tw = Math.min(280, window.innerWidth - 24); tip.style.maxWidth = tw + 'px';
+    const w = tip.offsetWidth, h = tip.offsetHeight; let x = r.left + r.width / 2 - w / 2; x = Math.max(12, Math.min(x, window.innerWidth - w - 12));
+    let y = r.top - h - 8; if (y < 120) y = r.bottom + 8;
+    tip.style.left = x + 'px'; tip.style.top = (y + window.scrollY) + 'px';
+  });
+  window.addEventListener('scroll', hideTip, {passive:true});
   main.addEventListener('input', e => { const t = e.target; if (t.dataset.i == null) return; ANS[+t.dataset.i] = t.value; t.closest('.cd').classList.toggle('done', !!t.value.trim()); saveDraft(); prog(); $('warn').hidden = true; $('go').dataset.force = ''; });
   $('go').onclick = () => {
     if (!NAME){ askName(); return; }
