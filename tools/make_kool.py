@@ -13,5 +13,6 @@ for src,out in [('/home/claude/words/단어마스터.html','voca.html'),('/home/
     if out=='voca.html':
         a='on=speechSynthesis.speaking||speechSynthesis.pending'
         assert s.count(a)==1; s=s.replace(a,a+'||!!window.__audOn')
-        i=s.rfind('</body>'); s=s[:i]+'<script>'+open('/home/claude/enchool-rec/tools/voca_aud.js',encoding='utf8').read()+'</script>'+s[i:]
+        import hashlib; AJ=hashlib.md5(open('/home/claude/enchool-rec/kool/aud.json','rb').read()).hexdigest()[:8]
+        i=s.rfind('</body>'); s=s[:i]+'<script>'+open('/home/claude/enchool-rec/tools/voca_aud.js',encoding='utf8').read().replace('__AUDJ__',AJ)+'</script>'+s[i:]
     open('/home/claude/enchool-rec/kool/'+out,'w',encoding='utf8').write(s);print(out,len(s))

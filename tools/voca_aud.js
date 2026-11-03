@@ -1,3 +1,9 @@
+/* 한 번 받은 원어민 음원·음원 위치표는 폰(브라우저)에 저장해 두고 다시 안 받음 (쿨보카·녹음 화면 같이 씀 · 2026-11-03) */
+const TKDB=(()=>{let p=null;const db=()=>p||(p=new Promise((ok,no)=>{try{const r=indexedDB.open('enchool_aud',1);r.onupgradeneeded=()=>r.result.createObjectStore('t');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}}));
+ return {get:k=>db().then(d=>new Promise(ok=>{try{const q=d.transaction('t').objectStore('t').get(k);q.onsuccess=()=>ok(q.result||null);q.onerror=()=>ok(null)}catch(e){ok(null)}})).catch(()=>null),
+  put:(k,v)=>db().then(d=>{try{d.transaction('t','readwrite').objectStore('t').put(v,k)}catch(e){}}).catch(()=>{})}})();
+const AUDV='a1';   /* 음원 파일을 고치면 이 값을 바꿔서 다시 받게 */
+function getTrack(k){return TKDB.get(AUDV+'|'+k).then(c=>c&&c.by?{ok:true,by:c.by,mime:c.mime}:fetch(LOG+'?a=track&k='+encodeURIComponent(k)).then(r=>r.json()).then(j=>{if(!j.ok)return {ok:false};const u=Uint8Array.from(atob(j.b64),c=>c.charCodeAt(0));TKDB.put(AUDV+'|'+k,{by:u.buffer.slice(0),mime:j.mime||'audio/mpeg'});return {ok:true,by:u.buffer,mime:j.mime}}))}
 /* 쿨보카 원어민 음원 (GitHub 주소에서만 · 2026-10-31): kool/aud.json 지도로 그 단어·예문 부분만 재생, 없거나 받는 중이면 TTS */
 (function(){
 const LOG='https://script.google.com/macros/s/AKfycbwdK8492SzMcrc_hmwGWIquliehqASMrSAhbXJ5D-UyygkmwYvO23LWDzU8O44UrGQD/exec';
@@ -8,11 +14,11 @@ async function toWav(buf){const C=window.OfflineAudioContext||window.webkitOffli
  w(0,'RIFF');d.setUint32(4,36+n*2,true);w(8,'WAVEfmt ');d.setUint32(16,16,true);d.setUint16(20,1,true);d.setUint16(22,1,true);d.setUint32(24,ab.sampleRate,true);d.setUint32(28,ab.sampleRate*2,true);d.setUint16(32,2,true);d.setUint16(34,16,true);w(36,'data');d.setUint32(40,n*2,true);
  const cs=[];for(let c=0;c<ch;c++)cs.push(ab.getChannelData(c));for(let i=0;i<n;i++){let v=0;for(let c=0;c<ch;c++)v+=cs[c][i];v=Math.max(-1,Math.min(1,v/ch));d.setInt16(44+i*2,v<0?v*0x8000:v*0x7fff,true)}
  return URL.createObjectURL(new Blob([d],{type:'audio/wav'}))}
-function load(k){if(LD[k])return LD[k];LD[k]=fetch(LOG+'?a=track&k='+encodeURIComponent(k)).then(r=>r.json()).then(j=>{if(!j.ok)throw 0;const by=Uint8Array.from(atob(j.b64),c=>c.charCodeAt(0));
+function load(k){if(LD[k])return LD[k];LD[k]=getTrack(k).then(j=>{if(!j.ok)throw 0;const by=new Uint8Array(j.by);
   return toWav(by.buffer.slice(0)).catch(()=>null).then(u=>{TK[k]=u||URL.createObjectURL(new Blob([by],{type:j.mime||'audio/mpeg'}))})}).catch(()=>{TK[k]='none'});return LD[k]}
 function pre(){const ids=(location.hash||'').slice(1).split('.').slice(1).filter(x=>/_\d/.test(x));if(!ids.length)return;const ks=new Set();
  Object.values(AM).forEach(L=>L.forEach(c=>{if(ids.some(id=>c[0].indexOf(id+'-')===0))ks.add(c[0])}));[...ks].sort().reduce((p,k)=>p.then(()=>load(k)),Promise.resolve())}
-fetch('aud.json',{cache:'no-cache'}).then(r=>r.json()).then(j=>{AM=j;pre()}).catch(()=>{});
+TKDB.get('aud|__AUDJ__').then(c=>c||fetch('aud.json?v=__AUDJ__').then(r=>r.json()).then(j=>{TKDB.put('aud|__AUDJ__',j);return j})).then(j=>{AM=j;pre()}).catch(()=>{});
 window.addEventListener('hashchange',()=>{if(AM)pre()});
 function pick(t){if(!AM)return null;const L=AM[nz(t)];if(!L)return null;return L.find(c=>TK[c[0]]&&TK[c[0]]!=='none')||L.find(c=>LD[c[0]])||L[0]}
 const tts=window.speak;let A=null,T=null;

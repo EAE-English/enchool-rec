@@ -118,7 +118,14 @@
 .cc-sum{margin:12px 0 0;background:#fff7dc;border:1.5px solid #f2c94c;border-radius:14px;padding:10px;color:#7a5600;font-weight:700;font-size:15px;line-height:1.5}.cc-sum b{font-size:22px;color:#132E5E}
 </style>
 </head>
-<script>/* 카톡 안 작은 브라우저면 바깥 브라우저로 다시 열기 (소리·마이크가 막혀서 · 2026-10-31) */(function(){try{if(/KAKAOTALK/i.test(navigator.userAgent)&&!/[?&#]noext/.test(location.href)){location.href="kakaotalk://web/openExternal?url="+encodeURIComponent(location.href)}}catch(e){}})();</script><body>
+<script>
+/* 한 번 받은 원어민 음원·음원 위치표는 폰(브라우저)에 저장해 두고 다시 안 받음 (쿨보카·녹음 화면 같이 씀 · 2026-11-03) */
+const TKDB=(()=>{let p=null;const db=()=>p||(p=new Promise((ok,no)=>{try{const r=indexedDB.open('enchool_aud',1);r.onupgradeneeded=()=>r.result.createObjectStore('t');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}}));
+ return {get:k=>db().then(d=>new Promise(ok=>{try{const q=d.transaction('t').objectStore('t').get(k);q.onsuccess=()=>ok(q.result||null);q.onerror=()=>ok(null)}catch(e){ok(null)}})).catch(()=>null),
+  put:(k,v)=>db().then(d=>{try{d.transaction('t','readwrite').objectStore('t').put(v,k)}catch(e){}}).catch(()=>{})}})();
+const AUDV='a1';   /* 음원 파일을 고치면 이 값을 바꿔서 다시 받게 */
+function getTrack(k){return TKDB.get(AUDV+'|'+k).then(c=>c&&c.by?{ok:true,by:c.by,mime:c.mime}:fetch('https://script.google.com/macros/s/AKfycbwdK8492SzMcrc_hmwGWIquliehqASMrSAhbXJ5D-UyygkmwYvO23LWDzU8O44UrGQD/exec?a=track&k='+encodeURIComponent(k)).then(r=>r.json()).then(j=>{if(!j.ok)return {ok:false};const u=Uint8Array.from(atob(j.b64),c=>c.charCodeAt(0));TKDB.put(AUDV+'|'+k,{by:u.buffer.slice(0),mime:j.mime||'audio/mpeg'});return {ok:true,by:u.buffer,mime:j.mime}}))}
+/* 카톡 안 작은 브라우저면 바깥 브라우저로 다시 열기 (소리·마이크가 막혀서 · 2026-10-31) */(function(){try{if(/KAKAOTALK/i.test(navigator.userAgent)&&!/[?&#]noext/.test(location.href)){location.href="kakaotalk://web/openExternal?url="+encodeURIComponent(location.href)}}catch(e){}})();</script><body>
 <header class="band"><div class="band-in">
   <div><div class="eae">E.A.Ǝ</div><div class="kr" id="appName">엔쿨 녹음 숙제</div></div>
   <div class="who"><span>오늘의 녹음</span><strong id="who">-</strong></div>
@@ -382,9 +389,9 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     set('wait'); setTimeout(() => { if (!TRK[k]) set('음원이 없어서'); }, 30000);   // 30초 넘게 못 받으면 원어민 목소리로라도 하게
     if (TRK[k] === 'none'){ set('음원이 아직 없어서 원어민 목소리로 읽어 줘요'); return; }
     if (TRK[k]){ AUD = rate(new Audio(TRK[k])); set('✓ 음원 준비 끝'); return; }
-    fetch(LOG + '?a=track&k=' + encodeURIComponent(k)).then(r => r.json()).then(j => {
+    getTrack(k).then(j => {
       if (!j.ok) throw 0;
-      const by = Uint8Array.from(atob(j.b64), c => c.charCodeAt(0));
+      const by = new Uint8Array(j.by);
       TRK[k] = URL.createObjectURL(new Blob([by], {type:j.mime || 'audio/mpeg'}));
       /* MP3(VBR)는 휴대폰에서 중간으로 건너뛸 때 위치가 어긋나 단어가 잘려요 → WAV로 풀어서 정확한 자리에서 재생 (2026-10-30) */
       const mp3 = TRK[k];
