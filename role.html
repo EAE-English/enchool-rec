@@ -103,7 +103,6 @@
   <button class="btn main" id="send" hidden>선생님께 보내기</button>
 </div></div>
 
-<script src="https://eae-english.github.io/enchool-rec/tools/tts_aud.js"></script>
 <script>
 (function(){
   const $ = id => document.getElementById(id);
@@ -155,8 +154,7 @@
   if (window.speechSynthesis){ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
   const spk = [...new Set(D.L.map(l => l[0]))];
   function say(text, who, done){
-    /* 쿨톡 목소리: 미리 만든 자연스러운 음성이 있으면 그걸로 (2026-11-04) */
-    if (window.TTSA && TTSA.play(text, who, () => setTimeout(done, 450))) return;
+    /* 역할극 녹음 중에는 예전 목소리(기계음)로: 새 목소리(오디오 재생)를 틀면 폰에서 녹음이 끊겨 빈 파일이 됐어요 (2026-11-04 은설·유하·나율) */
     if (!window.speechSynthesis){ setTimeout(done, 1500); return; }
     (window.TTSA && TTSA.stop(), speechSynthesis.cancel());
     const u = new SpeechSynthesisUtterance(plain(text));

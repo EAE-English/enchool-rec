@@ -489,7 +489,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   if (window.speechSynthesis){ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
   function say(text, who, done){
     /* 쿨톡 목소리: 미리 만든 자연스러운 음성이 있으면 그걸로 (2026-11-04) */
-    if (window.TTSA && TTSA.play(text, who, () => setTimeout(done, 450), MODE === 'shadow' ? RATE : 1)) return;
+    if (window.TTSA && MODE !== 'role' && TTSA.play(text, who, () => setTimeout(done, 450), MODE === 'shadow' ? RATE : 1)) return;
     if (!window.speechSynthesis){ setTimeout(done, 1500); return; }
     (window.TTSA && TTSA.stop(), speechSynthesis.cancel());
     const u = new SpeechSynthesisUtterance(plain(text)); u.lang = 'en-US'; u.rate = MODE === 'shadow' ? .92 * RATE : .92;
