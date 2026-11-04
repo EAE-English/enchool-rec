@@ -83,6 +83,7 @@
   :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 
   .pklist{display:flex;flex-direction:column;gap:8px}
+  /* 불규칙: 쿨톡처럼 고르기 (2026-11-04) */.irm{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:4px 0 6px}.irm button{all:unset;cursor:pointer;background:#fff;border:2px solid var(--line);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;font-family:var(--ko)}.irm button b{font-size:17px;color:var(--navy)}.irm button small{font-size:12.5px;color:var(--muted)}.irm button.on{background:var(--navy);border-color:var(--navy)}.irm button.on b{color:#f3c74f}.irm button.on small{color:#dfe6f2}.irg{display:grid;grid-template-columns:1fr 1fr;gap:10px}.irc{all:unset;cursor:pointer;background:#fff;border:2px solid #e8e2d6;border-radius:16px;padding:12px 14px 13px;display:flex;flex-direction:column;gap:4px;position:relative;overflow:hidden;font-family:var(--ko)}.irc::before{content:'';position:absolute;left:0;right:0;top:0;height:6px;background:var(--gc)}.irc b{font-family:var(--en);font-size:19px;color:var(--navy);margin-top:4px}.irc em{font-style:normal;font-size:12.5px;font-weight:700;color:var(--gc)}.irc small{font-family:var(--en);font-size:13px;color:var(--muted);line-height:1.35}.irc.done{border-color:#9fd8b5}.irc .dn{position:absolute;right:10px;top:12px;font-size:12px;color:#1f9d55;font-weight:700}
   .pkh{font-size:13.5px;color:var(--muted);margin:8px 2px 0;border-bottom:1px solid var(--line);padding-bottom:4px}.pkh b{color:var(--navy);font-size:15px}
   .pk{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:13px 15px;cursor:pointer;font-family:var(--ko);position:relative}
   .pk b{font-family:var(--en);font-size:17px;color:var(--navy)}.pk small{color:var(--muted);font-size:13.5px}
@@ -91,6 +92,7 @@
   .back{align-self:flex-start;border:0;background:none;color:var(--navy);font-family:var(--ko);font-size:14.5px;cursor:pointer;padding:6px 2px;margin-top:6px}
   .listen{margin-top:12px;width:100%;border:1.5px solid var(--navy);background:#fff;color:var(--navy);border-radius:12px;padding:11px;font-family:var(--ko);font-size:15.5px;cursor:pointer}
   .ln.rd{max-width:100%}
+  /* 불규칙 랩보이스 표 (2026-11-04) */.rap{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;font-size:16px}.rap th{background:var(--navy);color:#fff;font-weight:700;font-size:13px;padding:8px 6px}.rap td{padding:9px 6px;border-top:1px solid #e6eaf0;text-align:center;font-family:var(--en);font-weight:700;color:var(--navy)}.rap td.k{font-family:var(--ko);font-weight:400;font-size:13.5px;color:var(--muted)}.rap tr:nth-child(even) td{background:#f6f8fb}.rapg{display:inline-block;background:#fff1c9;color:#7a5200;border-radius:99px;padding:2px 12px;font-weight:800;margin-bottom:8px}.beat{display:flex;align-items:center;gap:8px;justify-content:center;font-weight:700;color:#7a5200;background:#fff8e1;border:1px solid #f1d58a;border-radius:12px;padding:8px 12px;margin-bottom:10px}.beat i{width:10px;height:10px;border-radius:50%;background:#e2a400;animation:bt .5s ease-in-out infinite alternate}@keyframes bt{from{transform:scale(.6);opacity:.5}to{transform:scale(1.2);opacity:1}}
   .ln.sh .wd{font-family:var(--en);font-weight:800;font-size:20px;color:var(--navy)}.ln.sh .wd small{font-family:var(--ko);font-weight:400;font-size:14px;color:var(--muted);margin-left:6px}.ln.sh .en{font-weight:600;font-size:16.5px}
   .say{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));width:min(528px,calc(100% - 32px));background:var(--gold);color:var(--navy);border-radius:14px;padding:10px 14px;box-shadow:0 6px 18px rgba(19,46,94,.25);z-index:5}
   .say b{display:block;font-size:17px;text-align:center}.say span{display:block;height:6px;background:rgba(19,46,94,.18);border-radius:99px;margin-top:6px;overflow:hidden}.say i{display:block;height:100%;width:100%;background:var(--navy)}
@@ -233,7 +235,8 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const plain = s => String(s).replace(/[\[\]]/g, '');
   const Q = new URLSearchParams(location.search);
-  const WONLY = Q.get('w') === '1';   // 단어만 따라 읽기 (예문은 건너뜀 · 2026-10-29)
+  const WONLY = Q.get('w') === '1';
+  let RAP = Q.get('rap') === '1';   // 불규칙 랩보이스: 비트 깔고 표 보며 랩하듯 읽기 (2026-11-04)   // 단어만 따라 읽기 (예문은 건너뜀 · 2026-10-29)
   let STUDENT = (Q.get('s') || '').trim(); const CLS = Q.get('c') || '', KEY = (Q.get('k') || '').trim(), ME0 = Q.get('me') || '';
   window.addEventListener('error', e => { try{ showErr('화면 오류: ' + (e.message || '') + ' — 이 화면을 캡처해서 선생님께 보내 주세요.'); }catch(_){} });
   function showErr(m){ $('err').textContent = m; $('err').hidden = false; }
@@ -285,15 +288,23 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   function showPick(){
     stopAll(); $('pick').hidden = false; $('rolePick').hidden = true; $('stage').hidden = true; $('bar').hidden = true;
     $('pkUnit').textContent = PACK.unit || '녹음 숙제';
+    if (PACK.book === '불규칙 동사표') $('appName').textContent = RAP ? '불규칙 랩보이스' : '불규칙 쿨보이스';
+    if (PACK.book === '불규칙 동사표'){
+      const GC = ['#c0392b','#2f5fa8','#1f7a4d','#b8860b','#6b3fa0','#1d3557'];
+      $('pkList').innerHTML = (Q.has('rap') ? `<div class="pkh"><b>${RAP ? '🎤 랩보이스' : '🎧 쿨보이스'} · 묶음을 골라요</b></div>` : `<div class="pkh"><b>① 어떻게 녹음할까요?</b></div><div class="irm"><button data-irm="1" class="${RAP ? 'on' : ''}"><b>🎤 랩보이스</b><small>비트 깔고 랩하듯 읽기</small></button><button data-irm="0" class="${RAP ? '' : 'on'}"><b>🎧 쿨보이스</b><small>원어민 듣고 따라 하기</small></button></div><div class="pkh"><b>② 묶음 고르기</b></div>`) + `<div class="irg">` +
+        ITEMS.map((x, i) => { const W = x.words || [], done = sentOK[x.id + (RAP ? 'r' : '')]; return `<button class="irc${done ? ' done' : ''}" data-it="${i}" style="--gc:${GC[i % GC.length]}"><b>${esc(x.t)}</b><em>${W.length}개</em><small>${esc(W.slice(0, 3).map(w => (w.f || [w.w])[0]).join(', ') + (W.length > 3 ? ' …' : ''))}</small>${done ? '<span class="dn">✓ 보냄</span>' : ''}</button>`; }).join('') + '</div>';
+      return;
+    }
     let h = '', last = -1;
     ITEMS.forEach((x, i) => {
       const g = x.kind === 'body' ? 'b' : x.kind === 'shadow' ? 'h' : (x.st || 0);
-      if (g !== last){ last = g; h += `<div class="pkh">${g === 'h' ? '<b>🎧 따라 읽기</b>' : g === 'b' ? '<b>📖 본문 읽기</b>' : g ? `<b>Step ${g}</b>${PACK.steps && PACK.steps[g] ? ' · ' + esc(PACK.steps[g]) : ''}` : '<b>🎭 대화문 역할극</b>'}</div>`; }
+      if (g !== last){ last = g; h += `<div class="pkh">${g === 'h' ? (RAP ? '<b>🎤 랩보이스 · 묶음을 골라요</b>' : '<b>🎧 따라 읽기</b>') : g === 'b' ? '<b>📖 본문 읽기</b>' : g ? `<b>Step ${g}</b>${PACK.steps && PACK.steps[g] ? ' · ' + esc(PACK.steps[g]) : ''}` : '<b>🎭 대화문 역할극</b>'}</div>`; }
       const done = sentOK[x.id];
-      h += `<button class="pk${done ? ' done' : ''}" data-it="${i}"><b>${esc(x.t)}</b><small>${esc(x.kind === 'shadow' ? (x.words || []).map(w => w.w).join(', ') : [x.p, x.sub].filter(Boolean).join(' · '))}</small>${done ? '<span>✓ 보냄</span>' : ''}</button>`;
+      h += `<button class="pk${done ? ' done' : ''}" data-it="${i}"><b>${esc(x.t)}</b><small>${esc(x.kind === 'shadow' ? (PACK.book === '불규칙 동사표' ? (x.words || []).length + '개 · ' + (x.words || []).slice(0, 6).map(w => (w.f || [w.w])[0]).join(', ') + ((x.words || []).length > 6 ? ' …' : '') : (x.words || []).map(w => w.w).join(', ')) : [x.p, x.sub].filter(Boolean).join(' · '))}</small>${done ? '<span>✓ 보냄</span>' : ''}</button>`;
     });
     $('pkList').innerHTML = h;
   }
+  $('pkList').addEventListener('click', e => { const m = e.target.closest('[data-irm]'); if (m){ RAP = m.dataset.irm === '1'; showPick(); return; } });
   $('pkList').addEventListener('click', e => { const b = e.target.closest('[data-it]'); if (b) open(ITEMS[+b.dataset.it]); });
   document.addEventListener('click', e => { if (e.target.closest('[data-back]')) { if (running && !confirmLeave()) return; showPick(); } });
   function confirmLeave(){ stop(); return true; }
@@ -311,6 +322,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
       $('rpUnit').textContent = PACK.unit || ''; $('rpTitle').textContent = x.t + (x.sub ? ' · ' + x.sub : '');
       $('rpRoles').innerHTML = sps.map(s => `<button class="btn main" data-role="${esc(s)}">${esc(s)} 역할 <small>(${x.L.filter(l => l[0] === s).length}줄)</small></button>`).join('');
     } else if (x.kind === 'sum') start(x, 'sum', '');
+    else if (RAP) start(x, 'rap', '');
     else start(x, 'shadow', '');   // 따라 읽기 · 본문 모두 「듣고 바로 따라 하기」(2026-10-29)
   }
   $('rpRoles').addEventListener('click', e => { const b = e.target.closest('[data-role]'); if (b) start(IT, 'role', b.dataset.role); });
@@ -320,9 +332,11 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   function start(x, mode, me){
     MODE = mode; ME = me; HIDE = false; heard = {}; blob = null; COIN.arm(notTest(), '「선생님께 보내기」를 누르면 쌓여요'); if ($('ccSum')) $('ccSum').hidden = true;
     $('rolePick').hidden = true; $('stage').hidden = false; $('bar').hidden = false;
-    $('appName').textContent = mode === 'sum' ? '쿨요약 녹음' : mode === 'role' ? '쿨톡 역할극 녹음' : x.kind === 'body' ? '본문 따라 읽기 녹음' : mode === 'shadow' ? (WONLY ? '단어 따라 읽기 녹음' : '따라 읽기 녹음') : '본문 읽기 녹음';
+    $('appName').textContent = mode === 'rap' ? '불규칙 랩보이스' : PACK.book === '불규칙 동사표' && mode === 'shadow' ? '불규칙 쿨보이스' : mode === 'sum' ? '쿨요약 녹음' : mode === 'role' ? '쿨톡 역할극 녹음' : x.kind === 'body' ? '본문 따라 읽기 녹음' : mode === 'shadow' ? (WONLY ? '단어 따라 읽기 녹음' : '따라 읽기 녹음') : '본문 읽기 녹음';
     $('unit').textContent = PACK.unit || ''; $('title').textContent = x.t + (x.sub ? ' · ' + x.sub : '');
-    $('how').innerHTML = mode === 'sum'
+    $('how').innerHTML = mode === 'rap'
+      ? `🎤 <b>녹음 시작</b>을 누르면 <b>비트</b>가 나와요. 비트에 맞춰 표를 보면서 <b>원형 - 과거 - 과거분사</b>를 <b>랩하듯</b>읽어요.<br>다 읽으면 <b>다 했어요</b>를 눌러요. 비트도 같이 녹음돼요. 🔈 이어폰 없이 해도 돼요.`
+      : mode === 'sum'
       ? `<b>🎙 녹음 시작</b>을 누르면 <b>한글 문장</b>이 하나씩 나와요. <b>영어로 말하고</b> <b>다음 ▶</b>을 눌러요.<br>한글 문장이 다 끝나면 <b>요약해서 말해 보세요!</b>가 나와요. 표 내용을 내 말로 이어서 말하고 <b>다 했어요</b>를 눌러요.<br>녹음은 끝까지 쭉 이어져요.`
       : mode === 'role'
       ? `나는 <b>${esc(me)}</b> 역할! 상대 대사는 원어민이 읽어 줘요.<br>내 차례가 오면 녹음이 잠깐 멈춰요. 준비되면 <b>🎙 말하기</b>를 누르고 말한 뒤 <b>✓ 다 했어요</b>를 눌러요.<br>🔈 원어민 목소리도 같이 녹음되게 <b>이어폰은 빼고</b> 스피커로 해요.`
@@ -330,12 +344,13 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
       ? `<b class="ear">🎧 가능하면 이어폰을 끼고 진행해 주세요!</b><br><b>🎙 녹음 시작</b>을 누르면 원어민 음원이 나와요. 원어민이 하나 말하면 <b>잠깐 멈춰요</b>. 그때 <b>따라 말해요</b>.<br>끝까지 저절로 넘어가고, 음원이 끝나면 녹음도 끝나요.
         <div class="spd" id="spd">속도 ${[0.7,0.8,0.9,1].map(r => `<button data-spd="${r}" class="${r === RATE ? 'on' : ''}">${r === 1 ? '보통' : r + '배'}</button>`).join('')}</div>`
       : `먼저 <b>🔊 원어민 먼저 들어 보기</b>로 들어 봐요.<br>준비되면 <b>🎙 녹음 시작</b>을 누르고 처음부터 끝까지 소리 내어 읽은 뒤 <b>■ 다 읽었어요</b>를 눌러요.`;
-    $('tog').hidden = mode !== 'role'; $('listenAll').hidden = mode === 'role' || mode === 'sum';
+    $('tog').hidden = mode !== 'role'; $('listenAll').hidden = mode === 'role' || mode === 'sum' || mode === 'rap';
     $('tShow').classList.add('on'); $('tHide').classList.remove('on');
     ['after','doneCard','send','again','next','timer'].forEach(id => $(id).hidden = true);
     stopMine(); $('timer').classList.remove('abs'); document.querySelector('.bar-in').classList.remove('sumbar'); trkUI(null);
     $('go').hidden = false; $('go').disabled = false; goUI('녹음 시작', false);
     if (mode === 'shadow') loadTrack(x);
+    if (mode === 'rap') beatLoad();
     $('more').hidden = ITEMS.length < 2; /* 쿨톡에서 온 경우만 「다음」, QR로 바로 온 경우는 끝 안내만 (2026-10-29) */ $('fin').hidden = ITEMS.length > 1 || !BACK; $('finHint').hidden = ITEMS.length > 1 || !!BACK; $('finHint').innerHTML = '✓ 끝! 선생님께 잘 보냈어요.<br>이제 다음 숙제를 하면 돼요.';
     draw(); window.scrollTo({top:0});
   }
@@ -343,6 +358,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     if (IT.kind === 'shadow') return (IT.words || []).map(w => [w.w, WONLY ? '' : (w.ex || ''), w.ko || '']);
     return IT.kind === 'dlg' ? IT.L : (IT.lines || String(IT.text || '').split(/(?<=[.!?])\s+/)).map(t => ['', t, '']); }
   function draw(){
+    if (MODE === 'rap'){ $('lines').innerHTML = `<div style="text-align:center"><span class="rapg">${esc(IT.t)} · ${(IT.words || []).length}개</span></div><div class="beat" id="beatOn" hidden><i></i>비트 나오는 중 · 랩하듯 읽어요!</div><table class="rap"><tr><th>원형</th><th>과거</th><th>과거분사</th><th>뜻</th></tr>${(IT.words || []).map(w => `<tr>${(w.f || [w.w, '', '']).map(t => `<td>${esc(t)}</td>`).join('')}<td class="k">${esc(w.ko || '')}</td></tr>`).join('')}</table>`; return; }
     if (MODE === 'sum'){ $('lines').innerHTML = `<div class="sumq" id="sumq"><small>한글 ${(IT.ko || []).length}문장 → 요약하기</small><b>🎙 녹음 시작을 누르면<br>첫 문장이 나와요</b></div>`; return; }
     $('lines').innerHTML = lines().map((l, i) => {
       if (MODE === 'shadow' && IT.kind === 'body') return `<div class="ln rd" data-i="${i}"><span class="en">${esc(plain(l[1]))}</span></div>`;
@@ -373,7 +389,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     const b = $('tbox');
     if (!st){ b.hidden = true; return; }
     b.hidden = false; b.className = 'tbox ' + st;
-    b.textContent = st === 'wait' ? '⏳ 음원 준비 중… 잠깐만 기다려요' : st === 'ok' ? '✓ 음원 준비 끝! 아래 빨간 버튼을 눌러요' : '음원이 없어서 원어민 목소리로 읽어 줘요';
+    b.textContent = st === 'wait' ? '⏳ 음원 준비 중… 잠깐만 기다려요' : st === 'ok' ? '✓ 음원 준비 끝! 아래 빨간 버튼을 눌러요' : '✓ 준비 끝! 원어민 목소리로 읽어 줘요';
     if (!running) $('go').disabled = st === 'wait';
   }
   async function toWav(buf){
@@ -390,6 +406,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   function loadTrack(x){
     AUD = null; const k = x.audio;
     const set = t => { if (MODE !== 'shadow' || IT !== x || running || !$('after').hidden) return; trkUI(/준비 끝/.test(t) ? 'ok' : /없어서/.test(t) ? 'none' : 'wait'); };
+    if (!k){ set('음원이 없어서'); return; }   // 원음원 없는 묶음(내콘 단어·불규칙 등)은 기다리지 않고 바로 새 목소리로 (2026-11-04)
     set('wait'); setTimeout(() => { if (!TRK[k]) set('음원이 없어서'); }, 30000);   // 30초 넘게 못 받으면 원어민 목소리로라도 하게
     if (TRK[k] === 'none'){ set('음원이 아직 없어서 원어민 목소리로 읽어 줘요'); return; }
     if (TRK[k]){ AUD = rate(new Audio(TRK[k])); set('✓ 음원 준비 끝'); return; }
@@ -432,6 +449,12 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
       [0.25, 0.3, 0.35, 0.45, 0.55, 0.7, 0.9, 1.2].forEach(g => { const sg = cut(g), dd = Math.abs(sg.length - want) + (sg.length < want ? 0.5 : 0); if (dd < bd){ bd = dd; best = sg; } }); }
     return best;
   }
+  /* 랩 비트: 받아서 풀어 두고, 녹음할 때 마이크 + 비트를 섞어서 파일에 넣어요 (스피커 소리를 마이크로 다시 담지 않음) */
+  let BEAT = null, BEATP = null, ACX = null, BSRC = null;
+  function beatLoad(){ if (BEATP) return BEATP; trkUI('wait');
+    BEATP = fetch('irr/beat.mp3').then(r => r.arrayBuffer()).then(b => { BEAT = b; if (MODE === 'rap' && !running) trkUI(null), $('go').disabled = false; }).catch(() => { BEATP = null; showErr('비트를 못 받았어요. 인터넷을 확인하고 다시 들어와 주세요.'); });
+    return BEATP; }
+  function beatStop(){ try{ BSRC && BSRC.stop(); }catch(e){} BSRC = null; try{ ACX && ACX.close(); }catch(e){} ACX = null; const b = $('beatOn'); if (b) b.hidden = true; }
   let sayT = null;
   function showSay(sec){
     const el = $('say'); clearTimeout(sayT);
@@ -565,10 +588,24 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     if (running && MODE !== 'role'){ stop(); return; }
     if (playing) $('listenAll').click();
     $('err').hidden = true;
+    if (MODE === 'rap'){ try{ ACX = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ ACX = null; } }
     try{ stream = await navigator.mediaDevices.getUserMedia({audio: MODE === 'role' ? {echoCancellation:false, noiseSuppression:false, autoGainControl:true} : true}); }
-    catch(e){ micErr(e); return; }
+    catch(e){ micErr(e); beatStop(); return; }
     mime = pickMime();
-    rec = mime ? new MediaRecorder(stream, {mimeType:mime, audioBitsPerSecond:48000}) : new MediaRecorder(stream, {audioBitsPerSecond:48000});
+    let rs = stream;
+    if (MODE === 'rap'){
+      try{
+        if (!BEAT) await beatLoad();
+        const buf = await ACX.decodeAudioData(BEAT.slice(0)), dst = ACX.createMediaStreamDestination();
+        ACX.createMediaStreamSource(stream).connect(dst);
+        BSRC = ACX.createBufferSource(); BSRC.buffer = buf; BSRC.loop = true;
+        const gRec = ACX.createGain(), gOut = ACX.createGain(); gRec.gain.value = 0.22; gOut.gain.value = 0.7;
+        BSRC.connect(gRec).connect(dst); BSRC.connect(gOut).connect(ACX.destination);
+        if (ACX.state === 'suspended') await ACX.resume();
+        rs = dst.stream;
+      }catch(e){ beatStop(); showErr('비트를 틀지 못했어요. 다시 눌러 주세요. (' + (e && e.message || e) + ')'); try{ stream.getTracks().forEach(t => t.stop()); }catch(_){} return; }
+    }
+    rec = mime ? new MediaRecorder(rs, {mimeType:mime, audioBitsPerSecond: MODE === 'rap' ? 96000 : 48000}) : new MediaRecorder(rs, {audioBitsPerSecond: MODE === 'rap' ? 96000 : 48000});
     mime = rec.mimeType || mime || 'audio/webm'; chunks = [];
     rec.ondataavailable = e => e.data.size && chunks.push(e.data);
     rec.onstop = finishRec;
@@ -578,6 +615,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     finished = false; acc = 0; on = 0; rec.start(1000); running = true; i = 0; recOn(); $('timer').hidden = false;
     tick = setInterval(() => { dur = (acc + (on ? Date.now() - on : 0)) / 1000; $('tt').textContent = fmt(dur); if (dur >= 1500) stop(); }, 250); /* 최대 25분 (능률 고난도 Day 하나가 12분 넘음 · 2026-11-02) */
     if (MODE === 'role'){ $('go').hidden = true; $('timer').classList.add('abs'); step(); }
+    else if (MODE === 'rap'){ goUI('다 했어요', true); $('timer').classList.add('abs'); BSRC.start(); $('beatOn').hidden = false; }
     else if (MODE === 'sum'){ goUI('그만하기', true); $('timer').classList.remove('abs'); document.querySelector('.bar-in').classList.add('sumbar'); SUMI = 0; sumShow(); }   /* 시간은 버튼 위에 따로 (겹치지 않게 · 2026-11-02) */
     else if (MODE === 'shadow'){
       goUI('그만하기', true); trkUI(null); $('timer').classList.add('abs'); srStart(0);
@@ -619,6 +657,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     if (!running) return;
     running = false; clearInterval(tick); if (on){ acc += Date.now() - on; on = 0; } dur = acc / 1000;
     if (window.speechSynthesis) (window.TTSA && TTSA.stop(), speechSynthesis.cancel()); if (AUD) AUD.pause(); showSay(0);
+    if (MODE === 'rap') setTimeout(beatStop, 300);
     setTimeout(srStop, MODE !== 'role' ? 700 : 0);
     if (rec && rec.state !== 'inactive'){ try{ rec.requestData(); }catch(e){} rec.stop(); }
     setTimeout(() => { if (!finished && chunks.length) finishRec(); }, 2000);
@@ -656,13 +695,13 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
       const [R, H] = refsHeard();
       const payload = {
         student: STUDENT, cls: CLS, key: KEY,
-        title: `${PACK.unit || ''}${String(PACK.unit || '').endsWith(IT.t) ? '' : ' · ' + IT.t}${IT.sub ? ' · ' + IT.sub : ''}${MODE === 'sum' ? ' · 쿨요약' : MODE === 'role' ? ' · ' + ME + ' 역할' : IT.kind === 'body' ? ' · 본문 따라 읽기' : MODE === 'shadow' ? ' · 따라 읽기' : ' · 본문 읽기'}`,
+        title: `${PACK.unit || ''}${String(PACK.unit || '').endsWith(IT.t) ? '' : ' · ' + IT.t}${IT.sub ? ' · ' + IT.sub : ''}${MODE === 'rap' ? ' · 랩보이스' : MODE === 'sum' ? ' · 쿨요약' : MODE === 'role' ? ' · ' + ME + ' 역할' : IT.kind === 'body' ? ' · 본문 따라 읽기' : MODE === 'shadow' ? ' · 따라 읽기' : ' · 본문 읽기'}`,
         refList: R, heardList: H, transcript: heardText(),
         base64: String(r.result).split(',')[1], mimeType: mime, durationSec: dur
       };
       const reset = () => { $('send').disabled = false; $('again').disabled = false; $('send').textContent = '선생님께 보내기'; };
-      const ok = () => { reset(); sentOK[IT.id] = 1; coinSend(); $('doneCard').hidden = false; $('send').hidden = true; $('again').textContent = '한 번 더 하기';
-        $('doneIc').textContent = MODE === 'role' ? '🎬' : MODE === 'shadow' ? '🎧' : '📖'; $('doneT').textContent = MODE === 'role' ? '멋진 연기였어요!' : MODE === 'shadow' ? '원어민처럼 잘 따라 했어요!' : '또박또박 잘 읽었어요!';
+      const ok = () => { reset(); sentOK[IT.id + (MODE === 'rap' ? 'r' : '')] = 1; coinSend(); $('doneCard').hidden = false; $('send').hidden = true; $('again').textContent = '한 번 더 하기';
+        $('doneIc').textContent = MODE === 'rap' ? '🎤' : MODE === 'role' ? '🎬' : MODE === 'shadow' ? '🎧' : '📖'; $('doneT').textContent = MODE === 'rap' ? '멋진 랩이었어요!' : MODE === 'role' ? '멋진 연기였어요!' : MODE === 'shadow' ? '원어민처럼 잘 따라 했어요!' : '또박또박 잘 읽었어요!';
         $('doneCard').scrollIntoView({block:'center', behavior:'smooth'}); };
       const fail = e => { reset(); showErr('보내기가 안 됐어요. 다시 눌러 주세요. (' + e.message + ')'); };
       fetch(LOG, {method:'POST', body:JSON.stringify(payload)})
