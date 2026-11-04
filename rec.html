@@ -300,6 +300,8 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
 
   function open(x){
     IT = x; $('pick').hidden = true; $('err').hidden = true;
+    /* 원음원 없는 단어 묶음: 미리 만든 목소리를 먼저 받아 둠 (2026-11-04) */
+    if (window.TTSA && x.kind === 'shadow' && !x.audio) TTSA.ready.then(() => TTSA.pre((x.words || []).flatMap(w => [['', w.w]].concat(w.ex ? [['', w.ex]] : []))));
     const many = ITEMS.length > 1;
     $('backStage').hidden = !many; document.querySelector('#rolePick [data-back]').hidden = !many;
     if (x.kind === 'dlg'){
