@@ -691,7 +691,7 @@ function load(k){if(LD[k])return LD[k];LD[k]=getTrack(k).then(j=>{if(!j.ok)throw
   return toWav(by.buffer.slice(0)).catch(()=>null).then(u=>{TK[k]=u||URL.createObjectURL(new Blob([by],{type:j.mime||'audio/mpeg'}))})}).catch(()=>{TK[k]='none'});return LD[k]}
 function pre(){const ids=(location.hash||'').slice(1).split('.').slice(1).filter(x=>/_\d/.test(x));if(!ids.length)return;const ks=new Set();
  Object.values(AM).forEach(L=>L.forEach(c=>{if(ids.some(id=>c[0].indexOf(id+'-')===0))ks.add(c[0])}));[...ks].sort().reduce((p,k)=>p.then(()=>load(k)),Promise.resolve())}
-TKDB.get('aud|384c80fd').then(c=>c||fetch('aud.json?v=384c80fd').then(r=>r.json()).then(j=>{TKDB.put('aud|384c80fd',j);return j})).then(j=>{AM=j;pre()}).catch(()=>{});
+TKDB.get('aud|1f3726b9').then(c=>c||fetch('aud.json?v=1f3726b9').then(r=>r.json()).then(j=>{TKDB.put('aud|1f3726b9',j);return j})).then(j=>{AM=j;pre()}).catch(()=>{});
 window.addEventListener('hashchange',()=>{if(AM)pre()});
 function pick(t){if(!AM)return null;const L=AM[nz(t)];if(!L)return null;return L.find(c=>TK[c[0]]&&TK[c[0]]!=='none')||L.find(c=>LD[c[0]])||L[0]}
 const tts=window.speak;let A=null,T=null;
