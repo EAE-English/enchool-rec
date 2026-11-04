@@ -277,6 +277,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     else if ((m = SEL.match(/^s(\d+)(?:_(\d+))?$/i))) { const a = +m[1], b = +(m[2] || m[1]); ITEMS = dl.filter(d => d.st >= Math.min(a,b) && d.st <= Math.max(a,b)); }
     else if (/^body$/i.test(SEL)) ITEMS = bd;
     else if (/^sum$/i.test(SEL)) { ITEMS = bd.map(b => ({...b, kind:'sum'})); }
+    else if (/,/.test(SEL)) ITEMS = L.filter(x => SEL.split(',').includes(x.id));   // 단어 묶음 여러 개: 7-2,7-3 (2026-11-04)
     else ITEMS = L.filter(x => x.id === SEL);
     if (!ITEMS.length) ITEMS = L;
     if (ITEMS.length === 1) open(ITEMS[0]); else showPick();
