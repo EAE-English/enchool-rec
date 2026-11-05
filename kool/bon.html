@@ -282,6 +282,12 @@ header.hero .hr .hero-owl{position:static;width:114px;margin:2px 0 0}
 <style>/* 작은 폰 제목 */@media (max-width:380px){header.hero h1{font-size:20px}}</style>
 
 <style>/* 이오 문구: 말하듯 손글씨, 흰색 */.tag{font-family:var(--hand);font-size:17px;font-weight:700;color:#fff;line-height:1.15;letter-spacing:0;transform:rotate(-4deg);text-shadow:0 2px 0 rgba(0,0,0,.18)}.tag b{color:var(--gold);font-size:19px}@media (max-width:420px){.tag{font-size:16px}.tag b{font-size:18px}}</style>
+<style>/* QR 단순 화면 (2026-11-05) */
+body.qrs h2.sec,body.qrs #dbooks,body.qrs #dlgs,body.qrs #todayWrap,body.qrs #who [data-who],body.qrs #who .tot{display:none!important}
+#qrbar{display:none}body.qrs #qrbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:16px 2px 10px;background:#fffaf0;border:1.5px solid var(--gold,#f2c94c);border-radius:12px;padding:10px 14px;font-size:15px;color:var(--ink,#1d2433)}
+#qrbar b{color:var(--navy,#102f5e)}#qrbar span{margin-left:auto;font-size:13px;color:var(--muted,#7a8191);font-weight:700}
+</style>
+
 <div class="wrap">
  <header class="top hero">
   <div class="htop"><div class="hl">
@@ -727,6 +733,13 @@ document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest
 function trMin(){const m=Math.floor(TR.act/60),s=TR.act%60;return m?`${m}분 ${s}초`:`${s}초`}
 function trText(){const r=TR.n?TR.fast/TR.n:0;return `실제 학습 ${trMin()} · ${TR.n>=5&&r>=.4?"⚠️ 빠르게 넘김 의심":"✅ 꼼꼼히"} (빠른 넘김 ${TR.fast}/${TR.n})`}
 function openStart(){$("#nm").value=NAME;$("#start").hidden=false;setTimeout(()=>$("#nm").focus(),50)}
+/* QR로 들어오면 목록 없이 오늘 숙제 모험만 · 여러 개면 하나 끝낼 때마다 다음 것 (2026-11-05 예원) */
+const QRS=()=>!!SCODE&&!SHOWALL;
+function qrTargets(){const V=visDlgs();if(QRDLG&&V.some(d=>d.id===QRDLG))return V.filter(d=>d.id===QRDLG);const nA=V.filter(d=>d.id!=="all");return nA.length?nA:V}
+function qrPick(){if(COURSE)return;const T=qrTargets();if(!T.length)return;if(!T.some(d=>d.id===CUR)||isM(rec(CUR))){const nx=T.find(d=>!isM(rec(d.id)));if(nx)CUR=nx.id;else if(!T.some(d=>d.id===CUR))CUR=T[0].id}}
+function qrBar(){const T=qrTargets(),i=Math.max(0,T.findIndex(d=>d.id===CUR)),done=T.filter(d=>isM(rec(d.id))).length;let el=document.getElementById("qrbar");if(!el){el=document.createElement("div");el.id="qrbar";$("#course").before(el)}
+ el.innerHTML=done>=T.length?`🏆 오늘 숙제 <b>다 했어요!</b>`:`📌 오늘 숙제 <b>${T.length>1?`${T.length}개 중 ${i+1}번째`:esc(dlg().t)}</b>${T.length>1?`<span>마스터 ${done} / ${T.length}</span>`:""}`}
+const _homeAll=home;home=function(){const q=QRS();document.body.classList.toggle("qrs",q);if(q)qrPick();_homeAll();if(q)qrBar()};
 document.getElementById("heroOwl").src=OWL.wand;
 readHash();P=load();pickBook();stCur();if(QRDLG&&DLG.some(d=>d.id===QRDLG))CUR=QRDLG;setTimeout(goStep,300);
 home();if(!NAME)openStart();
