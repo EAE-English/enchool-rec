@@ -1,1 +1,373 @@
-{"unit":"송라수동2 · 6과","book":"송라수동2","steps":null,"dialogs":[],"body":[{"id":"b1","t":"6-1 본문","sub":"Club News ①","lines":["Let’s meet Fly High, our school’s cheerleading club.","The club started from an idea of one student two years ago.","Now, there are 10 girls and 6 boys in the club.","Each member has a special energy.","Do you remember the recent school basketball game?","After two quarters, our team was losing by 20 points.","During halftime, Fly High came on the court.","They performed wonderfully."],"audio":"n27_6_b1"},{"id":"b2","t":"6-2 본문","sub":"Club News ②","lines":["They flipped in the air and made a human pyramid.","Then they shouted, “Never give up!”","And guess what? Our team won the game in the end.","\u0007Jina, the captain of the club, said, “I can flip in the air because I trust my club members.","When I see the crowd cheering and screaming, I feel proud.","Fly High is the best part of my middle school life!”","You can watch Fly High doing their performance at the school festival next week.","Come and feel their energy!"],"audio":"n27_6_b2"},{"id":"b3","t":"6-3 본문","sub":"Student Survey ①","lines":["What do you do with your money?","Do you save it or spend it?","We asked the following questions to 100 students from our school.","Let’s look at the results.","Do you have a spending plan?","What do you spend the most money on?","Do you save money?","Surprisingly, the survey showed that only 15 out of 100 students had a spending plan."],"audio":"n27_6_b3"},{"id":"b4","t":"6-4 본문","sub":"Student Survey ② · 교장 선생님 메시지","lines":["The survey also showed what the students spent the most money on.","Food was chosen by the largest number of students.","Transportation followed food.","Also, 80 percent of 3rd-year students saved money, but only 30 percent of 1st-year students saved money.","Money doesn’t grow on trees.","Planning your spending is very important!","Everyone needs good spending habits.","Next week, every student will get a money diary."],"audio":"n27_6_b4"},{"id":"b5","t":"6-5 본문","sub":"Health News","lines":["Come and meet Carebot, our new AI healthcare robot, in the school nurse’s office.","What can Carebot do?","It can check the students’ health condition and give them advice.","Our school nurse, Ms. Kang, says, “Carebot is working hard to keep everyone healthy and safe.","So, if you see Carebot, don’t be shy and say hello.”"],"audio":"n27_6_b5"}]}
+{
+ "unit": "송라수동2 · 6과",
+ "book": "송라수동2",
+ "steps": null,
+ "dialogs": [],
+ "body": [
+  {
+   "id": "b1",
+   "t": "6-1 본문",
+   "sub": "Club News ①",
+   "lines": [
+    "Let’s meet Fly High, our school’s cheerleading club.",
+    "The club started from an idea of one student two years ago.",
+    "Now, there are 10 girls and 6 boys in the club.",
+    "Each member has a special energy.",
+    "Do you remember the recent school basketball game?",
+    "After two quarters, our team was losing by 20 points.",
+    "During halftime, Fly High came on the court.",
+    "They performed wonderfully."
+   ],
+   "audio": "n27_6_b1"
+  },
+  {
+   "id": "b2",
+   "t": "6-2 본문",
+   "sub": "Club News ②",
+   "lines": [
+    "They flipped in the air and made a human pyramid.",
+    "Then they shouted, “Never give up!”",
+    "And guess what? Our team won the game in the end.",
+    "\u0007Jina, the captain of the club, said, “I can flip in the air because I trust my club members.",
+    "When I see the crowd cheering and screaming, I feel proud.",
+    "Fly High is the best part of my middle school life!”",
+    "You can watch Fly High doing their performance at the school festival next week.",
+    "Come and feel their energy!"
+   ],
+   "audio": "n27_6_b2"
+  },
+  {
+   "id": "b3",
+   "t": "6-3 본문",
+   "sub": "Student Survey ①",
+   "lines": [
+    "What do you do with your money?",
+    "Do you save it or spend it?",
+    "We asked the following questions to 100 students from our school.",
+    "Let’s look at the results.",
+    "Do you have a spending plan?",
+    "What do you spend the most money on?",
+    "Do you save money?",
+    "Surprisingly, the survey showed that only 15 out of 100 students had a spending plan."
+   ],
+   "audio": "n27_6_b3"
+  },
+  {
+   "id": "b4",
+   "t": "6-4 본문",
+   "sub": "Student Survey ② · 교장 선생님 메시지",
+   "lines": [
+    "The survey also showed what the students spent the most money on.",
+    "Food was chosen by the largest number of students.",
+    "Transportation followed food.",
+    "Also, 80 percent of 3rd-year students saved money, but only 30 percent of 1st-year students saved money.",
+    "Money doesn’t grow on trees.",
+    "Planning your spending is very important!",
+    "Everyone needs good spending habits.",
+    "Next week, every student will get a money diary."
+   ],
+   "audio": "n27_6_b4"
+  },
+  {
+   "id": "b5",
+   "t": "6-5 본문",
+   "sub": "Health News",
+   "lines": [
+    "Come and meet Carebot, our new AI healthcare robot, in the school nurse’s office.",
+    "What can Carebot do?",
+    "It can check the students’ health condition and give them advice.",
+    "Our school nurse, Ms. Kang, says, “Carebot is working hard to keep everyone healthy and safe.",
+    "So, if you see Carebot, don’t be shy and say hello.”"
+   ],
+   "audio": "n27_6_b5"
+  }
+ ],
+ "shadow": [
+  {
+   "id": "6-1",
+   "t": "6과 (1) 단어",
+   "words": [
+    {
+     "w": "advice",
+     "ko": "조언, 충고"
+    },
+    {
+     "w": "air",
+     "ko": "공기; 공중"
+    },
+    {
+     "w": "article",
+     "ko": "(신문·잡지의) 기사"
+    },
+    {
+     "w": "captain",
+     "ko": "선장; (스포츠 팀의) 주장"
+    },
+    {
+     "w": "cheer",
+     "ko": "응원, 환호 / 응원하다, 환호하다"
+    },
+    {
+     "w": "cheerleading",
+     "ko": "응원"
+    },
+    {
+     "w": "choose",
+     "ko": "선택하다"
+    },
+    {
+     "w": "condition",
+     "ko": "상태"
+    },
+    {
+     "w": "court",
+     "ko": "법정; (테니스 등의) 코트, 경기장"
+    },
+    {
+     "w": "crowd",
+     "ko": "군중, 무리"
+    },
+    {
+     "w": "energy",
+     "ko": "기운, 에너지"
+    },
+    {
+     "w": "everywhere",
+     "ko": "어디에나"
+    },
+    {
+     "w": "flip",
+     "ko": "뒤집다"
+    },
+    {
+     "w": "following",
+     "ko": "다음에 나오는"
+    },
+    {
+     "w": "halftime",
+     "ko": "(스포츠) 하프 타임, 중간 휴식"
+    },
+    {
+     "w": "healthcare",
+     "ko": "건강 관리"
+    },
+    {
+     "w": "hold",
+     "ko": "잡다; 유지하다; 개최하다, 열다"
+    },
+    {
+     "w": "lower",
+     "ko": "낮추다"
+    },
+    {
+     "w": "manage",
+     "ko": "다루다, 관리하다"
+    },
+    {
+     "w": "messy",
+     "ko": "지저분한"
+    },
+    {
+     "w": "once",
+     "ko": "(과거의) 언젠가, 한때; 한 번"
+    },
+    {
+     "w": "perform",
+     "ko": "수행하다; 공연하다"
+    },
+    {
+     "w": "personal",
+     "ko": "개인적인"
+    },
+    {
+     "w": "practice",
+     "ko": "연습 / 연습하다"
+    }
+   ]
+  },
+  {
+   "id": "6-2",
+   "t": "6과 (2) 단어",
+   "words": [
+    {
+     "w": "principal",
+     "ko": "주요한 / 교장"
+    },
+    {
+     "w": "quarter",
+     "ko": "4분의 1; 쿼터(농구 경기 시간의 4분의 1)"
+    },
+    {
+     "w": "recent",
+     "ko": "최근의"
+    },
+    {
+     "w": "result",
+     "ko": "결과"
+    },
+    {
+     "w": "ride",
+     "ko": "타다 / 놀이기구"
+    },
+    {
+     "w": "school nurse",
+     "ko": "보건 선생님"
+    },
+    {
+     "w": "score",
+     "ko": "득점 / (골·득점 등을) 기록하다"
+    },
+    {
+     "w": "scream",
+     "ko": "소리치다, 고함치다"
+    },
+    {
+     "w": "selfie",
+     "ko": "셀피, 셀카(자신의 모습을 찍은 사진)"
+    },
+    {
+     "w": "shout",
+     "ko": "외치다"
+    },
+    {
+     "w": "shy",
+     "ko": "수줍어하는, 부끄러워하는"
+    },
+    {
+     "w": "spend",
+     "ko": "(돈을) 쓰다; (시간을) 보내다"
+    },
+    {
+     "w": "spread",
+     "ko": "펴다, 펼치다; 퍼뜨리다"
+    },
+    {
+     "w": "stressed",
+     "ko": "스트레스를 받는"
+    },
+    {
+     "w": "surprisingly",
+     "ko": "놀랍게도"
+    },
+    {
+     "w": "survey",
+     "ko": "(설문) 조사 / (설문) 조사하다"
+    },
+    {
+     "w": "teen",
+     "ko": "십 대 / 십 대의"
+    },
+    {
+     "w": "tidy",
+     "ko": "깔끔한"
+    },
+    {
+     "w": "transportation",
+     "ko": "교통, 수송, 운송"
+    },
+    {
+     "w": "trash",
+     "ko": "쓰레기"
+    },
+    {
+     "w": "trust",
+     "ko": "신뢰하다"
+    },
+    {
+     "w": "voice",
+     "ko": "목소리"
+    },
+    {
+     "w": "walk",
+     "ko": "걷다; 산책시키다 / 걷기, 산책"
+    },
+    {
+     "w": "wonderfully",
+     "ko": "훌륭하게, 멋있게"
+    }
+   ]
+  },
+  {
+   "id": "6-3",
+   "t": "6과 (3) 숙어",
+   "words": [
+    {
+     "w": "be careful about",
+     "ko": "~에 대해 주의하다"
+    },
+    {
+     "w": "cheer for",
+     "ko": "~을 응원하다"
+    },
+    {
+     "w": "give up",
+     "ko": "포기하다"
+    },
+    {
+     "w": "in front of",
+     "ko": "~의 앞에"
+    },
+    {
+     "w": "in the end",
+     "ko": "마침내, 결국"
+    },
+    {
+     "w": "lose by",
+     "ko": "~ 차이로 지다"
+    },
+    {
+     "w": "out of",
+     "ko": "~ 중에서"
+    },
+    {
+     "w": "pick up",
+     "ko": "~을 집어 올리다; ~을 (차에) 태우러 가다; ~을 찾아오다"
+    },
+    {
+     "w": "say goodbye to",
+     "ko": "~에게 작별 인사를 하다"
+    },
+    {
+     "w": "stay up",
+     "ko": "안 자다, 깨어 있다"
+    },
+    {
+     "w": "take a walk",
+     "ko": "산책하다"
+    },
+    {
+     "w": "the number of",
+     "ko": "~의 수"
+    },
+    {
+     "w": "these days",
+     "ko": "요즘에"
+    },
+    {
+     "w": "win first place",
+     "ko": "1등을 하다"
+    },
+    {
+     "w": "a day",
+     "ko": "하루에"
+    },
+    {
+     "w": "Let's + 동사원형 ~.",
+     "ko": "~하자."
+    },
+    {
+     "w": "look in the mirror",
+     "ko": "거울을 보다"
+    },
+    {
+     "w": "Welcome to ~.",
+     "ko": "~에 온 것을 환영합니다."
+    },
+    {
+     "w": "have a great year",
+     "ko": "멋진 한 해를 보내다"
+    }
+   ]
+  }
+ ]
+}
