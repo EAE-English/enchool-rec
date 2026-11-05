@@ -213,7 +213,7 @@ $("#sendT").addEventListener("click",()=>{SENT=true;setTimeout(()=>{$("#sendT").
   if(NL)h+=`<button class="btn pri" data-nextlv="${NL}">⬆ ${LVN[NL]}으로 다시 도전</button>`;
   if(NT)h+=`<button class="btn gold" data-nexttab="${NT}">다음: ${TABN[NT]} ▶</button>`;
   if(!NL&&!NT)h=QRNM?`<span class="sentok">🏆 오늘 숙제 끝! 정말 잘했어요</span>`:`<span class="sentok">🏆 고급까지 끝! 정말 잘했어요</span>`;
-  $("#nextRow").innerHTML=h;$("#nextRow").hidden=false},300)});
+  $("#nextRow").innerHTML=h;$("#nextRow").hidden=false;/* QR: 보내면 다음 실습으로 저절로 넘어가요 (2026-11-05) */if(QRNM&&NT){$("#nextRow").innerHTML=`<span class="sentok">잠시 뒤 ${TABN[NT]}(으)로 넘어가요 ▶</span>`;setTimeout(()=>{if($("#cheer").hidden)return;tab=NT;$("#cheer").hidden=true;render();window.scrollTo({top:0,behavior:"smooth"})},1600)}},300)});
 let warned=false;$("#cheerX").onclick=()=>{if(!SENT&&!warned){warned=true;const m=$("#mustMsg");m.classList.remove("pulse");void m.offsetWidth;m.classList.add("pulse");m.innerHTML="✋ 아직 안 보냈어요!<br><b>📮 선생님께 보내기</b>를 먼저 눌러요.";$("#cheerX").textContent="그래도 닫기";return}$("#cheer").hidden=true};
 
 function renderMemo(){let h=`<div class="intro"><p>쪽지를 완성해요. 우리말을 보고 빈칸에 영어를 써요.</p><div class="tools"><button class="btn" data-reset>처음부터</button></div></div><div class="memos">`;
