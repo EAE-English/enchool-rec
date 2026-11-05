@@ -1,0 +1,232 @@
+{
+ "unit": "화광3 · 7과",
+ "book": "화광3",
+ "steps": {
+  "1": "Listen & Speak 1",
+  "2": "Listen & Speak 2",
+  "3": "Real Life Talk"
+ },
+ "dialogs": [
+  {
+   "id": "ls1a",
+   "t": "Listen & Speak 1 A",
+   "sub": "이 산은 얼마나 높을까?",
+   "p": "p.122",
+   "st": 1,
+   "L": [
+    [
+     "B",
+     "We're [almost] at the top of the mountain.",
+     "우리는 산 정상에 거의 다 왔어."
+    ],
+    [
+     "G",
+     "[I wonder how high this mountain is.]",
+     "나는 이 산이 얼마나 높은지 궁금해."
+    ],
+    [
+     "B",
+     "It's about 2,000m [high].",
+     "이 산은 높이가 약 2,000미터야."
+    ],
+    [
+     "G",
+     "Wow! This is a really [high] mountain.",
+     "와! 이 산은 정말 높은 산이구나."
+    ],
+    [
+     "B",
+     "Yes, it is. Let's [keep going].",
+     "응, 맞아. 계속 가자."
+    ]
+   ]
+  },
+  {
+   "id": "ls1b",
+   "t": "Listen & Speak 1 B",
+   "sub": "남극은 얼마나 추울까?",
+   "p": "p.122",
+   "st": 1,
+   "L": [
+    [
+     "B",
+     "[Look at] the baby penguins on TV. They're so cute.",
+     "TV에 나온 아기 펭귄들을 봐. 아주 귀여워."
+    ],
+    [
+     "G",
+     "Yes, but they [look very cold] [out there].",
+     "응, 하지만 그들은 저곳에서 매우 추워 보여."
+    ],
+    [
+     "B",
+     "Yeah, [the South Pole] is the [coldest] place [on Earth].",
+     "그래, 남극은 지구상에서 가장 추운 곳이잖아."
+    ],
+    [
+     "G",
+     "[I wonder how cold it is there.]",
+     "나는 그곳이 얼마나 추운지 궁금해."
+    ],
+    [
+     "B",
+     "The average temperature is [about] -58°C in July and -26°C in December.",
+     "평균 기온이 7월에는 약 섭씨 영하 58도이고, 12월에는 약 섭씨 영하 26도야."
+    ],
+    [
+     "G",
+     "Oh, then, July is [colder than] December there. Interesting!",
+     "오, 그러면 그곳은 12월보다 7월이 더 춥구나. 흥미롭다!"
+    ],
+    [
+     "B",
+     "Yes. [Although] it's very cold there, it doesn't snow much.",
+     "응. 비록 그곳은 매우 춥지만 눈은 많이 내리지 않아."
+    ],
+    [
+     "G",
+     "That's interesting, too!",
+     "그것도 흥미로워!"
+    ]
+   ]
+  },
+  {
+   "id": "ls2a",
+   "t": "Listen & Speak 2 A",
+   "sub": "일기 예보에서 비가 온대",
+   "p": "p.123",
+   "st": 2,
+   "L": [
+    [
+     "B",
+     "The weather is so nice outside.",
+     "바깥 날씨가 아주 좋아."
+    ],
+    [
+     "G",
+     "Yeah. [How about going] on a picnic this afternoon?",
+     "그래. 오늘 오후에 소풍 가는 게 어때?"
+    ],
+    [
+     "B",
+     "Good idea. Can you check the weather?",
+     "좋은 생각이야. 날씨를 확인해 줄래?"
+    ],
+    [
+     "G",
+     "Oh, no! [The weather forecast says] it'll be rainy in the afternoon.",
+     "오, 이런! 일기 예보에서 오후에 비가 올 거래."
+    ],
+    [
+     "B",
+     "Let's go [another time], then.",
+     "그러면 다음에 가자."
+    ]
+   ]
+  },
+  {
+   "id": "ls2b",
+   "t": "Listen & Speak 2 B",
+   "sub": "남산 등산 가자",
+   "p": "p.123",
+   "st": 2,
+   "L": [
+    [
+     "B",
+     "Sumin, [what are you going to do] on Sunday?",
+     "수민아, 너는 일요일에 무엇을 할 거니?"
+    ],
+    [
+     "G",
+     "[I'm going to go hiking]. Do you want to join me?",
+     "나는 등산을 갈 거야. 나와 함께 갈래?"
+    ],
+    [
+     "B",
+     "[I'd love to.] Where do you want to go?",
+     "그러고 싶어. 넌 어디로 가고 싶니?"
+    ],
+    [
+     "G",
+     "[I'm thinking of going] to Namsan.",
+     "나는 남산에 가려고 생각 중이야."
+    ],
+    [
+     "B",
+     "Oh, the scenery there is so beautiful [this time of year].",
+     "오, 매년 이맘때 그곳 경치는 아주 아름답지."
+    ],
+    [
+     "G",
+     "Right. [I heard that] it's [covered with] red [autumn leaves] now.",
+     "맞아. 지금 빨간 단풍잎으로 덮여 있다고 들었어."
+    ],
+    [
+     "B",
+     "Great. How long does the shortest hiking course take?",
+     "좋아. 가장 짧은 등산 코스는 얼마나 걸리니?"
+    ],
+    [
+     "G",
+     "[The Internet says] it takes about two hours.",
+     "인터넷에 따르면 약 두 시간 정도 걸린대."
+    ],
+    [
+     "B",
+     "Okay, see you on Sunday!",
+     "알겠어, 일요일에 봐!"
+    ]
+   ]
+  },
+  {
+   "id": "rlt",
+   "t": "Real Life Talk",
+   "sub": "사막의 낙타",
+   "p": "p.124",
+   "st": 3,
+   "L": [
+    [
+     "Suji",
+     "[Check out] this picture!",
+     "이 사진을 봐!"
+    ],
+    [
+     "Tony",
+     "Wow! The camels are walking [in a line] in the desert.",
+     "와! 낙타들이 사막에서 한 줄로 걸어가고 있네."
+    ],
+    [
+     "Suji",
+     "Yeah. The desert [looks very hot and dry].",
+     "응. 사막은 매우 덥고 건조해 보여."
+    ],
+    [
+     "Tony",
+     "[I wonder how long camels can go] without water in the desert.",
+     "나는 낙타들이 사막에서 물 없이 얼마나 오래 지낼 수 있는지 궁금해."
+    ],
+    [
+     "Suji",
+     "Let's [find out] [on the Internet].",
+     "인터넷에서 찾아보자."
+    ],
+    [
+     "Tony",
+     "Okay. [The Internet says] they can go about two weeks without water.",
+     "그래. 인터넷에 따르면 낙타는 물 없이 2주 정도 지낼 수 있대."
+    ],
+    [
+     "Suji",
+     "Wow, that's amazing! Camels are really interesting animals.",
+     "와, 굉장하다! 낙타는 정말 흥미로운 동물이구나."
+    ],
+    [
+     "Tony",
+     "I want to travel with them in the desert [someday].",
+     "나는 언젠가 사막에서 그들과 함께 여행하고 싶어."
+    ]
+   ]
+  }
+ ],
+ "body": []
+}
