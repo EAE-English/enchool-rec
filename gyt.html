@@ -167,7 +167,7 @@ const jo=(w,a,b)=>{const c=String(w).charCodeAt(String(w).length-1);return w+((c
 const FORM="https://docs.google.com/forms/d/e/1FAIpQLSfbfbctafJeWzVfBF9MX_0XbaP0ZH7topOmDJewy2NbZciGnQ/formResponse";
 const FE={name:"809433524",prac:"1259747568",lv:"1013043464",score:"1843153319",shown:"957355580",wrong:"177085771",time:"1269343136",dev:"1445433581"};
 const LVN={easy:"초급",mid:"중급",adv:"고급"},TABN={memo:"① 메모",chat:"② 문자 메시지",diary:"③ 일기"};
-let NAME="",LEVEL="mid";try{NAME=localStorage.getItem("gyt_nm")||"";LEVEL=localStorage.getItem("gyt_lv")||"mid"}catch(e){}
+let QRNM=false;/* 숙제장 QR(이름 들어 있음)로 오면 「누가 연습하나요」 창 없이 바로 (2026-11-05) */let NAME="",LEVEL="mid";try{NAME=localStorage.getItem("gyt_nm")||"";LEVEL=localStorage.getItem("gyt_lv")||"mid"}catch(e){}
 function variants(seg){let outs=[""];seg.split(/(\[[^\]]+\])/).forEach(t=>{if(/^\[.*\]$/.test(t)){const al=t.slice(1,-1).split("|");outs=outs.flatMap(o=>al.map(a=>o+a))}else outs=outs.map(o=>o+t)});return outs.map(o=>o.trim())}
 function tf(en,c,all){if(LEVEL==="mid")return en;
  if(LEVEL==="adv")return en.split("<br>").map(x=>(all||/\[/.test(x))?"["+variants(x).join("|")+"]":x).join("<br>");
@@ -242,8 +242,8 @@ function render(){clearTimeout(chatTimer);for(const k in ANS)delete ANS[k];for(c
  document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",b.dataset.t===tab));
  const W=WORDS[tab];$("#main").innerHTML=(tab==="memo"?renderMemo():tab==="chat"?renderChat():renderDiary())+`<div class="words"><b>Words</b> &nbsp;${W.map(w=>`<span><b>${w[0]}</b> ${w[1]}</span>`).join("")}</div><div class="score"><span id="sc"></span><span class="tools"><button class="btn" data-sendnow style="background:transparent;color:#fff;border-color:rgba(255,255,255,.6)">📮 보내기</button><button class="btn gold" data-allchk>전체 확인</button></span></div>`;
  if(tab==="chat")chatNext();score();prog();whoBar()}
-function whoBar(){$("#who").innerHTML=`<span class="me">👤 ${esc(NAME||"이름 없음")}</span><span class="lv">${LVN[LEVEL]}</span><button data-who>바꾸기</button>`}
-function openStart(){$("#nm").value=NAME;document.querySelectorAll(".lvb").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lv===LEVEL));$("#start").hidden=false;setTimeout(()=>$("#nm").focus(),50)}
+function whoBar(){$("#who").innerHTML=QRNM?`<span class="lv">${LVN[LEVEL]}</span><button data-who>레벨 바꾸기</button>`:`<span class="me">👤 ${esc(NAME||"이름 없음")}</span><span class="lv">${LVN[LEVEL]}</span><button data-who>바꾸기</button>`}
+function openStart(){$("#nm").value=NAME;$("#nm").hidden=QRNM;const lb=document.querySelector('label[for="nm"]');if(lb)lb.hidden=QRNM;$("#start h2").textContent=QRNM?"레벨을 골라요 ✏️":"누가 연습하나요? ✏️";document.querySelectorAll(".lvb").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lv===LEVEL));$("#start").hidden=false;setTimeout(()=>$("#nm").focus(),50)}
 let lastIn=null;document.addEventListener("focusin",e=>{if(e.target.closest&&e.target.closest(".bl"))lastIn=e.target});
 function prog(){$("#prog").innerHTML=[["memo",GD.prog.memo],["chat",GD.prog.chat],["diary",GD.prog.diary]].map(([k,l])=>`<span class="pchip">${tab===k?"<b>▶ </b>":""}${l}</span>`).join("")}
 document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
@@ -270,10 +270,10 @@ document.addEventListener("keydown",e=>{if(e.key!=="Enter"||e.target.tagName!=="
  if(i<ins.length-1){ins[i+1].focus();return}
  const sb=document.querySelector(`[data-send="${o.g}"]`)||document.querySelector(`[data-chk="${o.g}"]`);sb&&sb.click()});
 /* 기적영트 실습 (2026-11-04): 단원 내용은 gyt/<k>.json · 숙제장 QR: gyt.html?k=p1&s=이름 */
-(function(){const Q=new URLSearchParams(location.search),K=(Q.get("k")||"p1").replace(/[^a-z0-9_]/gi,""),S=(Q.get("s")||"").trim();if(S)NAME=S;
+(function(){const Q=new URLSearchParams(location.search),K=(Q.get("k")||"p1").replace(/[^a-z0-9_]/gi,""),S=(Q.get("s")||"").trim();if(S){NAME=S;QRNM=true}
  fetch("gyt/"+K+".json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{GD=d;MEMO=d.memo;CHAT=d.chat;DIARY=d.diary;WORDS=d.words;
   $("#gT").textContent=d.title||"기적영트 실습";$("#gS").textContent=d.sub||"";["memo","chat","diary"].forEach(t=>$("#tb_"+t).textContent=(d.tabs||{})[t]||"");document.title=(d.title||"기적영트 실습")+" "+(d.code||"").toUpperCase();
-  render();openStart()}).catch(()=>{$("#main").innerHTML='<p class="must">이 단원 내용이 아직 없어요. 선생님께 알려 주세요.</p>'})})();
+  render();if(!QRNM)openStart()}).catch(()=>{$("#main").innerHTML='<p class="must">이 단원 내용이 아직 없어요. 선생님께 알려 주세요.</p>'})})();
 </script>
 
 <script src="https://eae-english.github.io/enchool-rec/tools/tts_aud.js"></script>
