@@ -375,7 +375,7 @@ const BOOKS=[{"id":"bmviyiauzbrob_7","bid":"bmviyiauzbrob","key":"7","unit":"학
 const LATEST="n05_1";
 let BK=BOOKS[0],UNIT=BK.unit,SETS=BK.sets,SCODE="";
 /* 학습관리실 숙제장 QR: 앱주소#학생코드.s1 */
-const STUDENTS={"test":"김정호","anthony": "구본학", "chloe": "김예원", "claire": "최민", "conner": "윤서진", "elena": "박지수", "ellin": "최은설", "emily": "최은서", "eric": "최은호", "eva": "최유하", "inseo": "최인서", "james": "이건학", "jenny": "강나율", "kelly": "문지우", "lilly": "고예원", "lucy": "김륜진", "maya": "남연수", "olivia": "강민채", "rachel": "박민서", "ria": "김리아", "richard": "박선우", "seojin": "임서진", "sharon": "박새론", "smumyy820my0e": "허수호", "smumz0by7ivv0": "허지호", "smuy4depj7kc5": "박세림", "zoe": "조다은"};
+const STUDENTS={"test":"김정호","anthony": "구본학", "chloe": "김예원", "claire": "최민", "conner": "윤서진", "elena": "박지수", "ellin": "최은설", "emily": "최은서", "eric": "최은호", "eva": "최유하", "inseo": "최인서", "james": "이건학", "jenny": "강나율", "kelly": "문지우", "lilly": "고예원", "lucy": "김륜진", "maya": "남연수", "olivia": "강민채", "rachel": "박민서", "ria": "김리아", "richard": "박선우", "seojin": "임서진", "sharon": "박새론", "smumyy820my0e": "허수호", "smumz0by7ivv0": "허지호", "smuy4depj7kc5": "박세림", "zoe": "조다은", "smw2y9qdbkr6v": "김예지"};
 const MODES=[
  {id:"card",n:"①",t:"따라쟁이 카드",s:"카드",how:"단어 소리를 듣고 소리 내어 따라 말해요. 두 번째 바퀴에서는 뜻만 보여요. 영어로 말해 본 뒤 눌러요."},
  {id:"meaning",n:"②",t:"뜻 고르기",s:"뜻",how:"영어 단어를 보고 알맞은 뜻을 골라요."},
@@ -443,7 +443,7 @@ function stars(p){const n=p>=.95?3:p>=.8?2:p>=.5?1:0;return "★".repeat(n)+`<sp
 
 /* 주소에 아이 코드가 없으면(선생님이 그냥 열 때) 지난 아이 이름 대신 미리보기로 — 기록 안 남고, 가장 최근에 넣은 단어장이 먼저 보여요 */
 let NAME="test";
-let QRSET=null,QRBOOK=null,QRMORE=[],BKPICK=false;
+let QRSET=null,QRSETS=[],QRBOOK=null,QRMORE=[],BKPICK=false;
 const codeOf=n=>Object.keys(STUDENTS).find(k=>STUDENTS[k]===String(n||"").trim())||"";
 /* 내 단어장: QR로 연 단어장만 이 폰에 하나씩 쌓여요 */
 let MINE=[];const mineLoad=()=>{try{MINE=JSON.parse(localStorage.getItem("wd_bk_"+NAME)||"[]").filter(id=>BOOKS.some(b=>b.id===id))}catch(e){MINE=[]}};
@@ -455,7 +455,7 @@ function pickBook(){mineLoad();const q=findBook(QRBOOK);if(q){/* QR로 들어오
  if(BKPICK&&BK){useBook(BK);return}const L=myBooks();const b=MINE.length?L.find(x=>x.id===MINE[MINE.length-1]):(SCODE?BOOKS[0]:(BOOKS.find(x=>x.id===LATEST)||BOOKS[0]));useBook(b||BOOKS[0]);if(SCODE&&b)mineAdd(b.id)}
 function readHash(){const parts=(location.hash||"").replace(/^#/,"").toLowerCase().split(/[.\-]/).filter(Boolean);if(!parts.length||parts.some(x=>!/^[a-z0-9_]+$/.test(x)))return false;let hit=false;
  if(STUDENTS[parts[0]]){SCODE=parts[0];NAME=STUDENTS[parts[0]];try{localStorage.setItem("wd_nm",NAME)}catch(e){}hit=true;parts.shift()}
- QRSET=null;QRBOOK=null;QRMORE=[];parts.forEach(x=>{if(/^s[1-9]$/.test(x))QRSET=x;else if(!QRBOOK)QRBOOK=x;else QRMORE.push(x)});return hit}
+ QRSET=null;QRSETS=[];QRBOOK=null;QRMORE=[];parts.forEach(x=>{if(/^s[1-9]$/.test(x)){QRSETS.push(x);QRSET=QRSET||x;return}else if(!QRBOOK)QRBOOK=x;else QRMORE.push(x)});return hit}
 function load(){try{return JSON.parse(localStorage.getItem("wd_"+NAME)||"{}")}catch(e){return {}}}
 const TEST_NAMES=["김정호","test","테스트"];const isTest=()=>TEST_NAMES.includes(String(NAME||"").replace(/\s/g,"").toLowerCase());
 function save(){if(isTest())return;try{localStorage.setItem("wd_"+NAME,JSON.stringify(P))}catch(e){}}
@@ -673,7 +673,7 @@ function trText(){const r=TR.n?TR.fast/TR.n:0;return `실제 학습 ${trMin()} �
 function openStart(){$("#nm").value=NAME;$("#start").hidden=false;setTimeout(()=>$("#nm").focus(),50)}
 /* QR로 들어오면 목록 없이 오늘 숙제 모험만 · Day 여러 개면 하나 끝낼 때마다 다음 Day (2026-11-05 예원) */
 const QRS=()=>!!SCODE&&!!QRBOOK;let QB=null;
-function qrTargets(){const L=[QRBOOK,...QRMORE].map(findBook).filter((b,i,A)=>b&&A.indexOf(b)===i),T=[];L.forEach(b=>b.sets.forEach(x=>{if(!QRSET||x.id===QRSET||!b.sets.some(y=>y.id===QRSET))T.push([b,x.id])}));return T}
+function qrTargets(){const L=[QRBOOK,...QRMORE].map(findBook).filter((b,i,A)=>b&&A.indexOf(b)===i),T=[];L.forEach(b=>b.sets.forEach(x=>{if(!QRSETS.length||QRSETS.includes(x.id)||!b.sets.some(y=>QRSETS.includes(y.id)))T.push([b,x.id])}));return T}
 const qrDone=([b,id])=>{const r=P[b.pre+id];return !!(r&&(r.passed||[]).includes("write"))};
 const _pickAll=pickBook;pickBook=function(){_pickAll();if(!QRS())return;if(COURSE&&QB){useBook(QB);return}const T=qrTargets();if(!T.length)return;
  const cur=T.find(([b,id])=>b===QB&&id===CUR),nx=(cur&&!qrDone(cur))?cur:(T.find(t=>!qrDone(t))||cur||T[0]);useBook(nx[0]);CUR=nx[1];QB=nx[0]};
