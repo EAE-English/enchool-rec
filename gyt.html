@@ -136,6 +136,7 @@ a.btn[hidden]{display:none}
 .nextrow{display:flex;flex-direction:column;gap:8px;width:100%;margin-top:4px}.nextrow .btn{padding:9px 14px;font-size:14px}
 .sentok{color:var(--ok);font-weight:900;font-size:14px}
 footer{font-size:12px;color:var(--muted);text-align:center;margin-top:22px}
+body.qrs .tabs,body.qrs #who{display:none!important}/* QR로 오면 고르는 것 없이 ①→②→③ (2026-11-05) */
 </style>
 
 <div class="wrap">
@@ -208,10 +209,10 @@ function cheer(ok,n,part){const T={memo:"메모 완성!",chat:jo(GD.peerKo||"엄
  $("#sendT").href=FORM+"?"+Object.entries(q).map(([k,v])=>"entry."+FE[k]+"="+encodeURIComponent(v)).join("&")+"&submit=Submit";
  SENT=false;warned=false;$("#nextRow").hidden=true;$("#mustMsg").hidden=false;$("#mustMsg").innerHTML="⚠️ 꼭 <b>📮 선생님께 보내기</b>를 눌러야<br>선생님이 오늘 연습한 걸 확인할 수 있어요!";$("#cheerX").textContent="닫기";$("#sendT").hidden=false;$("#sentOk").hidden=true;$("#cheer").hidden=false}
 $("#sendT").addEventListener("click",()=>{SENT=true;setTimeout(()=>{$("#sendT").hidden=true;$("#sentOk").hidden=false;$("#mustMsg").hidden=true;$("#cheerX").textContent="닫기";
-  const NL={easy:"mid",mid:"adv"}[LEVEL],TO=["memo","chat","diary"],NT=TO[TO.indexOf(tab)+1];let h="";
+  const NL=QRNM?null:{easy:"mid",mid:"adv"}[LEVEL],TO=["memo","chat","diary"],NT=TO[TO.indexOf(tab)+1];let h="";
   if(NL)h+=`<button class="btn pri" data-nextlv="${NL}">⬆ ${LVN[NL]}으로 다시 도전</button>`;
   if(NT)h+=`<button class="btn gold" data-nexttab="${NT}">다음: ${TABN[NT]} ▶</button>`;
-  if(!NL&&!NT)h=`<span class="sentok">🏆 고급까지 끝! 정말 잘했어요</span>`;
+  if(!NL&&!NT)h=QRNM?`<span class="sentok">🏆 오늘 숙제 끝! 정말 잘했어요</span>`:`<span class="sentok">🏆 고급까지 끝! 정말 잘했어요</span>`;
   $("#nextRow").innerHTML=h;$("#nextRow").hidden=false},300)});
 let warned=false;$("#cheerX").onclick=()=>{if(!SENT&&!warned){warned=true;const m=$("#mustMsg");m.classList.remove("pulse");void m.offsetWidth;m.classList.add("pulse");m.innerHTML="✋ 아직 안 보냈어요!<br><b>📮 선생님께 보내기</b>를 먼저 눌러요.";$("#cheerX").textContent="그래도 닫기";return}$("#cheer").hidden=true};
 
@@ -270,7 +271,7 @@ document.addEventListener("keydown",e=>{if(e.key!=="Enter"||e.target.tagName!=="
  if(i<ins.length-1){ins[i+1].focus();return}
  const sb=document.querySelector(`[data-send="${o.g}"]`)||document.querySelector(`[data-chk="${o.g}"]`);sb&&sb.click()});
 /* 기적영트 실습 (2026-11-04): 단원 내용은 gyt/<k>.json · 숙제장 QR: gyt.html?k=p1&s=이름 */
-(function(){const Q=new URLSearchParams(location.search),K=(Q.get("k")||"p1").replace(/[^a-z0-9_]/gi,""),S=(Q.get("s")||"").trim();if(S){NAME=S;QRNM=true}
+(function(){const Q=new URLSearchParams(location.search),K=(Q.get("k")||"p1").replace(/[^a-z0-9_]/gi,""),S=(Q.get("s")||"").trim();if(S){NAME=S;QRNM=true;LEVEL="mid";document.body.classList.add("qrs")}
  fetch("gyt/"+K+".json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{GD=d;MEMO=d.memo;CHAT=d.chat;DIARY=d.diary;WORDS=d.words;
   $("#gT").textContent=d.title||"기적영트 실습";$("#gS").textContent=d.sub||"";["memo","chat","diary"].forEach(t=>$("#tb_"+t).textContent=(d.tabs||{})[t]||"");document.title=(d.title||"기적영트 실습")+" "+(d.code||"").toUpperCase();
   render();if(!QRNM)openStart()}).catch(()=>{$("#main").innerHTML='<p class="must">이 단원 내용이 아직 없어요. 선생님께 알려 주세요.</p>'})})();
