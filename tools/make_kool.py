@@ -22,4 +22,5 @@ for src,out in [('/home/claude/words/단어마스터.html','voca.html'),('/home/
         assert s.count(a2)==1; s=s.replace(a2,a2+'||!!(window.TTSA&&TTSA.playing())')
         s=s.replace('speechSynthesis.cancel()','(window.TTSA&&TTSA.stop(),speechSynthesis.cancel())')
         s=s.replace(KAKAO_JS,KAKAO_JS+'<script src="https://eae-english.github.io/enchool-rec/tools/tts_aud.js"></script>',1)
+    i=s.rfind('</body>');SJ='<script>'+open('/home/claude/enchool-rec/tools/send_inline.js',encoding='utf8').read()+'</script>';s=(s[:i]+SJ+s[i:]) if i>0 else s+SJ  # 선생님께 보내기: 새 창 없이 (2026-11-05)
     open('/home/claude/enchool-rec/kool/'+out,'w',encoding='utf8').write(s);print(out,len(s))
