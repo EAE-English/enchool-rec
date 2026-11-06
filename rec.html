@@ -353,6 +353,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     stopMine(); $('timer').classList.remove('abs'); document.querySelector('.bar-in').classList.remove('sumbar'); trkUI(null);
     $('go').hidden = false; $('go').disabled = false; goUI('녹음 시작', false);
     if (mode === 'shadow') loadTrack(x);
+    if (mode === 'role') loadRole(x);
     if (mode === 'rap') beatLoad();
     $('more').hidden = ITEMS.length < 2; /* 쿨톡에서 온 경우만 「다음」, QR로 바로 온 경우는 끝 안내만 (2026-10-29) */ $('fin').hidden = ITEMS.length > 1 || !BACK; $('finHint').hidden = ITEMS.length > 1 || !!BACK; $('finHint').innerHTML = '✓ 끝! 선생님께 잘 보냈어요.<br>이제 다음 숙제를 하면 돼요.';
     draw(); window.scrollTo({top:0});
@@ -563,6 +564,27 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     document.querySelectorAll('.ln').forEach(el => { const j = +el.dataset.i; el.classList.toggle('cur', j === k); el.classList.toggle('wait', !keep && k >= 0 && j > k); });
     const el = document.querySelector(`.ln[data-i="${k}"]`); if (el) el.scrollIntoView({block:'center', behavior:'smooth'});
   }
+  /* 역할극 상대 대사: 대화문 한 파일 음원에서 그 줄 구간만 틀어요 — 폰 기계 목소리는 아이폰 녹음 중에 소리가 안 나요 (2026-11-06) */
+  let RAUD = null, RPL = null;
+  function loadRole(x){
+    RAUD = null; RPL = null; const k = x.ra; if (!k){ trkUI(null); return; }
+    trkUI('wait'); let done = false; const ok = () => { if (done || IT !== x || MODE !== 'role') return; done = true; trkUI('ok'); };
+    setTimeout(() => { if (!done && IT === x && MODE === 'role' && !running){ done = true; trkUI(null); $('go').disabled = false; } }, 20000);
+    Promise.all([
+      getTrack(k).then(j => { if (!j.ok) throw 0; const by = new Uint8Array(j.by); return toWav(by.buffer.slice(0)).catch(() => null).then(u => u || URL.createObjectURL(new Blob([by], {type: j.mime || 'audio/mpeg'}))); }),
+      fetch('plans/' + k + '.json', {cache:'no-cache'}).then(r => r.ok ? r.json() : null)
+    ]).then(([u, pl]) => { if (IT !== x || !pl) throw 0; RAUD = new Audio(u); RAUD.preload = 'auto'; RPL = pl; ok(); })
+      .catch(() => { if (!done && IT === x){ done = true; trkUI(null); $('go').disabled = false; } });
+  }
+  function playLine(n, onDone){
+    const p = RPL && RPL.find(q => q[2] === n), a = RAUD;
+    if (!p || !a) return false;
+    const my = TSEQ; let fin = false; const end = () => { if (fin) return; fin = true; try{ a.pause(); }catch(e){} setTimeout(onDone, 450); };
+    a.onended = end; a.currentTime = p[0];
+    a.play().catch(() => { if (!fin){ fin = true; say(IT.L[n][1], IT.L[n][0], onDone); } });
+    (function w(){ if (fin) return; if (!running || my !== TSEQ){ fin = true; try{ a.pause(); }catch(e){} return; } if (a.currentTime >= p[1]) end(); else setTimeout(w, 30); })();
+    return true;
+  }
   const mineIdx = () => IT.L.map((l, k) => l[0] === ME ? k : -1).filter(k => k > -1);
   function step(){
     if (!running) return;
@@ -570,7 +592,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     focus(i);
     const l = IT.L[i], nb = $('next');
     if (l[0] === ME){ recOff(); speaking = false; nb.hidden = false; nb.disabled = false; rbSet(nb, '말하기', false); }
-    else { nb.hidden = true; recOn(); say(l[1], l[0], () => { i++; step(); }); }
+    else { nb.hidden = true; recOn(); const nx = () => { i++; step(); }; if (!playLine(i, nx)) say(l[1], l[0], nx); }
   }
   $('next').onclick = () => {
     if (MODE === 'sum'){ sumNext(); return; }
@@ -661,7 +683,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     wakeOff();
     if (!running) return;
     running = false; TSEQ++; clearInterval(tick); if (on){ acc += Date.now() - on; on = 0; } dur = acc / 1000;
-    if (window.speechSynthesis) (window.TTSA && TTSA.stop(), speechSynthesis.cancel()); if (AUD) AUD.pause(); showSay(0);
+    if (window.speechSynthesis) (window.TTSA && TTSA.stop(), speechSynthesis.cancel()); if (AUD) AUD.pause(); if (RAUD) RAUD.pause(); showSay(0);
     if (MODE === 'rap') setTimeout(beatStop, 300);
     setTimeout(srStop, MODE !== 'role' ? 700 : 0);
     if (rec && rec.state !== 'inactive'){ try{ rec.requestData(); }catch(e){} rec.stop(); }
