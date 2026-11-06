@@ -168,7 +168,7 @@ const jo=(w,a,b)=>{const c=String(w).charCodeAt(String(w).length-1);return w+((c
 const FORM="https://docs.google.com/forms/d/e/1FAIpQLSfbfbctafJeWzVfBF9MX_0XbaP0ZH7topOmDJewy2NbZciGnQ/formResponse";
 const FE={name:"809433524",prac:"1259747568",lv:"1013043464",score:"1843153319",shown:"957355580",wrong:"177085771",time:"1269343136",dev:"1445433581"};
 const LVN={easy:"초급",mid:"중급",adv:"고급"},TABN={memo:"① 메모",chat:"② 문자 메시지",diary:"③ 일기"};
-let QRNM=false;/* 숙제장 QR(이름 들어 있음)로 오면 「누가 연습하나요」 창 없이 바로 (2026-11-05) */let NAME="",LEVEL="mid";try{NAME=localStorage.getItem("gyt_nm")||"";LEVEL=localStorage.getItem("gyt_lv")||"mid"}catch(e){}
+let QRNM=false,GTEST=false;/* 🧪 s=테스트면 보내지 않아요 (2026-11-06) *//* 숙제장 QR(이름 들어 있음)로 오면 「누가 연습하나요」 창 없이 바로 (2026-11-05) */let NAME="",LEVEL="mid";try{NAME=localStorage.getItem("gyt_nm")||"";LEVEL=localStorage.getItem("gyt_lv")||"mid"}catch(e){}
 function variants(seg){let outs=[""];seg.split(/(\[[^\]]+\])/).forEach(t=>{if(/^\[.*\]$/.test(t)){const al=t.slice(1,-1).split("|");outs=outs.flatMap(o=>al.map(a=>o+a))}else outs=outs.map(o=>o+t)});return outs.map(o=>o.trim())}
 function tf(en,c,all){if(LEVEL==="mid")return en;
  if(LEVEL==="adv")return en.split("<br>").map(x=>(all||/\[/.test(x))?"["+variants(x).join("|")+"]":x).join("<br>");
@@ -208,7 +208,7 @@ function cheer(ok,n,part){const T={memo:"메모 완성!",chat:jo(GD.peerKo||"엄
  const wr=Object.values(WRONG);const q={name:NAME||"이름 없음",prac:"기적영트 실습 "+(GD.code||"").toUpperCase()+" "+TABN[tab],lv:LVN[LEVEL],score:`${ok}/${n}${part?" (중간)":""}`,shown:String(shown),wrong:wr.length?wr.join(" / "):"없음",time:tm,dev};
  $("#sendT").href=FORM+"?"+Object.entries(q).map(([k,v])=>"entry."+FE[k]+"="+encodeURIComponent(v)).join("&")+"&submit=Submit";
  SENT=false;warned=false;$("#nextRow").hidden=true;$("#mustMsg").hidden=false;$("#mustMsg").innerHTML="⚠️ 꼭 <b>📮 선생님께 보내기</b>를 눌러야<br>선생님이 오늘 연습한 걸 확인할 수 있어요!";$("#cheerX").textContent="닫기";$("#sendT").hidden=false;$("#sentOk").hidden=true;$("#cheer").hidden=false}
-$("#sendT").addEventListener("click",()=>{SENT=true;setTimeout(()=>{$("#sendT").hidden=true;$("#sentOk").hidden=false;$("#mustMsg").hidden=true;$("#cheerX").textContent="닫기";
+$("#sendT").addEventListener("click",e=>{if(GTEST){e.preventDefault();e.stopImmediatePropagation();$("#sentOk").textContent="🧪 테스트라 선생님께 안 보냈어요";}SENT=true;setTimeout(()=>{$("#sendT").hidden=true;$("#sentOk").hidden=false;$("#mustMsg").hidden=true;$("#cheerX").textContent="닫기";
   const NL=QRNM?null:{easy:"mid",mid:"adv"}[LEVEL],TO=["memo","chat","diary"],NT=TO[TO.indexOf(tab)+1];let h="";
   if(NL)h+=`<button class="btn pri" data-nextlv="${NL}">⬆ ${LVN[NL]}으로 다시 도전</button>`;
   if(NT)h+=`<button class="btn gold" data-nexttab="${NT}">다음: ${TABN[NT]} ▶</button>`;
@@ -271,7 +271,7 @@ document.addEventListener("keydown",e=>{if(e.key!=="Enter"||e.target.tagName!=="
  if(i<ins.length-1){ins[i+1].focus();return}
  const sb=document.querySelector(`[data-send="${o.g}"]`)||document.querySelector(`[data-chk="${o.g}"]`);sb&&sb.click()});
 /* 기적영트 실습 (2026-11-04): 단원 내용은 gyt/<k>.json · 숙제장 QR: gyt.html?k=p1&s=이름 */
-(function(){const Q=new URLSearchParams(location.search),K=(Q.get("k")||"p1").replace(/[^a-z0-9_]/gi,""),S=(Q.get("s")||"").trim();if(S){NAME=S;QRNM=true;LEVEL="mid";document.body.classList.add("qrs")}
+(function(){const Q=new URLSearchParams(location.search),K=(Q.get("k")||"p1").replace(/[^a-z0-9_]/gi,""),S=(Q.get("s")||"").trim();if(S){NAME=S;QRNM=true;LEVEL="mid";document.body.classList.add("qrs")}GTEST=/^(test|테스트|김정호)$/i.test(S.replace(/\s/g,""));
  fetch("gyt/"+K+".json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{GD=d;MEMO=d.memo;CHAT=d.chat;DIARY=d.diary;WORDS=d.words;
   $("#gT").textContent=d.title||"기적영트 실습";$("#gS").textContent=d.sub||"";["memo","chat","diary"].forEach(t=>$("#tb_"+t).textContent=(d.tabs||{})[t]||"");document.title=(d.title||"기적영트 실습")+" "+(d.code||"").toUpperCase();
   render();if(!QRNM)openStart()}).catch(()=>{$("#main").innerHTML='<p class="must">이 단원 내용이 아직 없어요. 선생님께 알려 주세요.</p>'})})();

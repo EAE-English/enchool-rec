@@ -708,6 +708,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
         $('doneIc').textContent = MODE === 'rap' ? '🎤' : MODE === 'role' ? '🎬' : MODE === 'shadow' ? '🎧' : '📖'; $('doneT').textContent = MODE === 'rap' ? '멋진 랩이었어요!' : MODE === 'role' ? '멋진 연기였어요!' : MODE === 'shadow' ? '원어민처럼 잘 따라 했어요!' : '또박또박 잘 읽었어요!';
         $('doneCard').scrollIntoView({block:'center', behavior:'smooth'}); };
       const fail = e => { reset(); showErr('보내기가 안 됐어요. 다시 눌러 주세요. (' + e.message + ')'); };
+      /* 🧪 테스트(s=테스트): 보내지 않고 끝 화면만 (2026-11-06) */if (!notTest()) { ok(); $('doneT').textContent += ' (테스트라 선생님께 안 보냈어요)'; return; }
       fetch(LOG, {method:'POST', body:JSON.stringify(payload)})
         .then(x => x.json()).then(j => j && j.ok ? ok() : fail(new Error(j && j.error || '저장 실패'))).catch(fail);
     };

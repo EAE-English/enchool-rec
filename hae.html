@@ -150,6 +150,7 @@
     $('again').onclick = () => { ST = blank(); CUR = 0; save(); draw(); window.scrollTo({top:0}); };
     window.scrollTo({top:0});
     if (ST._sent) { $('sv').textContent = '✓ 선생님께 보냈어요'; return; }
+    /* 🧪 테스트(s=테스트): 보내지 않아요 (2026-11-06) */if (/^(test|테스트|김정호)$/i.test(String(NAME).replace(/\s/g, ''))) { $('sv').textContent = '🧪 테스트라 선생님께 안 보냈어요'; return; }
     fetch(LOG, {method:'POST', body:JSON.stringify({a:'kh', step:'save', k:K, title:P.book + ' · ' + P.unit + ' · ' + P.title, student:NAME, cls:CLS,
       sents:ST.map(x => ({ko:x.ko, pct:x.pct || 0, tries:x.tries, pass:x.pass, fb:x.fb, ww:x.ww, won:x.won})), looked:[...LOOK]})})
       .then(r => r.json()).then(j => { if (!j || !j.ok) throw 0; $('sv').textContent = '✓ 선생님께 보냈어요'; try{ localStorage.removeItem(dk()); }catch(e){} })
