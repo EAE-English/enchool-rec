@@ -155,7 +155,7 @@ body.qrs .tabs,body.qrs #who{display:none!important}/* QR로 오면 고르는 �
  <main id="main"></main>
  <footer>빈칸에 쓰고 <b>확인</b>을 누르세요 · 두 번 틀리면 첫 글자(고급은 첫 단어) 힌트 · 🔊 누르면 문장을 읽어 줘요</footer>
 </div>
-<div class="cheer" id="cheer" hidden><div><div class="big" id="cheerI">🎉</div><h2 id="cheerT">다 맞혔어요!</h2><p id="cheerP" style="margin:0 0 14px;color:#6b7280"></p><p class="must" id="mustMsg">⚠️ 꼭 <b>📮 선생님께 보내기</b>를 눌러야<br>선생님이 오늘 연습한 걸 확인할 수 있어요!</p><div class="sendrow"><a class="btn gold" id="sendT" target="_blank" rel="noopener">📮 선생님께 보내기</a><span class="sentok" id="sentOk" hidden>✓ 보냈어요! 새 창은 닫아도 돼요</span><div class="nextrow" id="nextRow" hidden></div><button class="btn" id="cheerX">닫기</button></div></div></div>
+<div class="cheer" id="cheer" hidden><div><div class="big" id="cheerI">🎉</div><h2 id="cheerT">다 맞혔어요!</h2><p id="cheerP" style="margin:0 0 14px;color:#6b7280"></p><p class="must" id="mustMsg">⚠️ 꼭 <b>📮 선생님께 보내기</b>를 눌러야<br>선생님이 오늘 연습한 걸 확인할 수 있어요!</p><div class="sendrow"><a class="btn gold" id="sendT" target="_blank" rel="noopener">📮 선생님께 보내기</a><span class="sentok" id="sentOk" hidden>✓ 선생님께 보냈어요!</span><div class="nextrow" id="nextRow" hidden></div><button class="btn" id="cheerX">닫기</button></div></div></div>
 <div class="start" id="start" hidden><div class="box"><h2>누가 연습하나요? ✏️</h2><p>이름과 레벨을 고르면 시작해요. 끝나면 꼭 <b>📮 선생님께 보내기</b>를 눌러 주세요!</p>
  <label for="nm">이름</label><input id="nm" autocomplete="off" placeholder="예) 김세림">
  <label>레벨</label><div class="lvs"><button class="lvb" data-lv="easy">초급<span>빈칸 2~3개<br>보기에서 골라요</span></button><button class="lvb" data-lv="mid">중급<span>책 빈칸<br>그대로</span></button><button class="lvb" data-lv="adv">고급<span>문장 전체<br>빈칸</span></button></div>
@@ -278,10 +278,18 @@ document.addEventListener("keydown",e=>{if(e.key!=="Enter"||e.target.tagName!=="
 </script>
 
 <script src="https://eae-english.github.io/enchool-rec/tools/tts_aud.js"></script>
-<script>/* [Claude] 「📮 선생님께 보내기」: 새 창 없이 화면에서 바로 보내요 (2026-11-05 · 새 창이 까맣게 떠서 뒤로가기를 누르면 기록이 안 갔어요) */
+<script>/* [Claude] 「📮 선생님께 보내기」: 새 창 없이 화면에서 바로 보내요 (2026-11-05 · 새 창이 까맣게 떠서 뒤로가기를 누르면 기록이 안 갔어요)
+   + 자동 보내기 (2026-11-06): 결과 화면이 뜨면 아이가 안 눌러도 저절로 보내요 · 같은 결과는 두 번 안 보내요 */
 (function(){var a=document.getElementById('sendT');if(!a)return;a.removeAttribute('target');
+ var DONE={},TRIED={},key=function(){return (a.getAttribute('data-key')||a.href||'').replace(/&coins=[^&]*/,'')};
+ var fetchIt=function(u,ok,fail){try{fetch(u,{mode:'no-cors',keepalive:true,cache:'no-store',credentials:'omit'}).then(ok).catch(fail)}catch(err){fail()}};
+ /* 결과 화면 전에 미리 보내기 (쿨보카 마스터 테스트 끝 · 2026-11-06) */
+ window.koolSendSilent=function(u,k){if(!u||DONE[k])return;DONE[k]=1;fetchIt(u,function(){},function(){delete DONE[k]})};
  a.addEventListener('click',function(e){e.preventDefault();var u=a.href;if(!u||/^(#|javascript)/.test(u.replace(location.href.split('#')[0],'')))return;
-  var lab=a.getAttribute('data-lab')||a.textContent;a.setAttribute('data-lab',lab);
-  var fail=function(){setTimeout(function(){a.hidden=false;a.textContent='📮 다시 보내기';var ok=document.getElementById('sentOk');if(ok)ok.hidden=true;var m=document.getElementById('must')||document.getElementById('mustMsg');if(m){m.hidden=false;m.innerHTML='⚠️ 인터넷이 끊겨서 못 보냈어요.<br><b>📮 다시 보내기</b>를 눌러 주세요.'}},450)};
-  try{fetch(u,{mode:'no-cors',keepalive:true,cache:'no-store',credentials:'omit'}).then(function(){a.textContent=lab}).catch(fail)}catch(err){fail()}});})();
+  var lab=a.getAttribute('data-lab')||a.textContent;a.setAttribute('data-lab',lab);var k=key();
+  if(DONE[k]){a.textContent=lab;return}
+  var fail=function(){delete DONE[k];setTimeout(function(){a.hidden=false;a.textContent='📮 다시 보내기';var ok=document.getElementById('sentOk');if(ok)ok.hidden=true;var m=document.getElementById('must')||document.getElementById('mustMsg');if(m){m.hidden=false;m.innerHTML='⚠️ 인터넷이 끊겨서 못 보냈어요.<br><b>📮 다시 보내기</b>를 눌러 주세요.'}},450)};
+  DONE[k]=1;fetchIt(u,function(){a.textContent=lab},fail)});
+ var auto=function(){if(a.hidden||!a.offsetParent)return;var u=a.href;if(!u||/^(#|javascript)/.test(u.replace(location.href.split('#')[0],'')))return;var k=key();if(TRIED[k])return;TRIED[k]=1;setTimeout(function(){if(!a.hidden)a.click()},350)};
+ try{new MutationObserver(function(){setTimeout(auto,60)}).observe(document.body,{attributes:true,subtree:true,attributeFilter:['hidden','href','class','style']})}catch(err){}})();
 </script></body></html>

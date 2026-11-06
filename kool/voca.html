@@ -357,7 +357,7 @@ button.node{border:0;background:none;padding:0;font:inherit;cursor:pointer}
  <div class="meter"><i id="rM" style="width:0"></i></div>
  <p id="rW" style="font-size:13px;color:var(--bad);margin:0 0 10px"></p>
  <p class="must" id="must"></p>
- <div class="col"><a class="btn gold lg" id="sendT" target="_blank" rel="noopener">📮 선생님께 보내기</a><span class="sentok" id="sentOk" hidden>✓ 보냈어요! 새 창은 닫아도 돼요</span>
+ <div class="col"><a class="btn gold lg" id="sendT" target="_blank" rel="noopener">📮 선생님께 보내기</a><span class="sentok" id="sentOk" hidden>✓ 선생님께 보냈어요!</span>
  <div class="col" id="nextRow" hidden></div><button class="btn" id="rX">닫기</button></div>
 </div></div>
 
@@ -590,6 +590,7 @@ function finishStep(pct){const c=COURSE,s=set(),M=MN(MODE);
  const nx=c.steps[c.idx],last=c.idx>=c.steps.length;
  /* 마스터 테스트: 점수를 보여 주고 90점 이상이면 재시험은 선택, 미만이면 필수 (2026-10-29) */
  if(MODE==="write"&&last){const sc=Math.round(ST.ok/Math.max(1,ST.total)*100),pass=sc>=90,mn=c.miss.size;
+  /* 마스터 테스트가 끝나면 바로 선생님께 보내요 — 결과 보기를 안 눌러도 기록이 가요 (2026-11-06) */try{if(!isTest()&&window.koolSendSilent){const L=logOf(courseRes());window.koolSendSilent(L.u+"&coins="+COIN.coins(),L.k);COIN.markDay();setTimeout(()=>COIN.clear(),0)}}catch(e){}
   owl(pass?"knight":"scholar",pass?"통과! 대단해!":"괜찮아! 틀린 단어만 다시 하자!",pass?"good":"");
   $("#stage").innerHTML=`<div class="clearpanel"><img src="${pass?OWL.knight:OWL.scholar}" alt=""><h3>⑦ 마스터 테스트 끝!</h3><div class="mscore ${pass?"ok":"no"}">${sc}점</div><p>한 번에 맞힘 ${ST.ok}/${ST.total}</p>
    ${!mn?`<button class="btn pri lg nextb" data-cstep style="margin-top:8px">다음: 🏆 결과 보기 ▶</button>`
@@ -601,12 +602,7 @@ function finishStep(pct){const c=COURSE,s=set(),M=MN(MODE);
   <button class="btn pri lg nextb" data-cstep style="margin-top:8px">${nx?`다음: ${MN(nx).n} ${MN(nx).t} ▶`:c.miss.size&&!c.review?`다음: ↺ 틀린 단어 ${c.miss.size}개 ▶`:"다음: 🏆 결과 보기 ▶"}</button></div>`;
  $("#cnt").textContent="클리어!";if(last&&!c.miss.size){}}
 function endCourse(){const c=COURSE,s=set(),r=rec(s.id);r.courses=(r.courses||0)+1;save();
- const test=c.res.find(x=>x.m==="write")||{ok:0,n:1};const pct=test.ok/test.n;const mastered=isM(r);
- const miss=[...c.miss].map(i=>s.W[i][0]);const sec=Math.round((Date.now()-T0)/1000),tm=`${Math.floor(sec/60)}분 ${sec%60}초`;
- const sumTxt=c.res.filter(x=>x.m!=="review").map(x=>`${MN(x.m).s} ${x.ok}/${x.n}`).join(" · ");
- showResult({owl:mastered?"knight":pct>=PASS?"wizard":"scholar",title:mastered?`${s.t} 마스터!`:`오늘의 모험 완료!`,pct,
-  line:`${NAME||"이름 없음"} · 마스터 테스트 ${test.ok}/${test.n} · ${tm}`,sub:sumTxt,miss,
-  q:{prac:`${BK.book} · ${UNIT.replace(/\s*단어$/,"")} ${s.t} · 오늘의 모험`,lv:`${pct>=PASS?"클리어":"재도전"} · ${sumTxt}`,score:`${test.ok}/${test.n}`,time:tm}});
+ showResult(courseRes());
  COURSE=null;$("#act").hidden=true;home()}
 
 /* ───── 끝 ───── */
@@ -619,11 +615,19 @@ function finish(){if(ST.fin)return;ST.fin=true;const s=set(),r=rec(s.id);const p
   line:`${NAME||"이름 없음"} · 한 번에 맞힘 ${ST.ok}/${ST.total} · ${tm}`,sub:"",miss,
   q:{prac:`${BK.book} · ${UNIT.replace(/\s*단어$/,"")} ${s.t} · ${M.n} ${M.t}`,lv:pass?"클리어":"재도전",score:`${ST.ok}/${ST.total}`,time:tm}});
  $("#act").hidden=true;home()}
+/* 보내는 주소 · 같은 결과 표시(key) (2026-11-06) */
+function logOf(o){const ua=navigator.userAgent,dev=/iPad|Tablet|Android(?!.*Mobile)/i.test(ua)?"태블릿":/Mobi|iPhone|Android/i.test(ua)?"폰":"PC";
+ const q={name:NAME||"이름 없음",prac:o.q.prac,lv:o.q.lv,score:o.q.score,shown:"0",wrong:o.miss.length?o.miss.join(" / "):"없음",time:o.q.time+" · "+trText(),dev};
+ return {u:LOG+"?a=log&app=쿨보카&"+Object.entries(q).map(([k,v])=>k+"="+encodeURIComponent(v)).join("&"),k:["쿨보카",NAME,q.prac,q.lv,q.score,q.wrong].join("|")}}
+function courseRes(){const c=COURSE,s=set(),r=rec(s.id);const test=c.res.find(x=>x.m==="write")||{ok:0,n:1};const pct=test.ok/test.n;const mastered=isM(r);
+ const miss=[...c.miss].map(i=>s.W[i][0]);const sec=Math.round((Date.now()-T0)/1000),tm=`${Math.floor(sec/60)}분 ${sec%60}초`;
+ const sumTxt=c.res.filter(x=>x.m!=="review").map(x=>`${MN(x.m).s} ${x.ok}/${x.n}`).join(" · ");
+ return {owl:mastered?"knight":pct>=PASS?"wizard":"scholar",title:mastered?`${s.t} 마스터!`:`오늘의 모험 완료!`,pct,
+  line:`${NAME||"이름 없음"} · 마스터 테스트 ${test.ok}/${test.n} · ${tm}`,sub:sumTxt,miss,
+  q:{prac:`${BK.book} · ${UNIT.replace(/\s*단어$/,"")} ${s.t} · 오늘의 모험`,lv:`${pct>=PASS?"클리어":"재도전"} · ${sumTxt}`,score:`${test.ok}/${test.n}`,time:tm}}}
 function showResult(o){$("#rO").src=OWL[o.owl];$("#rT").textContent=o.title;$("#rS").innerHTML=stars(o.pct);$("#rP").innerHTML=esc(o.line)+`<br><small>공부한 시간 ${trMin()}</small>`+(o.sub?`<br><small>${esc(o.sub)}</small>`:"");
  $("#rM").style.width=Math.round(o.pct*100)+"%";$("#rW").textContent=o.miss.length?`다시 볼 단어: ${o.miss.join(", ")}`:"";
- const ua=navigator.userAgent,dev=/iPad|Tablet|Android(?!.*Mobile)/i.test(ua)?"태블릿":/Mobi|iPhone|Android/i.test(ua)?"폰":"PC";
- const q={name:NAME||"이름 없음",prac:o.q.prac,lv:o.q.lv,score:o.q.score,shown:"0",wrong:o.miss.length?o.miss.join(" / "):"없음",time:o.q.time+" · "+trText(),dev};
- $("#sendT").href=LOG+"?a=log&app=쿨보카&"+Object.entries(q).map(([k,v])=>k+"="+encodeURIComponent(v)).join("&");
+ const L=logOf(o);$("#sendT").href=L.u;$("#sendT").setAttribute("data-key",L.k);
  SENT=false;warned=false;$("#sendT").hidden=false;$("#sentOk").hidden=true;$("#must").hidden=false;$("#must").innerHTML="⚠️ 꼭 <b>📮 선생님께 보내기</b>를 눌러야<br>선생님이 오늘 연습한 걸 확인할 수 있어요!";if(isTest()){SENT=true;$("#sendT").hidden=true;$("#must").innerHTML="🧪 테스트 이름(김정호)이라 기록하지 않아요.";}$("#nextRow").hidden=true;$("#rX").textContent="닫기";
  $("#result").hidden=false;T0=0}
 $("#sendT").addEventListener("click",()=>{SENT=true;setTimeout(()=>{$("#sendT").hidden=true;$("#sentOk").hidden=false;$("#must").hidden=true;
@@ -716,10 +720,18 @@ window.speak=function(t,slow){const c=pick(t);if(!c)return tts(t,slow);const k=c
  const go=()=>{try{A.currentTime=Math.max(0,c[1]-.05)}catch(e){}window.__audOn=true;A.play().then(()=>{(function w(){if(A.paused||A.currentTime>=c[2]+.08){A.pause();window.__audOn=false;return}T=setTimeout(w,25)})()},()=>{window.__audOn=false;tts(t,slow)})};
  if(A.readyState>=1)go();else{A.onloadedmetadata=()=>{A.onloadedmetadata=null;go()};A.load()}};
 })();
-</script><script>/* [Claude] 「📮 선생님께 보내기」: 새 창 없이 화면에서 바로 보내요 (2026-11-05 · 새 창이 까맣게 떠서 뒤로가기를 누르면 기록이 안 갔어요) */
+</script><script>/* [Claude] 「📮 선생님께 보내기」: 새 창 없이 화면에서 바로 보내요 (2026-11-05 · 새 창이 까맣게 떠서 뒤로가기를 누르면 기록이 안 갔어요)
+   + 자동 보내기 (2026-11-06): 결과 화면이 뜨면 아이가 안 눌러도 저절로 보내요 · 같은 결과는 두 번 안 보내요 */
 (function(){var a=document.getElementById('sendT');if(!a)return;a.removeAttribute('target');
+ var DONE={},TRIED={},key=function(){return (a.getAttribute('data-key')||a.href||'').replace(/&coins=[^&]*/,'')};
+ var fetchIt=function(u,ok,fail){try{fetch(u,{mode:'no-cors',keepalive:true,cache:'no-store',credentials:'omit'}).then(ok).catch(fail)}catch(err){fail()}};
+ /* 결과 화면 전에 미리 보내기 (쿨보카 마스터 테스트 끝 · 2026-11-06) */
+ window.koolSendSilent=function(u,k){if(!u||DONE[k])return;DONE[k]=1;fetchIt(u,function(){},function(){delete DONE[k]})};
  a.addEventListener('click',function(e){e.preventDefault();var u=a.href;if(!u||/^(#|javascript)/.test(u.replace(location.href.split('#')[0],'')))return;
-  var lab=a.getAttribute('data-lab')||a.textContent;a.setAttribute('data-lab',lab);
-  var fail=function(){setTimeout(function(){a.hidden=false;a.textContent='📮 다시 보내기';var ok=document.getElementById('sentOk');if(ok)ok.hidden=true;var m=document.getElementById('must')||document.getElementById('mustMsg');if(m){m.hidden=false;m.innerHTML='⚠️ 인터넷이 끊겨서 못 보냈어요.<br><b>📮 다시 보내기</b>를 눌러 주세요.'}},450)};
-  try{fetch(u,{mode:'no-cors',keepalive:true,cache:'no-store',credentials:'omit'}).then(function(){a.textContent=lab}).catch(fail)}catch(err){fail()}});})();
+  var lab=a.getAttribute('data-lab')||a.textContent;a.setAttribute('data-lab',lab);var k=key();
+  if(DONE[k]){a.textContent=lab;return}
+  var fail=function(){delete DONE[k];setTimeout(function(){a.hidden=false;a.textContent='📮 다시 보내기';var ok=document.getElementById('sentOk');if(ok)ok.hidden=true;var m=document.getElementById('must')||document.getElementById('mustMsg');if(m){m.hidden=false;m.innerHTML='⚠️ 인터넷이 끊겨서 못 보냈어요.<br><b>📮 다시 보내기</b>를 눌러 주세요.'}},450)};
+  DONE[k]=1;fetchIt(u,function(){a.textContent=lab},fail)});
+ var auto=function(){if(a.hidden||!a.offsetParent)return;var u=a.href;if(!u||/^(#|javascript)/.test(u.replace(location.href.split('#')[0],'')))return;var k=key();if(TRIED[k])return;TRIED[k]=1;setTimeout(function(){if(!a.hidden)a.click()},350)};
+ try{new MutationObserver(function(){setTimeout(auto,60)}).observe(document.body,{attributes:true,subtree:true,attributeFilter:['hidden','href','class','style']})}catch(err){}})();
 </script></body></html>
