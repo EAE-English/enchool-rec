@@ -422,10 +422,46 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     if (mono) PCMS[pk] = mono;
     return URL.createObjectURL(new Blob([d], {type:'audio/wav'}));
   }
+  /* 원음원 파일이 없는 숙제: 미리 만든 목소리 조각(kool/tts)을 그 자리에서 한 파일로 이어 붙여요 (2026-11-06)
+     → 폰 기계 목소리(아이폰 녹음 중 무음)로 돌아가지 않게. 조각이 하나라도 없으면 null */
+  let TMAP = null;
+  const tkey = (who, t) => String(who || '') + '\t' + String(t).replace(/[\[\]]/g, '').replace(/\s+/g, ' ').trim();
+  async function clipTrack(L){   // L: [[who, text, tag], …] → {url, pcm, plan:[[s,e,n,tag]]}
+    if (!TMAP) TMAP = await fetch('kool/tts/map.json', {cache:'no-cache'}).then(r => r.json()).catch(() => ({}));
+    const fns = L.map(l => TMAP[tkey(l[0], l[1])]); if (!L.length || fns.some(f => !f)) return null;
+    const C = window.OfflineAudioContext || window.webkitOfflineAudioContext; if (!C) return null;
+    const bufs = await Promise.all(fns.map(fn => (TKDB.get('clip|' + fn).then(c => c && c.by ? c.by : fetch('kool/tts/' + fn).then(r => { if (!r.ok) throw 0; return r.arrayBuffer(); }).then(b => { TKDB.put('clip|' + fn, {by: b.slice(0)}); return b; })))
+      .then(b => new Promise((ok, no) => { const ctx = new C(1, PSR, PSR); const r = ctx.decodeAudioData(b.slice(0), ok, no); if (r && r.then) r.then(ok, no); }))));
+    const GAP = Math.round(PSR * 0.4), LEAD = Math.round(PSR * 0.3);
+    let n = LEAD; bufs.forEach(ab => { n += ab.length + GAP; });
+    const pcm = new Float32Array(n), plan = []; let t = LEAD;
+    bufs.forEach((ab, k) => { const ch = ab.numberOfChannels, cs = []; for (let c = 0; c < ch; c++) cs.push(ab.getChannelData(c));
+      for (let i = 0; i < ab.length; i++){ let v = 0; for (let c = 0; c < ch; c++) v += cs[c][i]; pcm[t + i] = v / ch; }
+      plan.push([+(t / PSR).toFixed(2), +((t + ab.length) / PSR).toFixed(2), k].concat(L[k][2] ? [L[k][2]] : [])); t += ab.length + GAP; });
+    const d = new DataView(new ArrayBuffer(44 + n * 2)), w = (o, s2) => { for (let i = 0; i < s2.length; i++) d.setUint8(o + i, s2.charCodeAt(i)); };
+    w(0, 'RIFF'); d.setUint32(4, 36 + n * 2, true); w(8, 'WAVEfmt '); d.setUint32(16, 16, true); d.setUint16(20, 1, true); d.setUint16(22, 1, true);
+    d.setUint32(24, PSR, true); d.setUint32(28, PSR * 2, true); d.setUint16(32, 2, true); d.setUint16(34, 16, true); w(36, 'data'); d.setUint32(40, n * 2, true);
+    for (let i = 0; i < n; i++){ const v = Math.max(-1, Math.min(1, pcm[i])); d.setInt16(44 + i * 2, v < 0 ? v * 0x8000 : v * 0x7fff, true); }
+    return {url: URL.createObjectURL(new Blob([d], {type:'audio/wav'})), pcm, plan};
+  }
+  function clipLines(x){
+    if (x.kind === 'shadow') return (x.words || []).flatMap(w => [['', w.w, '']].concat(w.ex ? [['', w.ex, 'e']] : []));
+    if (x.kind === 'body') return bodyLines(x).map(t => ['', t, '']);
+    return (x.L || []).map(l => [l[0], l[1], '']);
+  }
   function loadTrack(x){
     AUD = null; const k = x.audio;
     const set = t => { if (MODE !== 'shadow' || IT !== x || running || !$('after').hidden) return; trkUI(/준비 끝/.test(t) ? 'ok' : /없어서/.test(t) ? 'none' : 'wait'); };
-    if (!k){ set('음원이 없어서'); return; }   // 원음원 없는 묶음(내콘 단어·불규칙 등)은 기다리지 않고 바로 새 목소리로 (2026-11-04)
+    if (!k){
+      const ck = 'clip:' + (x.id || x.t);
+      if (TRK[ck] && SEGS[ck]){ x.audio = ck; AUD = rate(new Audio(TRK[ck])); set('✓ 음원 준비 끝'); return; }
+      set('wait'); let gave = false; setTimeout(() => { if (!gave && IT === x && !x.audio){ gave = true; set('음원이 없어서'); } }, 20000);
+      clipTrack(clipLines(x)).then(r => { if (gave) return; gave = true; if (!r){ set('음원이 없어서'); return; }
+        TRK[ck] = r.url; if (WA_REC) PCMS[ck] = r.pcm; SEGS[ck] = (WONLY ? r.plan.filter(q => q[3] !== 'e') : r.plan).map(q => [q[0], q[1], 1].concat(q[3] ? [q[3]] : []));
+        x.audio = ck; if (IT === x){ AUD = rate(new Audio(r.url)); set('✓ 음원 준비 끝'); } })
+        .catch(() => { if (!gave){ gave = true; set('음원이 없어서'); } });
+      return;
+    }
     set('wait'); setTimeout(() => { if (!TRK[k]) set('음원이 없어서'); }, 30000);   // 30초 넘게 못 받으면 원어민 목소리로라도 하게
     if (TRK[k] === 'none'){ set('음원이 아직 없어서 원어민 목소리로 읽어 줘요'); return; }
     if (TRK[k]){ AUD = rate(new Audio(TRK[k])); set('✓ 음원 준비 끝'); return; }
@@ -593,7 +629,14 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   /* 역할극 상대 대사: 대화문 한 파일 음원에서 그 줄 구간만 틀어요 — 폰 기계 목소리는 아이폰 녹음 중에 소리가 안 나요 (2026-11-06) */
   let RAUD = null, RPL = null;
   function loadRole(x){
-    RAUD = null; RPL = null; const k = x.ra; if (!k){ trkUI(null); return; }
+    RAUD = null; RPL = null; const k = x.ra;
+    if (!k){
+      trkUI('wait'); let gave = false; const giveUp = () => { if (gave) return; gave = true; if (IT === x && MODE === 'role' && !running){ trkUI(null); $('go').disabled = false; } };
+      setTimeout(giveUp, 20000);
+      clipTrack(clipLines(x)).then(r => { if (gave || IT !== x || MODE !== 'role') return; if (!r){ giveUp(); return; } gave = true;
+        const ck = 'clip:' + (x.id || x.t); if (WA_REC) PCMS[ck] = r.pcm; x.raClip = ck; RAUD = new Audio(r.url); RAUD.preload = 'auto'; RPL = r.plan; trkUI('ok'); }).catch(giveUp);
+      return;
+    }
     trkUI('wait'); let done = false; const ok = () => { if (done || IT !== x || MODE !== 'role') return; done = true; trkUI('ok'); };
     setTimeout(() => { if (!done && IT === x && MODE === 'role' && !running){ done = true; trkUI(null); $('go').disabled = false; } }, 20000);
     Promise.all([
@@ -605,7 +648,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   function playLine(n, onDone){
     const p = RPL && RPL.find(q => q[2] === n), a = RAUD;
     if (!p || !a) return false;
-    const pcm = WA_REC && PCTX && PCMS[IT.ra];
+    const pcm = WA_REC && PCTX && PCMS[IT.ra || IT.raClip];
     if (pcm){ const my = TSEQ; waPlay(pcm, p[0], p[1], () => { if (running && my === TSEQ) setTimeout(onDone, 450); }); return true; }
     const my = TSEQ; let fin = false; const end = () => { if (fin) return; fin = true; try{ a.pause(); }catch(e){} setTimeout(onDone, 450); };
     a.onended = end; a.currentTime = p[0];
