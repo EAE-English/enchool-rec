@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<title>엔쿨 온라인 숙제장</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Gowun+Dodum&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* [Claude] 온라인 숙제장 · 엔쿨 네이비 + 골드 (2026-11-06) — 종이 숙제장을 안 가져간 아이도 휴대폰으로 보고 체크 */
+  :root{--bg:#F3F5F9;--card:#fff;--ink:#1B2433;--muted:#667085;--line:#E1E6EE;--navy:#132E5E;--navy-soft:#E8EDF6;
+    --gold:#D9B45A;--gold-soft:#FBF4E2;--green:#1B7A45;
+    --ko:'Gowun Dodum','Apple SD Gothic Neo','Malgun Gothic',sans-serif;--en:'Nunito','Helvetica Neue',Arial,sans-serif;--serif:'Cinzel',serif}
+  *{box-sizing:border-box}[hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ko);-webkit-font-smoothing:antialiased}
+  .band{background:var(--navy);color:#fff}
+  .band-in{max-width:560px;margin:0 auto;padding:14px 16px;display:flex;align-items:center;gap:12px}
+  .band img{width:44px;height:auto;display:block}
+  .eae{font-family:var(--serif);color:var(--gold);font-size:13px;letter-spacing:.12em}
+  .kr{font-size:17px}
+  .who{margin-left:auto;text-align:right}
+  .who span{display:block;font-size:12px;color:#B9C4DA}
+  .who strong{display:inline-block;margin-top:3px;font-size:16px;font-weight:400;color:var(--navy);background:var(--gold);border-radius:999px;padding:3px 12px}
+  .wrap{max-width:560px;margin:0 auto;padding:14px 16px 40px;display:flex;flex-direction:column;gap:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+  .top h1{font-weight:400;font-size:21px;margin:0;color:var(--navy);line-height:1.35}
+  .top .due{margin:4px 0 0;color:var(--muted);font-size:14.5px}
+  .top .due b{color:var(--navy);font-weight:400}
+  .prog{margin-top:14px;display:flex;align-items:center;gap:10px}
+  .bar{flex:1;height:10px;border-radius:99px;background:var(--navy-soft);overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:var(--gold);border-radius:99px;transition:width .25s}
+  .cnt{font-family:var(--en);font-weight:800;color:var(--navy);font-size:15px;white-space:nowrap}
+  .cnt small{font-family:var(--ko);font-weight:400;color:var(--muted);font-size:13px}
+  .list{display:flex;flex-direction:column;gap:10px}
+  .it{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 14px 14px 12px;display:flex;gap:12px;transition:background .2s,border-color .2s}
+  .it.on{background:#F7F9FC;border-color:#D5DCE8}
+  .ck{flex:none;width:34px;height:34px;border-radius:10px;border:2px solid #B9C4DA;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;margin-top:1px;-webkit-tap-highlight-color:transparent}
+  .ck svg{width:20px;height:20px;opacity:0}
+  .it.on .ck{background:var(--navy);border-color:var(--navy)}
+  .it.on .ck svg{opacity:1}
+  .bd{flex:1;min-width:0}
+  .hd{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .num{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:99px;background:var(--navy);color:#fff;font-family:var(--en);font-weight:800;font-size:12.5px}
+  .tag{font-size:12.5px;color:var(--navy);background:var(--navy-soft);border-radius:6px;padding:2px 8px}
+  .tk{margin:6px 0 0;font-size:17px;line-height:1.4;word-break:keep-all;overflow-wrap:anywhere}
+  .dt{margin:3px 0 0;color:var(--muted);font-size:14.5px;line-height:1.5;word-break:keep-all;overflow-wrap:anywhere}
+  .it.on .tk,.it.on .dt{color:#98A2B3}
+  .go{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+  .gob{display:flex;align-items:center;gap:10px;text-decoration:none;border-radius:12px;padding:11px 12px;border:1.5px solid var(--kc,var(--navy));color:var(--kc,var(--navy));background:#fff}
+  .gob b{font-weight:400;font-size:16px;white-space:nowrap}
+  .gob small{margin-left:auto;font-size:12px;color:var(--muted);text-align:right;line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .gob:active{background:var(--navy-soft)}
+  .k-voca{--kc:#132E5E}.k-rec{--kc:#B42318}.k-talk,.k-bon{--kc:#1B7A45}.k-photo{--kc:#8A5A00}.k-hae{--kc:#0E6E8C}.k-gyt{--kc:#6B3FA0}.k-aud{--kc:#B42318}
+  .done{text-align:center;box-shadow:inset 0 4px 0 var(--gold);background:var(--gold-soft);border-color:var(--gold)}
+  .done .ic{font-size:40px;line-height:1}
+  .done h2{margin:6px 0 2px;color:var(--navy);font-weight:400;font-size:21px}
+  .done p{margin:0;color:var(--muted);font-size:14.5px}
+  .foot{color:var(--muted);font-size:13px;text-align:center;line-height:1.6}
+  .err{background:#FDECEC;color:#9B1C1F;border-radius:12px;padding:14px;font-size:15px;line-height:1.6}
+  :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+</style>
+</head>
+<body>
+<header class="band"><div class="band-in">
+  <img src="logo.png" alt="">
+  <div><div class="eae">E.A.Ǝ</div><div class="kr">엔쿨 온라인 숙제장</div></div>
+  <div class="who"><span id="cls">오늘의 숙제</span><strong id="who">-</strong></div>
+</div></header>
+<main class="wrap" id="app"></main>
+<script>
+(function(){
+  const $=s=>document.querySelector(s),W=["일","월","화","수","목","금","토"];
+  const esc=t=>String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const md=d=>{const x=new Date(d+"T00:00:00");return isNaN(x)?d:`${x.getMonth()+1}월 ${x.getDate()}일 (${W[x.getDay()]})`};
+  const mds=d=>{const x=new Date(d+"T00:00:00");return isNaN(x)?d:`${x.getMonth()+1}/${x.getDate()}(${W[x.getDay()]})`};
+  async function read(){const h=location.hash.slice(1),p=new URLSearchParams(h);
+    if(p.get("j"))return JSON.parse(p.get("j"));
+    const z=p.get("z");if(!z)throw new Error("no data");
+    const b=atob(z.replace(/-/g,"+").replace(/_/g,"/")),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);
+    const s=new Blob([u]).stream().pipeThrough(new DecompressionStream("deflate-raw"));return JSON.parse(await new Response(s).text())}
+  const CK='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  read().then(D=>{
+    const key="enchool_hw_"+(D.sid||D.nm||"x")+"_"+D.d;let st={};try{st=JSON.parse(localStorage.getItem(key)||"{}")}catch(e){}
+    const save=()=>{try{localStorage.setItem(key,JSON.stringify(st))}catch(e){}};
+    $("#who").textContent=D.nm?(D.en&&D.en!==D.nm?D.en+" · "+D.nm:D.nm):"우리 반";$("#cls").textContent=D.c||"오늘의 숙제";
+    document.title=`${D.nm||""} 숙제 · ${mds(D.d)} — 엔쿨`;
+    const go=b=>`<a class="gob k-${esc(b.k)}" href="${esc(b.u)}"><b>${esc(b.l)}</b><small>${esc(String(b.s||"").replace(/^녹음 · /,""))}</small></a>`;
+    const items=(D.it||[]),N=items.length;
+    $("#app").innerHTML=`<section class="card top"><h1>${md(D.d)} 숙제</h1><p class="due">${D.due?`<b>${mds(D.due)}</b> 수업까지 해 와요`:"다음 수업까지 해 와요"}</p>
+      <div class="prog"><div class="bar"><i id="pb"></i></div><span class="cnt" id="pc"></span></div></section>
+      <section class="card done" id="dn" hidden><div class="ic">🎉</div><h2>오늘 숙제 끝!</h2><p>정말 잘했어요. 다음 수업에서 만나요 😊</p></section>
+      <div class="list">${items.map((r,i)=>`<article class="it" data-i="${i}"><button class="ck" type="button" aria-label="${r.n||i+1}번 숙제 했어요">${CK}</button>
+        <div class="bd"><div class="hd"><span class="num">${r.n||i+1}</span>${r.g?`<span class="tag">${esc(r.g)}</span>`:""}</div>
+        <p class="tk">${esc(r.t)}</p>${r.x?`<p class="dt">${esc(r.x)}</p>`:""}${(r.b||[]).length?`<div class="go">${r.b.map(go).join("")}</div>`:""}</div></article>`).join("")}</div>
+      ${(D.free||[]).length?`<section class="card"><div class="hd"><span class="tag">바로 가기</span></div><div class="go">${D.free.map(go).join("")}</div></section>`:""}
+      <p class="foot">종이 숙제장과 같은 내용이에요.<br>체크한 건 이 휴대폰에 저장돼요.</p>`;
+    const paint=()=>{let n=0;document.querySelectorAll(".it").forEach(el=>{const on=!!st[el.dataset.i];el.classList.toggle("on",on);el.querySelector(".ck").setAttribute("aria-pressed",on);if(on)n++});
+      $("#pb").style.width=(N?n/N*100:0)+"%";$("#pc").innerHTML=`${n} / ${N} <small>완료</small>`;$("#dn").hidden=!(N&&n===N)};
+    document.querySelectorAll(".it .ck").forEach(b=>b.addEventListener("click",()=>{const i=b.closest(".it").dataset.i;st[i]=!st[i];if(!st[i])delete st[i];save();paint();if(N&&Object.keys(st).length===N)$("#dn").scrollIntoView({behavior:"smooth",block:"center"})}));
+    paint();
+  }).catch(()=>{$("#app").innerHTML=`<div class="err">숙제장을 열지 못했어요 😢<br>선생님께 받은 링크를 처음부터 끝까지 다시 눌러 주세요.</div>`});
+})();
+</script>
+</body>
+</html>
