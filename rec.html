@@ -127,7 +127,7 @@ const TKDB=(()=>{let p=null;const db=()=>p||(p=new Promise((ok,no)=>{try{const r
  return {get:k=>db().then(d=>new Promise(ok=>{try{const q=d.transaction('t').objectStore('t').get(k);q.onsuccess=()=>ok(q.result||null);q.onerror=()=>ok(null)}catch(e){ok(null)}})).catch(()=>null),
   put:(k,v)=>db().then(d=>{try{d.transaction('t','readwrite').objectStore('t').put(v,k)}catch(e){}}).catch(()=>{})}})();
 const AUDV='a1';   /* 음원 파일을 고치면 이 값을 바꿔서 다시 받게 */
-function getTrack(k){return TKDB.get(AUDV+'|'+k).then(c=>c&&c.by?{ok:true,by:c.by,mime:c.mime}:fetch('https://script.google.com/macros/s/AKfycbwdK8492SzMcrc_hmwGWIquliehqASMrSAhbXJ5D-UyygkmwYvO23LWDzU8O44UrGQD/exec?a=track&k='+encodeURIComponent(k)).then(r=>r.json()).then(j=>{if(!j.ok)return {ok:false};const u=Uint8Array.from(atob(j.b64),c=>c.charCodeAt(0));TKDB.put(AUDV+'|'+k,{by:u.buffer.slice(0),mime:j.mime||'audio/mpeg'});return {ok:true,by:u.buffer,mime:j.mime}}))}
+function getTrack(k){return TKDB.get(AUDV+'|'+k).then(c=>c&&c.by?{ok:true,by:c.by,mime:c.mime}:/^gh_/.test(k)?fetch('kool/aud/'+k+'.mp3',{cache:'no-cache'}).then(r=>{if(!r.ok)return {ok:false};return r.arrayBuffer().then(b=>{TKDB.put(AUDV+'|'+k,{by:b.slice(0),mime:'audio/mpeg'});return {ok:true,by:b,mime:'audio/mpeg'}})})/* 원음원 없는 본문: 미리 만든 목소리 음원 (2026-11-06) */:fetch('https://script.google.com/macros/s/AKfycbwdK8492SzMcrc_hmwGWIquliehqASMrSAhbXJ5D-UyygkmwYvO23LWDzU8O44UrGQD/exec?a=track&k='+encodeURIComponent(k)).then(r=>r.json()).then(j=>{if(!j.ok)return {ok:false};const u=Uint8Array.from(atob(j.b64),c=>c.charCodeAt(0));TKDB.put(AUDV+'|'+k,{by:u.buffer.slice(0),mime:j.mime||'audio/mpeg'});return {ok:true,by:u.buffer,mime:j.mime}}))}
 /* 카톡 안 작은 브라우저면 바깥 브라우저로 다시 열기 (소리·마이크가 막혀서 · 2026-10-31) */(function(){try{if(/KAKAOTALK/i.test(navigator.userAgent)&&!/[?&#]noext/.test(location.href)){location.href="kakaotalk://web/openExternal?url="+encodeURIComponent(location.href)}}catch(e){}})();</script><body>
 <header class="band"><div class="band-in">
   <div><div class="eae">E.A.Ǝ</div><div class="kr" id="appName">엔쿨 녹음 숙제</div></div>
@@ -470,20 +470,20 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     if (SEGS[IT.audio] === null && tries < 40) return setTimeout(() => playWithGaps(onDone, tries + 1), 100);   // 음원 나누는 중이면 잠깐 기다림
     const a = AUD, sg = SEGS[IT.audio];
     if (!sg || !sg.length){ a.currentTime = 0; a.onended = onDone; a.play().catch(() => ttsShadow(onDone)); return; }
-    let i = 0;
+    let i = 0; const my = ++TSEQ;
     /* 끊은 개수가 대본과 맞으면 지금 나오는 단어·문장 칸을 따라가며 보여 줌 */
     const map = [];
     if (IT.kind === 'shadow') (IT.words || []).forEach((w, k) => { map.push(k); if (w.ex && !WONLY) map.push(k); }); else lines().forEach((_, k) => map.push(k));
     const follow = !sg.some(x => x.length > 2) && (map.length === sg.length || (IT.kind === 'shadow' && map.length + 1 === sg.length));
     const off = sg.length - map.length;   // 맨 앞 책 소개 멘트가 하나 더 있을 때
     (function next(){
-      if (!running) return;
+      if (!running || my !== TSEQ) return;
       if (i >= sg.length){ showSay(0); onDone(); return; }
       const [s0, e0] = sg[i]; a.onended = null; a.currentTime = s0; showSay(0);
       if (follow && i - off >= 0) focus(map[i - off], true);
       a.play().catch(() => {});
       (function watch(){
-        if (!running){ a.pause(); return; }
+        if (!running || my !== TSEQ){ if (my === TSEQ) a.pause(); return; }
         if (a.currentTime >= e0 || a.ended){
           a.pause(); const len = (e0 - s0) / RATE, rep = sg[i][2] !== 0, gap = rep ? len + plusFor(len) : 0.25; i++;   // 한국어 뜻(0)은 따라 하지 않고 바로 다음
           if (!rep){ setTimeout(next, gap * 1000); return; }
@@ -494,18 +494,19 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   }
 
   /* 음원이 없을 때: 단어 → (따라 할 틈) → 예문 → (틈) … */
-  function ttsShadow(onDone){
+  let TSEQ = 0;   /* 듣기·녹음 줄이 두 개 겹쳐 돌면 순서가 왔다 갔다 해요 → 새로 시작하면 예전 줄은 멈춰요 (2026-11-06 예원) */
+  function ttsShadow(onDone){ const my = ++TSEQ;
     /* 본문(음원 없음)은 문장이 [1]칸에 있어요 → [0]으로 옮겨서 읽어 줘요 (안 그러면 바로 끝나서 「선생님께 보내기」로 넘어감 · 2026-11-02) */
     const L = lines().map(l => l[0] ? l : [l[1], '', l[2]]); let k = 0, part = 0;
     (function nx(){
-      if (!(running || playing)) return;
+      if (!(running || playing) || my !== TSEQ) return;
       if (k >= L.length){ onDone && onDone(); return; }
       focus(k, true); const t = part === 0 ? L[k][0] : L[k][1];
       if (!t){ part = 0; k++; return nx(); }
       const t0 = Date.now();
       say(t, '', () => { const len = Math.max(500, Date.now() - t0 - 450) / 1000, gap = len + plusFor(len);   // 원어민이 말한 시간 + (단어 1초 · 문장 2초)
         if (running) showSay(gap);
-        setTimeout(() => { showSay(0); if (part === 0 && L[k][1]) part = 1; else { part = 0; k++; } nx(); }, gap * 1000); });
+        setTimeout(() => { if (my !== TSEQ) return; showSay(0); if (part === 0 && L[k][1]) part = 1; else { part = 0; k++; } nx(); }, gap * 1000); });
     })();
   }
 
@@ -528,12 +529,12 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   }
   let playing = false;
   $('listenAll').onclick = () => {
-    if (playing){ playing = false; (window.TTSA && TTSA.stop(), speechSynthesis.cancel()); if (AUD) AUD.pause(); focus(-1); $('listenAll').textContent = '🔊 원어민 먼저 들어 보기'; return; }
+    if (playing){ playing = false; TSEQ++; (window.TTSA && TTSA.stop(), speechSynthesis.cancel()); if (AUD) AUD.pause(); focus(-1); $('listenAll').textContent = '🔊 원어민 먼저 들어 보기'; return; }
     playing = true; $('listenAll').textContent = '■ 그만 듣기';
     const endL = () => { playing = false; focus(-1); $('listenAll').textContent = '🔊 원어민 먼저 들어 보기'; };
     if (MODE === 'shadow'){ if (AUD){ AUD.currentTime = 0; AUD.onended = endL; AUD.play().catch(endL); } else ttsShadow(endL); return; }
-    const L = lines(); let k = 0;
-    (function nx(){ if (!playing || k >= L.length){ playing = false; focus(-1); $('listenAll').textContent = '🔊 원어민 먼저 들어 보기'; return; } focus(k, true); say(L[k][1], '', () => { k++; nx(); }); })();
+    const L = lines(); let k = 0; const my = ++TSEQ;
+    (function nx(){ if (my !== TSEQ) return; if (!playing || k >= L.length){ playing = false; focus(-1); $('listenAll').textContent = '🔊 원어민 먼저 들어 보기'; return; } focus(k, true); say(L[k][1], '', () => { k++; nx(); }); })();
   };
 
   /* 받아쓰기(Chrome 내장) */
@@ -659,7 +660,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   function stop(){
     wakeOff();
     if (!running) return;
-    running = false; clearInterval(tick); if (on){ acc += Date.now() - on; on = 0; } dur = acc / 1000;
+    running = false; TSEQ++; clearInterval(tick); if (on){ acc += Date.now() - on; on = 0; } dur = acc / 1000;
     if (window.speechSynthesis) (window.TTSA && TTSA.stop(), speechSynthesis.cancel()); if (AUD) AUD.pause(); showSay(0);
     if (MODE === 'rap') setTimeout(beatStop, 300);
     setTimeout(srStop, MODE !== 'role' ? 700 : 0);
