@@ -73,7 +73,9 @@
   const esc=t=>String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const md=d=>{const x=new Date(d+"T00:00:00");return isNaN(x)?d:`${x.getMonth()+1}월 ${x.getDate()}일 (${W[x.getDay()]})`};
   const mds=d=>{const x=new Date(d+"T00:00:00");return isNaN(x)?d:`${x.getMonth()+1}/${x.getDate()}(${W[x.getDay()]})`};
-  async function read(){const h=location.hash.slice(1),p=new URLSearchParams(h);
+  async function read(){/* 짧은 주소: hw.html?k=ja1106-james → hw/ja1106-james.json (2026-11-06) */const k=new URLSearchParams(location.search).get("k");
+    if(k&&/^[\w-]{1,60}$/.test(k)){const r=await fetch("hw/"+k+".json",{cache:"no-cache"});if(!r.ok)throw new Error("no file");return r.json()}
+    const h=location.hash.slice(1),p=new URLSearchParams(h);
     if(p.get("j"))return JSON.parse(p.get("j"));
     const z=p.get("z");if(!z)throw new Error("no data");
     const b=atob(z.replace(/-/g,"+").replace(/_/g,"/")),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);
