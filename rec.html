@@ -380,6 +380,19 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
 
   /* 따라 읽기 음원: 선생님 드라이브 → Apps Script → 여기 (없으면 원어민 목소리로) */
   let AUD = null, TRK = {}, RATE = 1;
+  /* 안드로이드: 녹음 중에 <audio>를 틀었다 멈췄다 하면 폰이 녹음을 멈춰 버리는 기기가 있어요(은설 11/6) →
+     녹음 중에는 소리를 Web Audio 한 줄기로만 내요 (재생 요소를 켰다 껐다 하지 않음) */
+  const WA_REC = /Android/i.test(navigator.userAgent);
+  const PCMS = {}, PSR = 22050; let PCTX = null, CSRC = null;
+  function waStop(){ const s = CSRC; CSRC = null; if (s){ try{ s.onended = null; s.stop(); }catch(e){} } }
+  function waPlay(pcm, s0, e0, onEnd){
+    const st = Math.max(0, Math.floor(s0 * PSR)), en = Math.min(pcm.length, Math.ceil(e0 * PSR)), n = Math.max(1, en - st);
+    const ab = PCTX.createBuffer(1, n, PSR); ab.getChannelData(0).set(pcm.subarray(st, st + n));
+    const src = PCTX.createBufferSource(); src.buffer = ab; src.playbackRate.value = RATE; src.connect(PCTX.destination);
+    let done = false; const fin = () => { if (done) return; done = true; if (CSRC === src) CSRC = null; onEnd(); };
+    src.onended = fin; setTimeout(fin, (n / PSR / RATE + 0.6) * 1000); waStop(); CSRC = src;
+    if (PCTX.state === 'suspended') PCTX.resume(); src.start();
+  }
   try{ RATE = +localStorage.getItem('enc_rec_rate') || 1; }catch(e){}
   function rate(a){ if (a){ a.playbackRate = RATE; a.preservesPitch = true; a.webkitPreservesPitch = true; } return a; }
   document.addEventListener('click', e => { const b = e.target.closest('[data-spd]'); if (!b || running) return;
@@ -396,7 +409,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     b.textContent = st === 'wait' ? '⏳ 음원 준비 중… 잠깐만 기다려요' : st === 'ok' ? '✓ 음원 준비 끝! 아래 빨간 버튼을 눌러요' : '✓ 준비 끝! 원어민 목소리로 읽어 줘요';
     if (!running) $('go').disabled = st === 'wait';
   }
-  async function toWav(buf){
+  async function toWav(buf, pk){
     const C = window.OfflineAudioContext || window.webkitOfflineAudioContext; if (!C) return null;
     const SR = 22050, ctx = new C(1, SR, SR);
     const ab = await new Promise((ok, no) => { const r = ctx.decodeAudioData(buf, ok, no); if (r && r.then) r.then(ok, no); });
@@ -404,7 +417,9 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     w(0, 'RIFF'); d.setUint32(4, 36 + n * 2, true); w(8, 'WAVEfmt '); d.setUint32(16, 16, true); d.setUint16(20, 1, true); d.setUint16(22, 1, true);
     d.setUint32(24, ab.sampleRate, true); d.setUint32(28, ab.sampleRate * 2, true); d.setUint16(32, 2, true); d.setUint16(34, 16, true); w(36, 'data'); d.setUint32(40, n * 2, true);
     const cs = []; for (let c = 0; c < ch; c++) cs.push(ab.getChannelData(c));
-    for (let i = 0; i < n; i++){ let v = 0; for (let c = 0; c < ch; c++) v += cs[c][i]; v = Math.max(-1, Math.min(1, v / ch)); d.setInt16(44 + i * 2, v < 0 ? v * 0x8000 : v * 0x7fff, true); }
+    const mono = (pk && WA_REC && ab.sampleRate === PSR) ? new Float32Array(n) : null;
+    for (let i = 0; i < n; i++){ let v = 0; for (let c = 0; c < ch; c++) v += cs[c][i]; v = Math.max(-1, Math.min(1, v / ch)); if (mono) mono[i] = v; d.setInt16(44 + i * 2, v < 0 ? v * 0x8000 : v * 0x7fff, true); }
+    if (mono) PCMS[pk] = mono;
     return URL.createObjectURL(new Blob([d], {type:'audio/wav'}));
   }
   function loadTrack(x){
@@ -425,7 +440,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
       fetch('plans/' + k + '.json', {cache:'no-cache'}).then(r => r.ok ? r.json() : null).catch(() => null)
         .then(pl => pl && pl.length ? (SEGS[k] = WONLY ? pl.filter(x => x[3] !== 'e') : pl) : segment(by.buffer.slice(0), wantSegs(x)).then(sg => { SEGS[k] = sg; }))
         .catch(() => { SEGS[k] = []; });
-      toWav(by.buffer.slice(0)).catch(() => null).then(u => { if (u){ try{ URL.revokeObjectURL(mp3); }catch(e){} } TRK[k] = u || mp3; if (IT && IT.audio === k){ AUD = rate(new Audio(TRK[k])); set('✓ 음원 준비 끝'); } });
+      toWav(by.buffer.slice(0), k).catch(() => null).then(u => { if (u){ try{ URL.revokeObjectURL(mp3); }catch(e){} } TRK[k] = u || mp3; if (IT && IT.audio === k){ AUD = rate(new Audio(TRK[k])); set('✓ 음원 준비 끝'); } });
     }).catch(() => { TRK[k] = 'none'; if (IT && IT.audio === k) set('음원이 아직 없어서 원어민 목소리로 읽어 줘요'); });
   }
   /* 따라 말할 틈: 음원을 소리 덩어리(단어·예문)로 나눠서, 하나 끝날 때마다 그 길이만큼 쉬어요 */
@@ -480,8 +495,19 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     (function next(){
       if (!running || my !== TSEQ) return;
       if (i >= sg.length){ showSay(0); onDone(); return; }
-      const [s0, e0] = sg[i]; a.onended = null; a.currentTime = s0; showSay(0);
+      const [s0, e0] = sg[i]; showSay(0);
       if (follow && i - off >= 0) focus(map[i - off], true);
+      const pcm = WA_REC && PCTX && PCMS[IT.audio];
+      if (pcm){
+        waPlay(pcm, s0, e0, () => {
+          if (!running || my !== TSEQ) return;
+          const len = (e0 - s0) / RATE, rep = sg[i][2] !== 0, gap = rep ? len + plusFor(len) : 0.25; i++;
+          if (!rep){ setTimeout(next, gap * 1000); return; }
+          showSay(gap); setTimeout(next, gap * 1000);
+        });
+        return;
+      }
+      a.onended = null; a.currentTime = s0;
       a.play().catch(() => {});
       (function watch(){
         if (!running || my !== TSEQ){ if (my === TSEQ) a.pause(); return; }
@@ -571,7 +597,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     trkUI('wait'); let done = false; const ok = () => { if (done || IT !== x || MODE !== 'role') return; done = true; trkUI('ok'); };
     setTimeout(() => { if (!done && IT === x && MODE === 'role' && !running){ done = true; trkUI(null); $('go').disabled = false; } }, 20000);
     Promise.all([
-      getTrack(k).then(j => { if (!j.ok) throw 0; const by = new Uint8Array(j.by); return toWav(by.buffer.slice(0)).catch(() => null).then(u => u || URL.createObjectURL(new Blob([by], {type: j.mime || 'audio/mpeg'}))); }),
+      getTrack(k).then(j => { if (!j.ok) throw 0; const by = new Uint8Array(j.by); return toWav(by.buffer.slice(0), k).catch(() => null).then(u => u || URL.createObjectURL(new Blob([by], {type: j.mime || 'audio/mpeg'}))); }),
       fetch('plans/' + k + '.json', {cache:'no-cache'}).then(r => r.ok ? r.json() : null)
     ]).then(([u, pl]) => { if (IT !== x || !pl) throw 0; RAUD = new Audio(u); RAUD.preload = 'auto'; RPL = pl; ok(); })
       .catch(() => { if (!done && IT === x){ done = true; trkUI(null); $('go').disabled = false; } });
@@ -579,6 +605,8 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   function playLine(n, onDone){
     const p = RPL && RPL.find(q => q[2] === n), a = RAUD;
     if (!p || !a) return false;
+    const pcm = WA_REC && PCTX && PCMS[IT.ra];
+    if (pcm){ const my = TSEQ; waPlay(pcm, p[0], p[1], () => { if (running && my === TSEQ) setTimeout(onDone, 450); }); return true; }
     const my = TSEQ; let fin = false; const end = () => { if (fin) return; fin = true; try{ a.pause(); }catch(e){} setTimeout(onDone, 450); };
     a.onended = end; a.currentTime = p[0];
     a.play().catch(() => { if (!fin){ fin = true; say(IT.L[n][1], IT.L[n][0], onDone); } });
@@ -616,6 +644,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     if (playing) $('listenAll').click();
     $('err').hidden = true;
     if (MODE === 'rap'){ try{ ACX = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ ACX = null; } }
+    if (WA_REC && MODE !== 'rap'){ try{ if (!PCTX) PCTX = new (window.AudioContext || window.webkitAudioContext)(); if (PCTX.state === 'suspended') PCTX.resume(); }catch(e){ PCTX = null; } }
     try{ stream = await navigator.mediaDevices.getUserMedia({audio: MODE === 'role' ? {echoCancellation:false, noiseSuppression:false, autoGainControl:true} : true}); }
     catch(e){ micErr(e); beatStop(); return; }
     mime = pickMime();
@@ -688,7 +717,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     CUT = why + ' ' + sec + '초';
     running = false; TSEQ++; clearInterval(tick); if (on){ acc += Date.now() - on; on = 0; } dur = acc / 1000; wakeOff();
     try{ if (window.speechSynthesis) (window.TTSA && TTSA.stop(), speechSynthesis.cancel()); }catch(e){}
-    if (AUD) AUD.pause(); if (RAUD) RAUD.pause(); showSay(0); if (MODE === 'rap') setTimeout(beatStop, 300);
+    if (AUD) AUD.pause(); if (RAUD) RAUD.pause(); waStop(); showSay(0); if (MODE === 'rap') setTimeout(beatStop, 300);
     showErr('⚠️ 휴대폰이 녹음을 중간에 멈췄어요 (' + sec + '초까지 녹음됨). 아래 「다시 하기」를 눌러 처음부터 다시 해 주세요. 또 끊기면 이어폰을 끼고 해 보고, 그래도 안 되면 선생님께 알려 주세요.');
     setTimeout(() => $('err').scrollIntoView({block:'center', behavior:'smooth'}), 400);
   }
@@ -696,7 +725,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     wakeOff();
     if (!running) return;
     running = false; TSEQ++; clearInterval(tick); if (on){ acc += Date.now() - on; on = 0; } dur = acc / 1000;
-    if (window.speechSynthesis) (window.TTSA && TTSA.stop(), speechSynthesis.cancel()); if (AUD) AUD.pause(); if (RAUD) RAUD.pause(); showSay(0);
+    if (window.speechSynthesis) (window.TTSA && TTSA.stop(), speechSynthesis.cancel()); if (AUD) AUD.pause(); if (RAUD) RAUD.pause(); waStop(); showSay(0);
     if (MODE === 'rap') setTimeout(beatStop, 300);
     setTimeout(srStop, MODE !== 'role' ? 700 : 0);
     if (rec && rec.state !== 'inactive'){ try{ rec.requestData(); }catch(e){} rec.stop(); }
