@@ -95,6 +95,9 @@
   const $ = id => document.getElementById(id);
   const LOG = 'https://script.google.com/macros/s/AKfycbwdK8492SzMcrc_hmwGWIquliehqASMrSAhbXJ5D-UyygkmwYvO23LWDzU8O44UrGQD/exec';
   const Q = new URLSearchParams(location.search);
+  /* 짧은 QR (2026-11-07): ?z=이름|반|숙제|날짜 를 base64url로 — 한글 주소가 길어 QR이 촘촘해서 잘 안 찍히던 문제 (은설) */
+  try{ const z = Q.get('z'); if (z){ const b = atob(z.replace(/-/g, '+').replace(/_/g, '/')), u8 = Uint8Array.from(b, ch => ch.charCodeAt(0)), p = new TextDecoder().decode(u8).split('|');
+    ['s', 'c', 'h', 'd'].forEach((k, i) => { if (p[i] && !Q.get(k)) Q.set(k, k === 'd' && /^\d{6}$/.test(p[i]) ? '20' + p[i].slice(0, 2) + '-' + p[i].slice(2, 4) + '-' + p[i].slice(4) : p[i]); }); } }catch(e){}
   let STUDENT = (Q.get('s') || '').replace(/\s+/g, '');
   const CLS = Q.get('c') || '', HW = (Q.get('h') || '').trim(), DATE = Q.get('d') || '';
   const MAX = 6, EDGE = 1600;
