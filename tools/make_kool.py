@@ -12,10 +12,11 @@ for src,out in [('/home/claude/words/단어마스터.html','voca.html'),('/home/
     s=s.replace('<body>',KAKAO_JS+'<body>',1) if '<body>' in s else KAKAO_JS+s
     if out=='voca.html':
         a='on=speechSynthesis.speaking||speechSynthesis.pending'
-        assert s.count(a)==1; s=s.replace(a,a+'||!!window.__audOn')
+        assert s.count(a)==1; s=s.replace(a,a+'||!!window.__audOn||!!(window.TTSA&&TTSA.playing())')
+        s=s.replace(KAKAO_JS,KAKAO_JS+'<script src="https://eae-english.github.io/enchool-rec/tools/tts_aud.js"></script>',1)  # 원음원 없는 단어도 자연스러운 목소리 (2026-11-08)
         import hashlib; AJ=hashlib.md5(open('/home/claude/enchool-rec/kool/aud.json','rb').read()).hexdigest()[:8]
         i=s.rfind('</body>'); s=s[:i]+'<script>'+open('/home/claude/enchool-rec/tools/voca_aud.js',encoding='utf8').read().replace('__AUDJ__',AJ)+'</script>'+s[i:]
-    if out=='talk.html':   # 쿨톡: 미리 만든 자연스러운 목소리 (tools/tts_aud.js · 2026-11-04)
+    if out in ('talk.html','bon.html'):   # 쿨톡 · 쿨본문(2026-11-08 예원 아이폰 무음): 쿨톡: 미리 만든 자연스러운 목소리 (tools/tts_aud.js · 2026-11-04)
         a1='function speak(text,who,done){'
         assert s.count(a1)==1; s=s.replace(a1,a1+'if(window.TTSA&&TTSA.play(text,who,done))return;')
         a2='on=speechSynthesis.speaking||speechSynthesis.pending'

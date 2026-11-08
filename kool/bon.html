@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]{display:none!important}</style></head><script>/* 카톡 안 작은 브라우저면 바깥 브라우저로 다시 열기 (소리·마이크가 막혀서 · 2026-10-31) */(function(){try{if(/KAKAOTALK/i.test(navigator.userAgent)&&!/[?&#]noext/.test(location.href)){location.href="kakaotalk://web/openExternal?url="+encodeURIComponent(location.href)}}catch(e){}})();</script><body><title>쿨본문</title>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]{display:none!important}</style></head><script>/* 카톡 안 작은 브라우저면 바깥 브라우저로 다시 열기 (소리·마이크가 막혀서 · 2026-10-31) */(function(){try{if(/KAKAOTALK/i.test(navigator.userAgent)&&!/[?&#]noext/.test(location.href)){location.href="kakaotalk://web/openExternal?url="+encodeURIComponent(location.href)}}catch(e){}})();</script><script src="https://eae-english.github.io/enchool-rec/tools/tts_aud.js"></script><body><title>쿨본문</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Gaegu:wght@400;700&display=swap">
 <style>
@@ -453,8 +453,8 @@ function diff(typed,ans){const A=norm(typed).split(" ").filter(Boolean),B=norm(a
 let VOICE=null;function pickVoice(){try{const v=speechSynthesis.getVoices().filter(x=>/^en/i.test(x.lang));VOICE=v.find(x=>/US/i.test(x.lang))||v[0]||null}catch(e){}}
 try{speechSynthesis.onvoiceschanged=pickVoice;pickVoice()}catch(e){}
 /* 마지막 소리가 끝까지 나온 뒤에 결과 화면으로 (2026-10-29) */
-function finishSay(){const S0=ST;if(!S0||S0._fs)return;S0._fs=1;const t0=Date.now();(function w(){let on=false;try{on=speechSynthesis.speaking||speechSynthesis.pending}catch(e){}if(on&&Date.now()-t0<15000)return setTimeout(w,200);if(ST===S0)setTimeout(()=>{if(ST===S0)finish()},500)})()}
-function speak(text,who,done){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(plain(text));u.lang="en-US";if(VOICE)u.voice=VOICE;u.rate=.88;
+function finishSay(){const S0=ST;if(!S0||S0._fs)return;S0._fs=1;const t0=Date.now();(function w(){let on=false;try{on=speechSynthesis.speaking||speechSynthesis.pending||!!(window.TTSA&&TTSA.playing())}catch(e){}if(on&&Date.now()-t0<15000)return setTimeout(w,200);if(ST===S0)setTimeout(()=>{if(ST===S0)finish()},500)})()}
+function speak(text,who,done){if(window.TTSA&&TTSA.play(text,who,done))return;try{(window.TTSA&&TTSA.stop(),speechSynthesis.cancel());const u=new SpeechSynthesisUtterance(plain(text));u.lang="en-US";if(VOICE)u.voice=VOICE;u.rate=.88;
  u.pitch=/^(G|Linda)$/.test(who||"")?1.25:.85;if(done)u.onend=done;speechSynthesis.speak(u)}catch(e){done&&done()}}
 const isRight=(d,s)=>s===d.L[0][0]?false:true; /* 첫 화자는 왼쪽, 상대는 오른쪽 */
 
@@ -707,7 +707,7 @@ document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)r
  if(b.dataset.keychk!==undefined){ST.chk();return}
  if(b.dataset.keyshow!==undefined){ST.show();return}
  if(b.dataset.role){ST.role(b.dataset.role);return}
- if(b.dataset.recdone!==undefined){try{speechSynthesis.cancel()}catch(e){}ST.recDone=true;ST.ok=ST.total=Math.max(1,ST.total||1);ST._fs=1;if(COURSE){const c=COURSE;c.res.push({m:"role",ok:1,n:1,rec:true});c.idx++;renderCourse();runStep()}else finish();return}
+ if(b.dataset.recdone!==undefined){try{(window.TTSA&&TTSA.stop(),speechSynthesis.cancel())}catch(e){}ST.recDone=true;ST.ok=ST.total=Math.max(1,ST.total||1);ST._fs=1;if(COURSE){const c=COURSE;c.res.push({m:"role",ok:1,n:1,rec:true});c.idx++;renderCourse();runStep()}else finish();return}
  if(b.dataset.lshow!==undefined){showLine(document.querySelector(`.full[data-li="${b.dataset.lshow}"]`),d);return}
  if(b.dataset.allchk!==undefined){let first=null;/* 전체 확인 때는 줄마다 읽어 주지 않아요 (2026-10-29) */ST.bulk=true;document.querySelectorAll("#stage .full").forEach(x=>{if(!gradeLine(x,d)&&!first)first=x});ST.bulk=false;
   if(first){first.querySelector("input").focus();if(MODE==="write")document.querySelectorAll("#stage .full.bad").forEach(x=>{if(!x.querySelector(".lsb"))x.insertAdjacentHTML("beforeend",`<div class="rowb lsb"><button class="mini" data-lshow="${x.dataset.li}">정답 보기</button></div>`)})}lineProgress();return}

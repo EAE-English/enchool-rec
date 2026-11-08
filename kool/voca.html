@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]{display:none!important}</style></head><script>/* 카톡 안 작은 브라우저면 바깥 브라우저로 다시 열기 (소리·마이크가 막혀서 · 2026-10-31) */(function(){try{if(/KAKAOTALK/i.test(navigator.userAgent)&&!/[?&#]noext/.test(location.href)){location.href="kakaotalk://web/openExternal?url="+encodeURIComponent(location.href)}}catch(e){}})();</script><body><title>쿨보카</title>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]{display:none!important}</style></head><script>/* 카톡 안 작은 브라우저면 바깥 브라우저로 다시 열기 (소리·마이크가 막혀서 · 2026-10-31) */(function(){try{if(/KAKAOTALK/i.test(navigator.userAgent)&&!/[?&#]noext/.test(location.href)){location.href="kakaotalk://web/openExternal?url="+encodeURIComponent(location.href)}}catch(e){}})();</script><script src="https://eae-english.github.io/enchool-rec/tools/tts_aud.js"></script><body><title>쿨보카</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Gaegu:wght@400;700&display=swap">
 <style>
@@ -437,7 +437,7 @@ function capsOk(typed,ans){const A=ans.replace(/~/g," ").split(/[\s-]+/).filter(
 let VOICE=null;function pickVoice(){try{const v=speechSynthesis.getVoices().filter(x=>/^en/i.test(x.lang));VOICE=v.find(x=>/US/i.test(x.lang))||v[0]||null}catch(e){}}
 try{speechSynthesis.onvoiceschanged=pickVoice;pickVoice()}catch(e){}
 /* 마지막 소리가 끝까지 나온 뒤에 결과 화면으로 (2026-10-29) */
-function finishSay(){const S0=ST;if(!S0||S0._fs)return;S0._fs=1;const t0=Date.now();(function w(){let on=false;try{on=speechSynthesis.speaking||speechSynthesis.pending||!!window.__audOn}catch(e){}if(on&&Date.now()-t0<15000)return setTimeout(w,200);if(ST===S0)setTimeout(()=>{if(ST===S0)finish()},500)})()}
+function finishSay(){const S0=ST;if(!S0||S0._fs)return;S0._fs=1;const t0=Date.now();(function w(){let on=false;try{on=speechSynthesis.speaking||speechSynthesis.pending||!!window.__audOn||!!(window.TTSA&&TTSA.playing())}catch(e){}if(on&&Date.now()-t0<15000)return setTimeout(w,200);if(ST===S0)setTimeout(()=>{if(ST===S0)finish()},500)})()}
 function speak(t,slow){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(say(t));u.lang="en-US";if(VOICE)u.voice=VOICE;u.rate=slow?.6:.82;speechSynthesis.speak(u)}catch(e){}}
 function stars(p){const n=p>=.95?3:p>=.8?2:p>=.5?1:0;return "★".repeat(n)+`<span class="off">${"★".repeat(3-n)}</span>`}
 
@@ -712,7 +712,7 @@ function pre(){const ids=(location.hash||'').slice(1).split('.').slice(1).filter
 TKDB.get('aud|c761549b').then(c=>c||fetch('aud.json?v=c761549b').then(r=>r.json()).then(j=>{TKDB.put('aud|c761549b',j);return j})).then(j=>{AM=j;pre()}).catch(()=>{});
 window.addEventListener('hashchange',()=>{if(AM)pre()});
 function pick(t){if(!AM)return null;const L=AM[nz(t)];if(!L)return null;return L.find(c=>TK[c[0]]&&TK[c[0]]!=='none')||L.find(c=>LD[c[0]])||L[0]}
-const tts=window.speak;let A=null,T=null;
+const tts0=window.speak,tts=(t,slow)=>{/* 원음원이 없는 단어는 미리 만든 자연스러운 목소리(kool/tts)로 · 없을 때만 기계 목소리 (2026-11-08 아이폰 무음) */try{if(window.TTSA&&TTSA.play(String(t),'',null,slow?.75:1))return}catch(e){}return tts0(t,slow)};let A=null,T=null;
 window.speak=function(t,slow){const c=pick(t);if(!c)return tts(t,slow);const k=c[0];
  if(!TK[k]){load(k);return tts(t,slow)}if(TK[k]==='none')return tts(t,slow);
  try{speechSynthesis.cancel()}catch(e){}clearTimeout(T);if(!A)A=new Audio();if(A.src!==TK[k])A.src=TK[k];

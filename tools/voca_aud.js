@@ -21,7 +21,7 @@ function pre(){const ids=(location.hash||'').slice(1).split('.').slice(1).filter
 TKDB.get('aud|__AUDJ__').then(c=>c||fetch('aud.json?v=__AUDJ__').then(r=>r.json()).then(j=>{TKDB.put('aud|__AUDJ__',j);return j})).then(j=>{AM=j;pre()}).catch(()=>{});
 window.addEventListener('hashchange',()=>{if(AM)pre()});
 function pick(t){if(!AM)return null;const L=AM[nz(t)];if(!L)return null;return L.find(c=>TK[c[0]]&&TK[c[0]]!=='none')||L.find(c=>LD[c[0]])||L[0]}
-const tts=window.speak;let A=null,T=null;
+const tts0=window.speak,tts=(t,slow)=>{/* 원음원이 없는 단어는 미리 만든 자연스러운 목소리(kool/tts)로 · 없을 때만 기계 목소리 (2026-11-08 아이폰 무음) */try{if(window.TTSA&&TTSA.play(String(t),'',null,slow?.75:1))return}catch(e){}return tts0(t,slow)};let A=null,T=null;
 window.speak=function(t,slow){const c=pick(t);if(!c)return tts(t,slow);const k=c[0];
  if(!TK[k]){load(k);return tts(t,slow)}if(TK[k]==='none')return tts(t,slow);
  try{speechSynthesis.cancel()}catch(e){}clearTimeout(T);if(!A)A=new Audio();if(A.src!==TK[k])A.src=TK[k];
