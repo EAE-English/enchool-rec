@@ -62,9 +62,15 @@ def chk_voca(ids):
 def chk_rec(k):
     # rec.html?k=<스크립트>.<항목,항목> 또는 k=<트랙키>~... : 항목마다 음원(파일·계획표)이 있는지
     if '.' not in k:
-        keys = [k.split('~')[0]]; base = re.sub(r'_\d+$', '', keys[0])
-        ok = all(has_trk(x) for x in keys)
-        return (1, 0 if ok else 1), ([] if ok else ['음원 파일 없음 ' + k])
+        m = re.match(r'^(.+?)_(\d+(?:~\d+)*)$', k)
+        names = [m.group(1) + '_' + n for n in m.group(2).split('~')] if m else [k]
+        tot = bad = 0; ex = []
+        for nm in names:
+            f = R + '/scripts/' + nm + '.json'
+            if not os.path.exists(f): tot += 1; bad += 1; ex.append('대본 없음 ' + nm); continue
+            d = json.load(open(f)); ids = [str(x['id']) for x in d.get('shadow') or []] + [str(x['id']) for x in d.get('body') or []]
+            r, e = chk_rec(nm + '.' + ','.join(ids)); tot += r[0]; bad += r[1]; ex += e
+        return (tot, bad), ex
     nm, its = k.split('.', 1); f = R + '/scripts/' + nm + '.json'
     if not os.path.exists(f): return None, ['대본 없음 ' + nm]
     d = json.load(open(f)); tot = bad = 0; ex = []
