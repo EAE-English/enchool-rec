@@ -601,7 +601,7 @@ function finishStep(pct){const c=COURSE,s=set(),M=MN(MODE);
  $("#stage").innerHTML=`<div class="clearpanel"><img src="${MODE==="write"?OWL.knight:OWL.wizard}" alt=""><h3>${M.n} ${M.t} 클리어!</h3><div class="stars">${stars(pct)}</div><p>한 번에 맞힘 ${ST.ok}/${ST.total}</p>
   <button class="btn pri lg nextb" data-cstep style="margin-top:8px">${nx?`다음: ${MN(nx).n} ${MN(nx).t} ▶`:c.miss.size&&!c.review?`다음: ↺ 틀린 단어 ${c.miss.size}개 ▶`:"다음: 🏆 결과 보기 ▶"}</button></div>`;
  $("#cnt").textContent="클리어!";if(last&&!c.miss.size){}}
-function endCourse(){const c=COURSE,s=set(),r=rec(s.id);r.courses=(r.courses||0)+1;save();
+function endCourse(){const c=COURSE,s=set(),r=rec(s.id);r.courses=(r.courses||0)+1;/* 마스터 테스트 80% 미만이어도 틀린 단어 재시험까지 끝내면 마스터로 기록 → QR 여러 세트면 다음 세트로 (2026-11-09) */if(c&&c.res.some(x=>x.m==="write")&&!r.passed.includes("write"))r.passed.push("write");save();
  showResult(courseRes());
  COURSE=null;$("#act").hidden=true;home()}
 
