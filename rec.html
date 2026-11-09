@@ -672,7 +672,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     nb.disabled = true; speaking = false; recOff(); setTimeout(srStop, 600);
     setTimeout(() => { i++; step(); }, 250);
   };
-  function micErr(e){
+  function micErr(e){ wakeOff();
     if (e && e.name === 'NotAllowedError') showErr('마이크가 막혀 있어요. 주소창 왼쪽 🔒(또는 조절 아이콘) → 권한 → 마이크 → 허용으로 바꾸고 다시 눌러 주세요.');
     else if (e && e.name === 'NotFoundError') showErr('마이크를 찾지 못했어요. 이어폰·마이크가 연결돼 있는지 봐 주세요.');
     else showErr('마이크를 쓸 수 없어요. (' + (e && e.name) + ')');
@@ -680,10 +680,20 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   /* 녹음하는 동안 화면이 꺼지지 않게 (화면이 꺼지면 녹음이 끊기고 페이지가 처음으로 튕겨요 · 2026-10-31) */
   let WL = null;
   async function wakeOn(){ try{ if (navigator.wakeLock && !WL){ WL = await navigator.wakeLock.request('screen'); WL.addEventListener('release', () => { WL = null; }); } }catch(e){ WL = null; } }
-  function wakeOff(){ try{ WL && WL.release(); }catch(e){} WL = null; }
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && running) wakeOn(); });
+  /* 아이폰: 화면 켜 두기(wakeLock)가 안 되는 화면이 있어요 → 소리 없는 아주 작은 영상을 반복 재생하면 자동 잠금이 안 걸려요 (2026-11-09 예원 · 30~40초에 끊김) */
+  let NSV = null;
+  const IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+  function nsOn(){ if (!IOS) return; try{ if (!NSV){ NSV = document.createElement('video'); NSV.setAttribute('playsinline', ''); NSV.setAttribute('muted', ''); NSV.muted = true; NSV.loop = true; NSV.src = 'nosleep.mp4';
+      NSV.style.cssText = 'position:fixed;left:0;bottom:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:-1'; document.body.appendChild(NSV); }
+    const p = NSV.play(); if (p && p.catch) p.catch(() => {}); }catch(e){} }
+  function nsOff(){ try{ NSV && NSV.pause(); }catch(e){} }
+  function wakeOff(){ try{ WL && WL.release(); }catch(e){} WL = null; nsOff(); }
+  /* 녹음 중에 화면이 꺼졌는지(잠겼는지) 기억해 둬요 — 끊긴 이유를 정확히 알려 주려고 */
+  let HID = 0;
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && running){ wakeOn(); nsOn(); } if (document.visibilityState === 'hidden' && running) HID = Date.now(); });
   $('go').onclick = async () => {
     if (running && MODE !== 'role'){ stop(); return; }
+    if (!running){ HID = 0; wakeOn(); nsOn(); }   /* 손가락으로 누른 바로 그 순간에 켜야 아이폰이 허락해요 */
     if (playing) $('listenAll').click();
     $('err').hidden = true;
     if (MODE === 'rap'){ try{ ACX = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ ACX = null; } }
@@ -756,11 +766,14 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   let CUT = '';
   function cutOff(why){
     const sec = Math.round((acc + (on ? Date.now() - on : 0)) / 1000);
-    CUT = why + ' ' + sec + '초';
+    const hid = !!HID || document.visibilityState === 'hidden';
+    CUT = why + ' ' + sec + '초' + (hid ? ' · 화면 꺼짐' : ' · 화면 켜짐') + (WL ? ' · 화면유지O' : ' · 화면유지X');
     running = false; TSEQ++; clearInterval(tick); if (on){ acc += Date.now() - on; on = 0; } dur = acc / 1000; wakeOff();
     try{ if (window.speechSynthesis) (window.TTSA && TTSA.stop(), speechSynthesis.cancel()); }catch(e){}
     if (AUD) AUD.pause(); if (RAUD) RAUD.pause(); waStop(); showSay(0); if (MODE === 'rap') setTimeout(beatStop, 300);
-    showErr('⚠️ 휴대폰이 녹음을 중간에 멈췄어요 (' + sec + '초까지 녹음됨). 아래 「다시 하기」를 눌러 처음부터 다시 해 주세요. 또 끊기면 이어폰을 끼고 해 보고, 그래도 안 되면 선생님께 알려 주세요.');
+    showErr(hid
+      ? '⚠️ 화면이 꺼져서(잠겨서) 녹음이 멈췄어요 (' + sec + '초). 아이폰은 설정 → 디스플레이 및 밝기 → 자동 잠금 → 「안 함」으로 바꾸고, 아래 「다시 하기」로 처음부터 해 주세요. 그래도 끊기면 이대로 「선생님께 보내기」를 눌러 주세요.'
+      : '⚠️ 휴대폰이 녹음을 중간에 멈췄어요 (' + sec + '초까지 녹음됨). 아래 「다시 하기」를 눌러 처음부터 다시 해 주세요. 또 끊기면 이대로 「선생님께 보내기」를 눌러 주세요 (끊긴 이유가 선생님께 같이 가요).');
     setTimeout(() => $('err').scrollIntoView({block:'center', behavior:'smooth'}), 400);
   }
   function stop(){
