@@ -22,7 +22,7 @@ for f in sorted(glob.glob(R + '/scripts/*.json')):
         for fn in fns:
             a = pcm(T + fn); plan.append([round(max(0, t - .05), 2), round(t + len(a) / SR + .05, 2), 1])
             parts += [a, np.zeros(int(SR * GAP), np.float32)]; t += len(a) / SR + GAP
-        tmp = '/tmp/claude-0/-home-claude/eb84d13a-720f-538f-be80-bff5a201daef/scratchpad/_bt.wav'; sf.write(tmp, np.concatenate(parts), SR)
+        import tempfile; tmp = os.path.join(tempfile.gettempdir(), '_bt.wav'); sf.write(tmp, np.concatenate(parts), SR)
         subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', tmp, '-ac', '1', '-b:a', '64k', R + '/kool/aud/' + key + '.mp3'], check=True)
         json.dump(plan, open(R + '/plans/' + key + '.json', 'w')); made += 1
         if k and k != key: b['audio_drive'] = k   # 원래 기다리던 드라이브 이름은 남겨 둬요 (나중에 원음원을 올리면 되돌릴 수 있게)
