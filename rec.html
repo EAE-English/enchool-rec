@@ -74,6 +74,11 @@
   .done{text-align:center;box-shadow:inset 0 4px 0 var(--gold)}
   .done h2{margin:6px 0;color:var(--navy);font-weight:400;font-size:22px}
   .done p{margin:0;color:var(--muted)}
+  /* 여러 개 녹음 숙제: 지금 할 것·남은 것 크게 (2026-11-11 예원 42→43 헷갈림) */
+  .nowb{display:flex;align-items:center;gap:10px;background:var(--navy);color:#fff;border-radius:14px;padding:11px 14px;margin:0 0 12px;font-family:var(--ko)}
+  .nowb b{font-size:17px;color:#f3c74f}.nowb small{margin-left:auto;font-size:13px;color:#dfe6f2;white-space:nowrap}
+  .dn-ok{font-size:21px;color:var(--navy);font-weight:800;margin:6px 0 4px}.dn-go{font-size:16px;color:#c0392b;font-weight:800;margin:10px 0 2px}
+  .dn-rem{margin-top:8px;font-size:14px;color:var(--navy)}.dn-rem b{color:#c0392b}
   .err{background:#FDECEC;color:#9B1C1F;border-radius:12px;padding:12px 14px;font-size:15px}
   .tip{font-size:15px;line-height:1.6;background:var(--gold-soft);border-color:var(--gold)}
   .tip b{color:var(--navy)}
@@ -155,6 +160,7 @@ function getTrack(k){return TKDB.get(AUDV+'|'+k).then(c=>c&&c.by?{ok:true,by:c.b
   <div id="stage" hidden>
     <section class="best" id="bestNote"><div class="bi">🏆</div><div><b>이 녹음은 선생님께 그대로 전달돼요!</b><p>매달 말, <b>이달의 최고 녹음</b>을 뽑아요.<br>항상 최선을 다해서 녹음해 주세요 💪</p></div></section>
     <section class="card" id="intro">
+      <div class="nowb" id="nowB" hidden><span>🎙 지금 녹음할 것</span><b id="nowT"></b><small id="nowN"></small></div>
       <p class="label" id="unit"></p>
       <h1 id="title"></h1>
       <p class="sub" id="how"></p>
@@ -170,7 +176,8 @@ function getTrack(k){return TKDB.get(AUDV+'|'+k).then(c=>c&&c.by?{ok:true,by:c.b
     <section class="card done" id="doneCard" hidden>
       <div style="font-size:44px" id="doneIc">🎬</div>
       <h2 id="doneT">멋진 연기였어요!</h2>
-      <p>녹음이 선생님께 잘 전달됐어요.</p>
+      <p id="doneP">녹음이 선생님께 잘 전달됐어요.</p>
+      <div id="doneMulti" hidden></div>
       <div class="cc-sum" id="ccSum" hidden></div>
       <button class="btn main" id="more" style="margin-top:14px;width:100%" hidden>다른 것도 녹음하기</button>
       <button class="btn main" id="fin" style="margin-top:14px;width:100%" hidden>다음 ▶</button>
@@ -312,11 +319,30 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   document.addEventListener('click', e => { if (e.target.closest('[data-back]')) { if (running && !confirmLeave()) return; showPick(); } });
   function confirmLeave(){ stop(); return true; }
 
+  const itName = x => String(x.t || '') + (x.sub && !/^\d+$/.test(String(x.t || '').trim()) ? '' : '');
+  const itKey = x => x.id + (MODE === 'rap' ? 'r' : '');
+  /* 보내기 끝: 여러 개면 「✅ 42 완료! 계속 이어가세요 · 남은 녹음 · ▶ 43 이어서 하기」 (2026-11-11) */
+  function doneMulti(){
+    const box = $('doneMulti'); if (ITEMS.length < 2){ box.hidden = true; return; }
+    const rem = ITEMS.filter(x => !sentOK[itKey(x)]), all = ITEMS.map(itName).map(esc).join(' · ');
+    $('doneP').hidden = true; box.hidden = false;
+    if (rem.length){
+      box.innerHTML = `<div class="dn-ok">✅ ${esc(itName(IT))} 선생님께 보내기 완료!</div><div class="dn-go">계속 학습을 이어가세요!</div>`
+        + `<div class="dn-rem">남은 녹음: <b>${rem.map(itName).map(esc).join(' · ')}</b> (${rem.length}개)</div>`;
+      $('more').hidden = false; $('more').textContent = '▶ ' + itName(rem[0]) + ' 이어서 하기'; $('more').onclick = () => open(rem[0]);
+      $('fin').hidden = true; $('finHint').hidden = true;
+    } else {
+      box.innerHTML = `<div class="dn-ok">🎉 오늘 녹음 숙제 끝!</div><div class="dn-rem">${all} 모두 선생님께 보냈어요.</div>`;
+      $('more').hidden = false; $('more').textContent = '다른 것도 녹음하기'; $('more').onclick = () => showPick();
+      $('fin').hidden = !BACK; $('finHint').hidden = !!BACK; $('finHint').innerHTML = '✓ 끝! 이제 다음 숙제를 하면 돼요.';
+    }
+  }
   function open(x){
     IT = x; $('pick').hidden = true; $('err').hidden = true;
     /* 원음원 없는 단어 묶음: 미리 만든 목소리를 먼저 받아 둠 (2026-11-04) */
     if (window.TTSA && x.kind === 'shadow' && !x.audio) TTSA.ready.then(() => TTSA.pre((x.words || []).flatMap(w => [['', w.w]].concat(w.ex ? [['', w.ex]] : []))));
     const many = ITEMS.length > 1;
+    try{ $('nowB').hidden = !many; if (many){ const ix = ITEMS.indexOf(x); $('nowT').textContent = itName(x); $('nowN').textContent = ITEMS.length + '개 중 ' + (ix + 1) + '번째'; } }catch(e){}
     $('backStage').hidden = !many; document.querySelector('#rolePick [data-back]').hidden = !many;
     if (x.kind === 'dlg'){
       const sps = [...new Set(x.L.map(l => l[0]))];
@@ -835,6 +861,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
       const reset = () => { $('send').disabled = false; $('again').disabled = false; $('send').textContent = '선생님께 보내기'; };
       const ok = () => { reset(); sentOK[IT.id + (MODE === 'rap' ? 'r' : '')] = 1; coinSend(); $('doneCard').hidden = false; $('send').hidden = true; $('again').textContent = '한 번 더 하기';
         $('doneIc').textContent = MODE === 'rap' ? '🎤' : MODE === 'role' ? '🎬' : MODE === 'shadow' ? '🎧' : '📖'; $('doneT').textContent = MODE === 'rap' ? '멋진 랩이었어요!' : MODE === 'role' ? '멋진 연기였어요!' : MODE === 'shadow' ? '원어민처럼 잘 따라 했어요!' : '또박또박 잘 읽었어요!';
+        try{ doneMulti(); }catch(e){}
         $('doneCard').scrollIntoView({block:'center', behavior:'smooth'}); };
       const fail = e => { reset(); showErr('보내기가 안 됐어요. 다시 눌러 주세요. (' + e.message + ')'); };
       /* 🧪 테스트(s=테스트): 보내지 않고 끝 화면만 (2026-11-06) */if (!notTest()) { ok(); $('doneT').textContent += ' (테스트라 선생님께 안 보냈어요)'; return; }
