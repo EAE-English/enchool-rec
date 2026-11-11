@@ -133,7 +133,7 @@
     addEventListener("pagehide",flush);document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")flush()});
     try{if(localStorage.getItem(PK))send()}catch(e){}
     $("#who").textContent=D.nm?(D.en&&D.en!==D.nm?D.en+" · "+D.nm:D.nm):"우리 반";$("#cls").textContent=D.c||"오늘의 숙제";
-    document.title=`${D.nm||""} 숙제 · ${mds(D.d)} — 엔쿨`;
+    document.title=KC?"엔쿨 숙제장":`${D.nm||""} 숙제 · ${mds(D.d)} — 엔쿨`;/* 아이 전용 주소: 홈 화면 바로가기 이름이 날짜 없이 「엔쿨 숙제장」으로 */
     const go=b=>`<a class="gob k-${esc(b.k)}" href="${esc(b.u)}"><b>${esc(b.l)}</b><small>${esc(String(b.s||"").replace(/^녹음 · /,""))}</small></a>`;
     const items=(D.it||[]),N=items.length;
     $("#app").innerHTML=tabsHTML()+`<section class="card top"><h1>${md(D.d)} 숙제</h1><p class="due">${D.due?`<b>${mds(D.due)}</b> 수업까지 해 와요`:"다음 수업까지 해 와요"}</p>
