@@ -233,7 +233,7 @@ header.hero .hr .hero-owl{position:static;width:114px;margin:2px 0 0}
 <style>/* QR 단순 화면 (2026-11-05) */
 body.qrs h2.sec,body.qrs #books,body.qrs #sets,body.qrs #more,body.qrs #who [data-who],body.qrs #who .tot{display:none!important}
 #qrbar{display:none}body.qrs #qrbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:16px 2px 10px;background:#fffaf0;border:1.5px solid var(--gold,#f2c94c);border-radius:12px;padding:10px 14px;font-size:15px;color:var(--ink,#1d2433)}
-#qrbar b{color:var(--navy,#102f5e)}
+#qrbar b{color:var(--navy,#102f5e)}#qrbar span{margin-left:auto;font-size:13px;color:var(--muted,#7a8191);font-weight:700}
 #qrgo{text-align:center;background:#fff;border:2px solid var(--gold,#f2c94c);border-radius:16px;padding:14px 14px 16px;margin:0 2px 12px}#qrgo .qg-go{font-size:24px;font-weight:800;color:#c0392b;line-height:1.3}#qrgo .qg-ok{font-size:16px;font-weight:800;color:var(--navy,#102f5e);margin-top:4px}#qrgo .qg-ok.big{font-size:22px}#qrgo .qg-rem{font-size:14px;color:var(--navy,#102f5e);margin-top:6px}#qrgo .qg-rem b{color:#c0392b}#qrgo .qg-btn{width:100%;margin-top:12px}body:not(.qrs) #qrgo{display:none}#qrbar span{margin-left:auto;font-size:13px;color:var(--muted,#7a8191);font-weight:700}
 </style>
 <style>
@@ -602,7 +602,7 @@ function finishStep(pct){const c=COURSE,s=set(),M=MN(MODE);
  $("#stage").innerHTML=`<div class="clearpanel"><img src="${MODE==="write"?OWL.knight:OWL.wizard}" alt=""><h3>${M.n} ${M.t} 클리어!</h3><div class="stars">${stars(pct)}</div><p>한 번에 맞힘 ${ST.ok}/${ST.total}</p>
   <button class="btn pri lg nextb" data-cstep style="margin-top:8px">${nx?`다음: ${MN(nx).n} ${MN(nx).t} ▶`:c.miss.size&&!c.review?`다음: ↺ 틀린 단어 ${c.miss.size}개 ▶`:"다음: 🏆 결과 보기 ▶"}</button></div>`;
  $("#cnt").textContent="클리어!";if(last&&!c.miss.size){}}
-function endCourse(){const c=COURSE,s=set(),r=rec(s.id);r.courses=(r.courses||0)+1;save();
+function endCourse(){const c=COURSE,s=set(),r=rec(s.id);r.courses=(r.courses||0)+1;/* 마스터 테스트 80% 미만이어도 틀린 단어 재시험까지 끝내면 마스터로 기록 → QR 여러 세트면 다음 세트로 (2026-11-09) */if(c&&c.res.some(x=>x.m==="write")&&!r.passed.includes("write"))r.passed.push("write");save();
  showResult(courseRes());
  COURSE=null;$("#act").hidden=true;home()}
 
