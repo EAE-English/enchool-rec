@@ -108,6 +108,16 @@ if __name__ == '__main__':
     else:
         U = [f'x/kool/bon.html#t.{k}' for k in BON] + [f'x/kool/talk.html#t.{k}' for k in TALK] + [f'x/kool/voca.html#t.{k}' for k in VOCA]
     bad = 0
+    # 새로 온 아이: 쿨앱(쿨보카·쿨톡·쿨본문) 학생 목록에 없으면 QR이 엉뚱한 책(맨 앞 책)으로 열려요 (2026-11-11 민아 → 워마고등)
+    STU = {}
+    for app in ('voca.html', 'talk.html', 'bon.html'):
+        m = re.search(r'const STUDENTS=(\{.*?\});', open(R + '/kool/' + app).read()); STU[app] = json.loads(m.group(1)) if m else {}
+    for u in U:
+        p = urllib.parse.urlparse(u); app = p.path.split('/')[-1]
+        if app in STU and p.fragment:
+            code = p.fragment.split('.')[0].lower()
+            if code not in STU[app] and not code.startswith(('t', 'n0', 'n1', 'n2', 'b')) or (code.startswith('sm') and code not in STU[app]):
+                bad += 1; print('❌ 쿨앱 학생 목록에 없음(엉뚱한 책이 열림)', app, code, u.split('enchool-rec/')[-1][:70])
     for u in U:
         r, ex = check(u)
         if r == 'skip': continue
