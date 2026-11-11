@@ -92,6 +92,7 @@
   .gd-g{display:grid;gap:8px;padding:10px}.gd-g div{display:flex;flex-direction:column;gap:2px;font-size:13.5px;line-height:1.5}.gd-g b{font-weight:400;color:var(--navy);font-size:14.5px}.gd-g span{color:var(--muted)}
   .gd-g .w b{color:#B42318}.gd-g .w{background:#FDF2F1;border-radius:8px;padding:6px 8px;margin:0 -2px}
   .a2k{padding:12px 14px}
+  .a2ask{margin:10px 0 0;text-align:center;background:var(--navy-soft);color:var(--navy);border-radius:10px;padding:9px 10px;font-size:14.5px}
   .a2hs a.a2go{display:block;margin-top:10px;text-align:center;text-decoration:none;background:var(--navy);color:#fff;border-radius:12px;padding:11px 12px;font-size:16px}
 </style>
 </head>
@@ -139,8 +140,11 @@
     const ROWS=[["kakao","💬 카톡에서 열었을 때","「인터넷에서 열기」 버튼 → 열린 화면의 안내대로"],["samsung","📱 삼성 인터넷","아래 오른쪽 점 세 개(⋮) → 「현재 페이지 추가」 → 「홈 화면」"],["chrome","📱 안드로이드 크롬","위 오른쪽 점 세 개(⋮) → 「설치 및 바로가기 만들기」(또는 「홈 화면에 추가」)"],["safari","🍎 아이폰 Safari","아래 공유 버튼(□↑) → 「홈 화면에 추가」"],["ichrome","🍎 아이폰 크롬","주소창 오른쪽 공유 버튼(□↑) → 「홈 화면에 추가」"]];
     const app=ios?"Safari":"인터넷(크롬)";
     /* 2026-11-12 선생님 「QR을 찍으면 저 안내가 상단에 접혀진 채로 나오고, 누르면 … 보여주면」: 안내문 전체를 접힌 한 줄로 · 누르면 아래로 펼쳐져요 */
-    const home=stand?"":`<div class="gd-s"><h3>📲 홈 화면에 추가하기 <small>· 한 번만!</small></h3><div class="a2st"><span class="a2ex">예시 · 삼성 인터넷</span><b>① 아래 점 세 개(⋮)를 눌러요</b><img src="hw-a2hs-samsung.png" alt="화면 아래 오른쪽 점 세 개"><b>② 「현재 페이지 추가」 → 「홈 화면」</b></div>
-      <div class="a2dv"><span class="a2ex">기종별 방법</span>${ROWS.map(([k,n,t])=>`<div class="a2r${k===cur?" on":""}"><b>${n}${k===cur?` <i>← 지금 이 폰</i>`:""}</b><span>${t}</span></div>`).join("")}</div></div>`;
+    /* 2026-11-12 선생님 「지금 이 폰 이걸 상단 예시 이렇게 수정」 「추가가 어려우면 수업시간에 선생님께 문의!」: 맨 위 예시 = 지금 이 폰 방법(삼성은 그림), 아래는 다른 기종 */
+    const STEP={samsung:["아래 오른쪽 점 세 개(⋮)를 눌러요","「현재 페이지 추가」 → 「홈 화면」"],chrome:["위 오른쪽 점 세 개(⋮)를 눌러요","「설치 및 바로가기 만들기」 → 「바로가기 만들기」 (또는 「홈 화면에 추가」)"],safari:["아래 가운데 공유 버튼(□↑)을 눌러요","「홈 화면에 추가」 → 「추가」"],ichrome:["주소창 오른쪽 공유 버튼(□↑)을 눌러요","「홈 화면에 추가」 → 「추가」"],kakao:["위의 「🌐 인터넷에서 열기」를 눌러요","열린 화면에서 이 안내대로 추가해요"]};
+    const nmOf=k=>(ROWS.find(r=>r[0]===k)||[,""])[1],st2=STEP[cur]||STEP.chrome;
+    const home=stand?"":`<div class="gd-s"><h3>📲 홈 화면에 추가하기 <small>· 한 번만!</small></h3><div class="a2st"><span class="a2ex">지금 이 폰 · ${nmOf(cur).replace(/^\S+\s/,"")}</span><b>① ${st2[0]}</b>${cur==="samsung"?`<img src="hw-a2hs-samsung.png" alt="화면 아래 오른쪽 점 세 개">`:""}<b>② ${st2[1]}</b></div>
+      <div class="a2dv"><span class="a2ex">다른 기종</span>${ROWS.filter(([k])=>k!==cur).map(([k,n,t])=>`<div class="a2r"><b>${n}</b><span>${t}</span></div>`).join("")}</div><p class="a2ask">🙋 추가가 어려우면 수업 시간에 선생님께 물어봐요!</p></div>`;
     return (kakao&&!stand?`<section class="a2hs a2k"><b>📌 카톡 안에서는 홈 화면에 추가가 안 돼요</b><small>아래 버튼을 눌러 ${app}에서 연 다음 추가해 주세요.</small><a class="a2go" href="kakaotalk://web/openExternal?url=${encodeURIComponent(location.href)}">🌐 ${app}에서 열기</a></section>`:inapp&&!stand?`<section class="a2hs a2k"><small>이 앱 안에서는 홈 화면에 추가가 안 돼요. ⋮ / ⋯ 메뉴 → 「다른 브라우저로 열기」</small></section>`:"")
      +`<details class="gd" id="gd"><summary><span class="gd-tt"><span class="gd-t">📌 처음이면 꼭 읽어요</span><span class="gd-s2">${stand?"":"홈 화면 추가 · "}숙제 체크 방법 · 눌러서 보기</span></span><span class="gd-c">▾</span></summary><div class="gd-b">${home}
       <div class="gd-s"><h3>✏️ 숙제는 꼭 순서대로, 하면서 바로 체크해요</h3><ol class="gd-o"><li><b>1번부터 순서대로</b> 해요. 건너뛰지 않아요.</li><li>쿨보카·녹음·쿨톡 버튼은 <b>끝까지</b> 하고 「📮 선생님께 보내기」까지 눌러요.</li><li>한 숙제를 끝내자마자 <b>바로 ☐ 체크</b>해요. 나중에 몰아서 하지 않아요.</li><li>다 체크하면 <b>🎉 오늘 숙제 끝!</b>이 나와요.</li></ol></div>
