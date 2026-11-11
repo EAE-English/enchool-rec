@@ -455,6 +455,8 @@ function useBook(b){if(!b)return;BK=b;UNIT=b.unit;SETS=b.sets;if(!SETS.some(x=>x
 function pickBook(){mineLoad();const q=findBook(QRBOOK);if(q){/* QR로 들어오면 그 QR의 책·Day만 보여요 (지난번 책은 안 섞임) */MINE=[q.id,...QRMORE.map(findBook).filter(Boolean).map(b=>b.id)].filter((x,i,A)=>A.indexOf(x)===i);if(!isTest())try{localStorage.setItem("wd_bk_"+NAME,JSON.stringify(MINE))}catch(e){}useBook(q);return}
  if(BKPICK&&BK){useBook(BK);return}const L=myBooks();const b=MINE.length?L.find(x=>x.id===MINE[MINE.length-1]):(SCODE?BOOKS[0]:(BOOKS.find(x=>x.id===LATEST)||BOOKS[0]));useBook(b||BOOKS[0]);if(SCODE&&b)mineAdd(b.id)}
 function readHash(){const parts=(location.hash||"").replace(/^#/,"").toLowerCase().split(/[.\-]/).filter(Boolean);if(!parts.length||parts.some(x=>!/^[a-z0-9_]+$/.test(x)))return false;let hit=false;
+ /* 학생 코드를 못 찾으면(폰에 옛날 화면이 남아 있을 때) 한 번만 새로 받아요 — 선생님 미리보기로 열리던 문제 (2026-11-11 민아) */
+ if(!STUDENTS[parts[0]]&&parts.length>1&&!BOOKS.some(x=>x.id===parts[0])){try{const k="wd_rl_"+parts[0];if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,"1");location.replace(location.pathname+"?v="+Date.now()+location.hash);return false}}catch(e){}}
  if(STUDENTS[parts[0]]){SCODE=parts[0];NAME=STUDENTS[parts[0]];try{localStorage.setItem("wd_nm",NAME)}catch(e){}hit=true;parts.shift()}
  QRSET=null;QRSETS=[];QRBOOK=null;QRMORE=[];parts.forEach(x=>{if(/^s[1-9]$/.test(x)){QRSETS.push(x);QRSET=QRSET||x;return}else if(!QRBOOK)QRBOOK=x;else QRMORE.push(x)});return hit}
 function load(){try{return JSON.parse(localStorage.getItem("wd_"+NAME)||"{}")}catch(e){return {}}}
