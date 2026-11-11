@@ -77,7 +77,7 @@
   /* 여러 개 녹음 숙제: 지금 할 것·남은 것 크게 (2026-11-11 예원 42→43 헷갈림) */
   .nowb{display:flex;align-items:center;gap:10px;background:var(--navy);color:#fff;border-radius:14px;padding:11px 14px;margin:0 0 12px;font-family:var(--ko)}
   .nowb b{font-size:17px;color:#f3c74f}.nowb small{margin-left:auto;font-size:13px;color:#dfe6f2;white-space:nowrap}
-  .dn-ok{font-size:21px;color:var(--navy);font-weight:800;margin:6px 0 4px}.dn-go{font-size:16px;color:#c0392b;font-weight:800;margin:10px 0 2px}
+  .dn-ok{font-size:21px;color:var(--navy);font-weight:800;margin:6px 0 4px}.dn-go{font-size:24px;color:#c0392b;font-weight:800;margin:10px 0 4px;line-height:1.3}.dn-ok.sm{font-size:16px;margin:2px 0 4px}
   .dn-rem{margin-top:8px;font-size:14px;color:var(--navy)}.dn-rem b{color:#c0392b}
   .err{background:#FDECEC;color:#9B1C1F;border-radius:12px;padding:12px 14px;font-size:15px}
   .tip{font-size:15px;line-height:1.6;background:var(--gold-soft);border-color:var(--gold)}
@@ -327,7 +327,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     const rem = ITEMS.filter(x => !sentOK[itKey(x)]), all = ITEMS.map(itName).map(esc).join(' · ');
     $('doneP').hidden = true; box.hidden = false;
     if (rem.length){
-      box.innerHTML = `<div class="dn-ok">✅ ${esc(itName(IT))} 선생님께 보내기 완료!</div><div class="dn-go">계속 학습을 이어가세요!</div>`
+      box.innerHTML = `<div class="dn-go">계속 학습을 이어가세요!</div><div class="dn-ok sm">✅ ${esc(itName(IT))} 선생님께 보내기 완료!</div>`
         + `<div class="dn-rem">남은 녹음: <b>${rem.map(itName).map(esc).join(' · ')}</b> (${rem.length}개)</div>`;
       $('more').hidden = false; $('more').textContent = '▶ ' + itName(rem[0]) + ' 이어서 하기'; $('more').onclick = () => open(rem[0]);
       $('fin').hidden = true; $('finHint').hidden = true;
