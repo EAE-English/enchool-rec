@@ -1,2 +1,2 @@
 <!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>숙제장</title>
-<script>/* 짧은 주소: …/enchool-rec/h/?ja1111-elena → hw.html?k=ja1111-elena */var k=location.search.slice(1).split("&")[0];location.replace("../hw.html"+(k?"?k="+k:"")+location.hash)</script>
+<script>/* 짧은 주소: …/h/?ja1111-elena → hw.html?k=ja1111-elena · 아이 전용 주소(영문+숫자 6자): …/h/?k7m2qx → hw.html?c=k7m2qx */var k=location.search.slice(1).split("&")[0];location.replace("../hw.html"+(k?(/^[a-z][a-z0-9]{5}$/i.test(k)?"?c=":"?k=")+k:"")+location.hash)</script>

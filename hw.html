@@ -5,6 +5,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
+<link rel="apple-touch-icon" href="logo.png">
+<meta name="apple-mobile-web-app-title" content="엔쿨 숙제장">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Gowun+Dodum&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
   /* [Claude] 온라인 숙제장 · 엔쿨 네이비 + 골드 (2026-11-06) — 종이 숙제장을 안 가져간 아이도 휴대폰으로 보고 체크 */
@@ -58,6 +62,14 @@
   .foot{color:var(--muted);font-size:13px;text-align:center;line-height:1.6}
   .err{background:#FDECEC;color:#9B1C1F;border-radius:12px;padding:14px;font-size:15px;line-height:1.6}
   :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  /* 아이 전용 주소 (2026-11-12): 이번/지난 숙제 버튼 · 홈 화면에 추가 안내 */
+  .tabs{display:flex;gap:8px}
+  .tab{flex:1;border:1.5px solid var(--line);background:#fff;color:var(--muted);border-radius:12px;padding:9px 6px;font:inherit;font-size:14.5px;cursor:pointer}
+  .tab.on{border-color:var(--navy);background:var(--navy);color:#fff}
+  .a2hs{background:var(--gold-soft);border:1.5px solid var(--gold);border-radius:14px;padding:12px 40px 12px 14px;position:relative;font-size:14.5px;line-height:1.6;color:var(--ink)}
+  .a2hs b{color:var(--navy);font-weight:400;font-size:15.5px}
+  .a2hs small{display:block;color:var(--muted);font-size:13px}
+  .a2hs button{position:absolute;right:8px;top:8px;border:0;background:none;font-size:17px;color:var(--muted);cursor:pointer;padding:4px 6px}
 </style>
 </head>
 <body>
@@ -75,6 +87,17 @@
   const esc=t=>String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const md=d=>{const x=new Date(d+"T00:00:00");return isNaN(x)?d:`${x.getMonth()+1}월 ${x.getDate()}일 (${W[x.getDay()]})`};
   const mds=d=>{const x=new Date(d+"T00:00:00");return isNaN(x)?d:`${x.getMonth()+1}/${x.getDate()}(${W[x.getDay()]})`};
+  /* 아이 전용 주소 (2026-11-12 선생님 「정해진 곳에서 아이들이 자기 숙제를 볼 수 있도록」): hw.html?c=코드 → 학습관리실이 자동으로 적어 두는 구글 시트 「[Claude] 온라인 숙제장」에서 그 아이 숙제 몇 장을 읽어 와요 */
+  const HWK_SS="1_ZoeGSdCxmZQpk5sasi1au10X9auhuBvo_lB_Hk8NcI";
+  const KC=(new URLSearchParams(location.search).get("c")||"").toLowerCase();
+  function gvizUrl(code,tqx){return "https://docs.google.com/spreadsheets/d/"+HWK_SS+"/gviz/tq?tqx="+tqx+"&headers=1&sheet=hw&tq="+encodeURIComponent("select D where A='"+code+"'")+"&_="+Date.now()}
+  function gvizCell(o){if(!o||o.status==="error")throw new Error("gviz");const r=((o.table||{}).rows||[])[0];const v=r&&r.c&&r.c[0]&&r.c[0].v;if(!v)throw new Error("no row");return JSON.parse(v)}
+  function gvizJsonp(code){return new Promise((ok,no)=>{const cb="__hwk"+Math.random().toString(36).slice(2);const sc=document.createElement("script");const tm=setTimeout(()=>{fin();no(new Error("timeout"))},9000);
+    const fin=()=>{clearTimeout(tm);try{delete window[cb]}catch(e){window[cb]=undefined}sc.remove()};
+    window[cb]=o=>{fin();try{ok(gvizCell(o))}catch(e){no(e)}};sc.onerror=()=>{fin();no(new Error("load"))};sc.src=gvizUrl(code,"responseHandler:"+cb);document.head.appendChild(sc)})}
+  async function gvizFetch(code){const t=await (await fetch(gvizUrl(code,"out:json"),{cache:"no-store"})).text();return gvizCell(JSON.parse(t.slice(t.indexOf("(")+1,t.lastIndexOf(")"))))}
+  async function readKid(code){let L;try{L=await gvizJsonp(code)}catch(e){L=await gvizFetch(code)}if(!Array.isArray(L)||!L.length)throw new Error("empty");
+    L=L.slice().sort((a,b)=>String(b.d).localeCompare(String(a.d)));const now=Date.now();let i=L.findIndex(x=>!x.at||Date.parse(x.at)<=now);if(i<0)i=L.length-1;return {L,i}}
   async function read(){/* 짧은 주소: hw.html?k=ja1106-james → hw/ja1106-james.json (2026-11-06) */const k=new URLSearchParams(location.search).get("k");
     if(k&&/^[\w-]{1,60}$/.test(k)){const r=await fetch("hw/"+k+".json",{cache:"no-cache"});if(!r.ok)throw new Error("no file");return r.json()}
     const h=location.hash.slice(1),p=new URLSearchParams(h);
@@ -83,7 +106,15 @@
     const b=atob(z.replace(/-/g,"+").replace(/_/g,"/")),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);
     const s=new Blob([u]).stream().pipeThrough(new DecompressionStream("deflate-raw"));return JSON.parse(await new Response(s).text())}
   const CK='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
-  read().then(D=>{
+  const KID={L:null,i:0,cur:0};
+  function tabsHTML(){if(!KID.L)return "";const a=KID.L[KID.i],b=KID.L[KID.i+1];
+    const ad=(()=>{try{return localStorage.getItem("enchool_a2hs_x")}catch(e){return "1"}})(),stand=(window.navigator.standalone===true)||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches);
+    const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+    return (!ad&&!stand?`<section class="a2hs" id="a2hs"><button type="button" id="a2x" aria-label="닫기">✕</button><b>📌 홈 화면에 추가해 두세요</b><br>다음부터 아이콘만 누르면 내 숙제가 바로 나와요.<small>${ios?"Safari 아래 공유 버튼(□↑) → 「홈 화면에 추가」":"Chrome 오른쪽 위 ⋮ → 「홈 화면에 추가」"}</small></section>`:"")
+     +(b?`<div class="tabs"><button type="button" class="tab${KID.cur===KID.i?" on":""}" data-k="${KID.i}">이번 숙제 · ${mds(a.d)}</button><button type="button" class="tab${KID.cur===KID.i+1?" on":""}" data-k="${KID.i+1}">지난 숙제 · ${mds(b.d)}</button></div>`:"")}
+  function wireTabs(){const x=$("#a2x");if(x)x.addEventListener("click",()=>{try{localStorage.setItem("enchool_a2hs_x","1")}catch(e){}$("#a2hs").remove()});
+    document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{KID.cur=+t.dataset.k;draw(KID.L[KID.cur]);scrollTo(0,0)}))}
+  function draw(D){
     const key="enchool_hw_"+(D.sid||D.nm||"x")+"_"+D.d;let st={};try{st=JSON.parse(localStorage.getItem(key)||"{}")}catch(e){}
     const save=()=>{try{localStorage.setItem(key,JSON.stringify(st))}catch(e){}};
     /* 체크하면 쌤 시트로 자동 보내기 (2026-11-06) — 휴대폰에 먼저 저장하고, 못 보냈으면 다음에 열 때 다시 보내요 */
@@ -101,7 +132,7 @@
     document.title=`${D.nm||""} 숙제 · ${mds(D.d)} — 엔쿨`;
     const go=b=>`<a class="gob k-${esc(b.k)}" href="${esc(b.u)}"><b>${esc(b.l)}</b><small>${esc(String(b.s||"").replace(/^녹음 · /,""))}</small></a>`;
     const items=(D.it||[]),N=items.length;
-    $("#app").innerHTML=`<section class="card top"><h1>${md(D.d)} 숙제</h1><p class="due">${D.due?`<b>${mds(D.due)}</b> 수업까지 해 와요`:"다음 수업까지 해 와요"}</p>
+    $("#app").innerHTML=tabsHTML()+`<section class="card top"><h1>${md(D.d)} 숙제</h1><p class="due">${D.due?`<b>${mds(D.due)}</b> 수업까지 해 와요`:"다음 수업까지 해 와요"}</p>
       <div class="prog"><div class="bar"><i id="pb"></i></div><span class="cnt" id="pc"></span></div></section>
       <section class="card done" id="dn" hidden><div class="ic">🎉</div><h2>오늘 숙제 끝!</h2><p>정말 잘했어요. 다음 수업에서 만나요 😊</p></section>
       <div class="list">${items.map((r,i)=>`<article class="it" data-i="${i}"><button class="ck" type="button" aria-label="${r.n||i+1}번 숙제 했어요">${CK}</button>
@@ -112,8 +143,11 @@
     const paint=()=>{let n=0;document.querySelectorAll(".it").forEach(el=>{const on=!!st[el.dataset.i];el.classList.toggle("on",on);el.querySelector(".ck").setAttribute("aria-pressed",on);if(on)n++});
       $("#pb").style.width=(N?n/N*100:0)+"%";$("#pc").innerHTML=`${n} / ${N} <small>완료</small>`;$("#dn").hidden=!(N&&n===N)};
     document.querySelectorAll(".it .ck").forEach(b=>b.addEventListener("click",()=>{const i=b.closest(".it").dataset.i;st[i]=!st[i];if(!st[i])delete st[i];save();paint();queue();if(N&&Object.keys(st).length===N)$("#dn").scrollIntoView({behavior:"smooth",block:"center"})}));
-    paint();
-  }).catch(()=>{$("#app").innerHTML=`<div class="err">숙제장을 열지 못했어요 😢<br>선생님께 받은 링크를 처음부터 끝까지 다시 눌러 주세요.</div>`});
+    paint();wireTabs();
+  }
+  const fail=()=>{$("#app").innerHTML=`<div class="err">숙제장을 열지 못했어요 😢<br>${KC?"인터넷 연결을 확인하고 다시 열어 주세요. 계속 안 되면 선생님께 말해 주세요.":"선생님께 받은 링크를 처음부터 끝까지 다시 눌러 주세요."}</div>`};
+  if(KC){if(!/^[a-z][a-z0-9]{5}$/.test(KC))fail();else{$("#app").innerHTML=`<p class="foot">숙제장을 불러오는 중…</p>`;readKid(KC).then(r=>{KID.L=r.L;KID.i=r.i;KID.cur=r.i;draw(r.L[r.i])}).catch(fail)}}
+  else read().then(draw).catch(fail);
 })();
 </script>
 </body>
