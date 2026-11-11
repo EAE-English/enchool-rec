@@ -74,11 +74,24 @@
   .a2hs button{position:absolute;right:8px;top:8px;border:0;background:none;font-size:17px;color:var(--muted);cursor:pointer;padding:4px 6px}
   .a2st{margin-top:8px;display:flex;flex-direction:column;gap:6px}.a2st b{font-size:15px!important;color:var(--ink)!important}.a2st img{width:100%;border-radius:10px;border:1px solid var(--line);display:block}
   .a2ex{display:inline-block;align-self:flex-start;font-size:12px;color:var(--navy);background:#fff;border:1px solid var(--gold);border-radius:99px;padding:1px 9px;margin-bottom:2px}
-  .a2st,.a2dv{margin-right:-26px}
   .a2dv{margin-top:12px;padding-top:10px;border-top:1px dashed var(--gold);display:flex;flex-direction:column;gap:6px}
   .a2r{background:#fff;border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-size:13.5px;line-height:1.5}
   .a2r b{display:block;font-weight:400;color:var(--navy);font-size:14px!important}.a2r i{font-style:normal;color:#B42318}
   .a2r span{color:var(--muted)}.a2r.on{border:2px solid var(--navy)}
+  /* 접힌 안내 (2026-11-12) */
+  .gd{background:var(--gold-soft);border:1.5px solid var(--gold);border-radius:14px;overflow:hidden}
+  .gd summary{list-style:none;display:flex;align-items:center;gap:8px;padding:12px 14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .gd summary::-webkit-details-marker{display:none}
+  .gd-tt{display:flex;flex-direction:column;gap:1px;min-width:0}.gd-t{color:var(--navy);font-size:16.5px;white-space:nowrap}.gd-s2{color:var(--muted);font-size:13px}.gd-c{margin-left:auto;color:var(--navy);font-size:15px;transition:transform .2s}
+  .gd[open] .gd-c{transform:rotate(180deg)}
+  .gd-b{padding:0 14px 14px;display:flex;flex-direction:column;gap:12px}
+  .gd-s{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}
+  .gd-s h3{margin:0 0 8px;font-weight:400;font-size:15.5px;color:var(--navy)}.gd-s h3 small{color:var(--muted);font-size:12.5px}
+  .gd-o{margin:0;padding-left:20px;font-size:14.5px;line-height:1.65}.gd-o b{font-weight:400;color:var(--navy)}
+  .gd-n{background:var(--navy);border-color:var(--navy);color:#fff;display:flex;flex-direction:column;gap:4px}.gd-n b{font-weight:400;font-size:15px}.gd-n span{font-size:13.5px;color:#D5DDEB;line-height:1.55}
+  .gd-g{display:grid;gap:8px;padding:10px}.gd-g div{display:flex;flex-direction:column;gap:2px;font-size:13.5px;line-height:1.5}.gd-g b{font-weight:400;color:var(--navy);font-size:14.5px}.gd-g span{color:var(--muted)}
+  .gd-g .w b{color:#B42318}.gd-g .w{background:#FDF2F1;border-radius:8px;padding:6px 8px;margin:0 -2px}
+  .a2k{padding:12px 14px}
   .a2hs a.a2go{display:block;margin-top:10px;text-align:center;text-decoration:none;background:var(--navy);color:#fff;border-radius:12px;padding:11px 12px;font-size:16px}
 </style>
 </head>
@@ -125,9 +138,15 @@
     const cur=kakao?"kakao":ios?(/CriOS/i.test(ua)?"ichrome":"safari"):/SamsungBrowser/i.test(ua)?"samsung":"chrome";
     const ROWS=[["kakao","💬 카톡에서 열었을 때","「인터넷에서 열기」 버튼 → 열린 화면의 안내대로"],["samsung","📱 삼성 인터넷","아래 오른쪽 점 세 개(⋮) → 「현재 페이지 추가」 → 「홈 화면」"],["chrome","📱 안드로이드 크롬","위 오른쪽 점 세 개(⋮) → 「설치 및 바로가기 만들기」(또는 「홈 화면에 추가」)"],["safari","🍎 아이폰 Safari","아래 공유 버튼(□↑) → 「홈 화면에 추가」"],["ichrome","🍎 아이폰 크롬","주소창 오른쪽 공유 버튼(□↑) → 「홈 화면에 추가」"]];
     const app=ios?"Safari":"인터넷(크롬)";
-    return (!ad&&!stand?`<section class="a2hs" id="a2hs"><button type="button" id="a2x" aria-label="닫기">✕</button><b>📌 홈 화면에 추가해 두세요</b><br>다음부터 아이콘만 누르면 내 숙제가 바로 나와요.${kakao?`<small>카톡 안에서는 홈 화면에 추가가 안 돼요. 아래 버튼을 눌러 ${app}에서 연 다음 추가해 주세요.</small><a class="a2go" href="kakaotalk://web/openExternal?url=${encodeURIComponent(location.href)}">🌐 ${app}에서 열기</a>`:inapp?`<small>이 앱 안에서는 홈 화면에 추가가 안 돼요. ⋮ / ⋯ 메뉴 → 「다른 브라우저로 열기」 다음 추가해 주세요.</small>`:""}
-      <div class="a2st"><span class="a2ex">예시 · 삼성 인터넷</span><b>① 아래 점 세 개(⋮)를 눌러요</b><img src="hw-a2hs-samsung.png" alt="화면 아래 오른쪽 점 세 개"><b>② 「현재 페이지 추가」 → 「홈 화면」</b></div>
-      <div class="a2dv"><span class="a2ex">기종별 방법</span>${ROWS.map(([k,n,t])=>`<div class="a2r${k===cur?" on":""}"><b>${n}${k===cur?` <i>← 지금 이 폰</i>`:""}</b><span>${t}</span></div>`).join("")}</div></section>`:"")
+    /* 2026-11-12 선생님 「QR을 찍으면 저 안내가 상단에 접혀진 채로 나오고, 누르면 … 보여주면」: 안내문 전체를 접힌 한 줄로 · 누르면 아래로 펼쳐져요 */
+    const home=stand?"":`<div class="gd-s"><h3>📲 홈 화면에 추가하기 <small>· 한 번만!</small></h3><div class="a2st"><span class="a2ex">예시 · 삼성 인터넷</span><b>① 아래 점 세 개(⋮)를 눌러요</b><img src="hw-a2hs-samsung.png" alt="화면 아래 오른쪽 점 세 개"><b>② 「현재 페이지 추가」 → 「홈 화면」</b></div>
+      <div class="a2dv"><span class="a2ex">기종별 방법</span>${ROWS.map(([k,n,t])=>`<div class="a2r${k===cur?" on":""}"><b>${n}${k===cur?` <i>← 지금 이 폰</i>`:""}</b><span>${t}</span></div>`).join("")}</div></div>`;
+    return (kakao&&!stand?`<section class="a2hs a2k"><b>📌 카톡 안에서는 홈 화면에 추가가 안 돼요</b><small>아래 버튼을 눌러 ${app}에서 연 다음 추가해 주세요.</small><a class="a2go" href="kakaotalk://web/openExternal?url=${encodeURIComponent(location.href)}">🌐 ${app}에서 열기</a></section>`:inapp&&!stand?`<section class="a2hs a2k"><small>이 앱 안에서는 홈 화면에 추가가 안 돼요. ⋮ / ⋯ 메뉴 → 「다른 브라우저로 열기」</small></section>`:"")
+     +`<details class="gd" id="gd"><summary><span class="gd-tt"><span class="gd-t">📌 처음이면 꼭 읽어요</span><span class="gd-s2">${stand?"":"홈 화면 추가 · "}숙제 체크 방법 · 눌러서 보기</span></span><span class="gd-c">▾</span></summary><div class="gd-b">${home}
+      <div class="gd-s"><h3>✏️ 숙제는 꼭 순서대로, 하면서 바로 체크해요</h3><ol class="gd-o"><li><b>1번부터 순서대로</b> 해요. 건너뛰지 않아요.</li><li>쿨보카·녹음·쿨톡 버튼은 <b>끝까지</b> 하고 「📮 선생님께 보내기」까지 눌러요.</li><li>한 숙제를 끝내자마자 <b>바로 ☐ 체크</b>해요. 나중에 몰아서 하지 않아요.</li><li>다 체크하면 <b>🎉 오늘 숙제 끝!</b>이 나와요.</li></ol></div>
+      <div class="gd-s gd-n"><b>🔗 체크하면 선생님 프로그램에 바로 연결돼요</b><span>체크한 내용은 엔쿨 학습관리 프로그램 수업 기록에 자동으로 들어가요. 선생님이 수업 전에 확인해요.</span></div>
+      <div class="gd-s gd-g"><div><b>✅ 다 한 것만 체크</b><span>끝까지 다 한 다음에 체크해요.</span></div><div><b>👀 선생님이 확인해요</b><span>앱 기록·녹음·사진·종이 숙제로 맞게 체크했는지 확인해요.</span></div><div class="w"><b>⚠️ 안 했는데 체크하면</b><span>코인이 차감돼요. 정직하게 체크해요.</span></div></div>
+     </div></details>`
      +(b?`<div class="tabs"><button type="button" class="tab${KID.cur===KID.i?" on":""}" data-k="${KID.i}">이번 숙제 · ${mds(a.d)}</button><button type="button" class="tab${KID.cur===KID.i+1?" on":""}" data-k="${KID.i+1}">지난 숙제 · ${mds(b.d)}</button></div>`:"")}
   function wireTabs(){const x=$("#a2x");if(x)x.addEventListener("click",()=>{try{localStorage.setItem("enchool_a2hs_x","1")}catch(e){}$("#a2hs").remove()});
     document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{KID.cur=+t.dataset.k;draw(KID.L[KID.cur]);scrollTo(0,0)}))}
