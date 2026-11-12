@@ -720,7 +720,7 @@ function load(k){if(LD[k])return LD[k];LD[k]=getTrack(k).then(j=>{if(!j.ok)throw
   return toWav(by.buffer.slice(0)).catch(()=>null).then(u=>{TK[k]=u||URL.createObjectURL(new Blob([by],{type:j.mime||'audio/mpeg'}))})}).catch(()=>{TK[k]='none'});return LD[k]}
 function pre(){const ids=(location.hash||'').slice(1).split('.').slice(1).filter(x=>/_\d/.test(x));if(!ids.length)return;const ks=new Set();
  Object.values(AM).forEach(L=>L.forEach(c=>{if(ids.some(id=>c[0].indexOf(id+'-')===0))ks.add(c[0])}));[...ks].sort().reduce((p,k)=>p.then(()=>load(k)),Promise.resolve())}
-/* 폰에 저장하는 이름표 = 지도 버전 — 지도가 바뀌면 새로 받아요 (2026-11-12 지우 「단어가 다르게 나와여」: 이름표가 옛날 그대로라 옛 지도로 엉뚱한 소리) */const AU='aud.json?v=f61de021',AK='aud|'+AU.split('v=')[1];TKDB.get(AK).then(c=>c||fetch(AU).then(r=>r.json()).then(j=>{TKDB.put(AK,j);return j})).then(j=>{AM=j;pre()}).catch(()=>{});
+/* 폰에 저장하는 이름표 = 지도 버전 — 지도가 바뀌면 새로 받아요 (2026-11-12 지우 「단어가 다르게 나와여」: 이름표가 옛날 그대로라 옛 지도로 엉뚱한 소리) */const AU='aud.json?v=94076421',AK='aud|'+AU.split('v=')[1];TKDB.get(AK).then(c=>c||fetch(AU).then(r=>r.json()).then(j=>{TKDB.put(AK,j);return j})).then(j=>{AM=j;pre()}).catch(()=>{});
 window.addEventListener('hashchange',()=>{if(AM)pre()});
 function pick(t){if(!AM)return null;const L=AM[nz(t)];if(!L)return null;return L.find(c=>TK[c[0]]&&TK[c[0]]!=='none')||L.find(c=>LD[c[0]])||L[0]}
 const tts0=window.speak,tts=(t,slow)=>{/* 원음원이 없는 단어는 미리 만든 자연스러운 목소리(kool/tts)로 · 없을 때만 기계 목소리 (2026-11-08 아이폰 무음) */try{if(window.TTSA&&TTSA.play(String(t),'',null,slow?.75:1))return}catch(e){}return tts0(t,slow)};let A=null,T=null;
