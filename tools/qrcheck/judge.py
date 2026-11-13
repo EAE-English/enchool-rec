@@ -13,7 +13,9 @@ for q in Q:
     if not r: bad.append(f"❌ {who} · 점검 못 함"); continue
     p = []
     if r['errs']: p.append('화면 오류 ' + r['errs'][0][:60])
-    if '/kool/' in u and not r.get('qrs'): p.append('목록 화면으로 열림')
+    if '/kool/bbi.html' in u:  # 삐딱동사: 아이 이름 없이 듣기만 하는 화면 (2026-11-13) — 동사표가 떴는지만 봐요
+        if '삐딱동사' not in r.get('top', '') or re.search(r'못 받았어요', r.get('top', '')): p.append('삐딱동사 화면이 안 열림')
+    elif '/kool/' in u and not r.get('qrs'): p.append('목록 화면으로 열림')
     if re.search(r'대본이 없|아직 없어요', r.get('top', '')): p.append('대본 없음')
     for it in r.get('items') or []:
         if not re.search(r'음원 준비 끝|\(없음\)', it['st']): p.append(f"음원 안 됨: {it['title'][:25]}")
