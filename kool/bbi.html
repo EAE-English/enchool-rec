@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>삐딱동사 · 엔쿨</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Gowun+Dodum&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#132E5E;--gold:#D9B45A;--gold-soft:#FBF4E2;--bg:#F3F5F9;--muted:#667085;--line:#E3E8F0;--en:'Nunito','Helvetica Neue',Arial,sans-serif;--ko:'Gowun Dodum','Apple SD Gothic Neo',sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#1d2433;font-family:var(--ko);-webkit-tap-highlight-color:transparent}
+.wrap{max-width:560px;margin:0 auto;padding:14px max(14px,env(safe-area-inset-left)) 40px max(14px,env(safe-area-inset-right))}
+.top{background:var(--navy);color:#fff;border-radius:18px;padding:16px 18px 14px;display:flex;flex-direction:column;gap:4px}
+.top .br{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.12em;color:var(--gold)}
+.top h1{margin:0;font-size:24px;font-weight:700;letter-spacing:-.01em}
+.top p{margin:0;font-size:13.5px;opacity:.85}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:14px 0 10px}.chip{border:1.5px solid var(--navy);background:#fff;color:var(--navy);border-radius:99px;padding:6px 13px;font:800 14px var(--en)}.chip small{font:600 11.5px var(--ko);opacity:.75;margin-left:2px}.cnt{margin-left:auto;font-size:13px;color:var(--muted)}
+.tabs button{border:1.5px solid var(--navy);background:#fff;color:var(--navy);border-radius:99px;padding:7px 13px;font:800 14px var(--en);cursor:pointer}
+.tabs button small{font:600 11.5px var(--ko);opacity:.75;margin-left:3px}
+.tabs button.on{background:var(--navy);color:#fff}
+.bar{display:flex;gap:8px;align-items:center;margin:0 0 10px}
+.all{flex:1;border:0;border-radius:14px;background:var(--gold);color:var(--navy);font:800 16px var(--ko);padding:13px 10px;cursor:pointer}
+.all.on{background:var(--navy);color:#fff}
+.slow{flex:none;border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:12px 12px;font:700 13.5px var(--ko);color:var(--muted);cursor:pointer}
+.slow.on{border-color:var(--navy);color:var(--navy);background:var(--gold-soft)}
+.tip{font-size:13px;color:var(--muted);margin:0 2px 8px}
+.tb{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(19,46,94,.08)}
+.tb th{background:var(--navy);color:#fff;font:700 12.5px var(--ko);padding:9px 4px}
+.tb td{padding:10px 4px;border-top:1px solid var(--line);text-align:center;font:800 16px var(--en);color:var(--navy)}
+.tb td.k{font:400 13px var(--ko);color:var(--muted);text-align:left;padding-left:6px}
+.tb td.p{width:44px;padding:4px}
+.tb tr.r{cursor:pointer}
+.tb tr.r:nth-child(odd) td{background:#F8FAFD}
+.tb tr.now td{background:var(--gold-soft)!important}
+.tb tr.now td:not(.k):not(.p){color:#8a5a00}
+.spk{width:36px;height:36px;border-radius:50%;border:0;background:#E8EEF8;color:var(--navy);font-size:15px;cursor:pointer;display:grid;place-items:center;margin:0 auto}
+tr.now .spk{background:var(--navy);color:#fff}
+.gh td{background:var(--gold-soft)!important;color:#7a5200!important;font:800 13.5px var(--en)!important;text-align:left!important;padding:7px 12px!important}
+.err{background:#fde8e8;color:#a3261f;border-radius:12px;padding:10px 14px;font-size:14px;margin:10px 0}
+@media(max-width:380px){.tb td{font-size:14.5px}.tb td.k{font-size:12px}}
+</style></head><body>
+<div class="wrap">
+  <div class="top"><span class="br">ENCHOOLANDSOME ENGLISH</span><h1>📖 삐딱동사</h1><p>불규칙 동사 — 듣고 따라하기</p></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="bar"><button class="all" id="all">▶ 묶음 전체 듣기</button><button class="slow" id="slow">🐢 천천히</button></div>
+  <p class="tip">🔊(또는 그 줄)를 누르면 그 동사만 들려줘요. 듣고 소리 내어 따라 해 봐요!</p>
+  <div id="err" class="err" hidden></div>
+  <table class="tb" id="tb"></table>
+</div>
+<script>
+(function(){
+/* 삐딱동사 (2026-11-13): ?g=g1,g2 처럼 고른 묶음을 한 표로 합쳐 보여주고, 줄마다 🔊 · 전체 듣기는 묶음을 이어서 */
+const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+const q=new URLSearchParams(location.search),want=(q.get('g')||'').split(',').map(s=>s.trim()).filter(Boolean);
+let G=[],R=[],A={},P={},mode=null,stopAt=0,rowAt=-1,timer=null,slow=false,curG=null,queue=[];
+try{slow=localStorage.getItem('bbi_slow')==='1'}catch(e){}
+function setSlow(){$('slow').classList.toggle('on',slow);Object.values(A).forEach(a=>{a.playbackRate=slow?0.8:1;a.preservesPitch=true;a.webkitPreservesPitch=true})}
+function aud(g){if(!A[g.id]){const a=new Audio();a.preload='auto';A[g.id]=a;/* 통째로 받아 두고 재생 — 어느 서버에서도 원하는 줄로 바로 건너뛰게 */fetch('aud/'+g.audio+'.mp3').then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>{a.src=URL.createObjectURL(b);a.load()}).catch(()=>err('소리를 못 받았어요. 인터넷을 확인하고 다시 들어와 주세요.'));}setSlow();return A[g.id]}
+function err(t){$('err').hidden=!t;$('err').textContent=t||''}
+function hi(n){rowAt=n;document.querySelectorAll('#tb tr.r').forEach(r=>r.classList.toggle('now',+r.dataset.n===n));if(n>=0&&mode==='all'){const r=document.querySelector(`#tb tr.r[data-n="${n}"]`);if(r)r.scrollIntoView({block:'center',behavior:'smooth'})}}
+function allBtn(on){$('all').classList.toggle('on',on);$('all').textContent=on?'■ 멈추기':(G.length>1?'▶ 전체 이어 듣기':'▶ 묶음 전체 듣기')}
+function stop(){clearInterval(timer);timer=null;queue=[];Object.values(A).forEach(a=>{try{a.pause()}catch(e){}});mode=null;hi(-1);allBtn(false)}
+function tick(){const a=A[curG.id];if(!a)return;const t=a.currentTime;
+  if(mode==='all'){let k=-1;R.forEach(r=>{if(r.g===curG&&t>=r.s-0.15)k=r.n});if(k>=0&&k!==rowAt)hi(k)}
+  if(t>=stopAt||a.ended){clearInterval(timer);timer=null;try{a.pause()}catch(_){}if(mode==='all'&&queue.length){setTimeout(()=>{if(mode==='all')playGroup(queue.shift())},500)}else stop()}}
+function play(g,s,e,m){const a=aud(g);clearInterval(timer);Object.values(A).forEach(x=>{if(x!==a)try{x.pause()}catch(_){}});mode=m;stopAt=e;curG=g;
+  const go=()=>{try{a.currentTime=s}catch(_){}const p=a.play();if(p&&p.catch)p.catch(()=>{err('소리를 켤 수 없어요. 한 번 더 눌러 주세요.');stop()});timer=setInterval(tick,40)};
+  if(a.readyState>=1)go();else a.addEventListener('loadedmetadata',go,{once:true})}
+function playGroup(g){const rs=R.filter(r=>r.g===g);if(!rs.length)return stop();play(g,rs[0].s,rs[rs.length-1].e+0.2,'all')}
+function draw(){
+  $('tabs').innerHTML=G.map(g=>`<span class="chip">${esc(g.t)} <small>${g.words.length}개</small></span>`).join('')+(G.length>1?`<span class="cnt">모두 ${R.length}개</span>`:'');
+  $('tb').innerHTML=`<tr><th>원형</th><th>과거</th><th>과거분사</th><th>뜻</th><th></th></tr>`+G.map(g=>(G.length>1?`<tr class="gh"><td colspan="5">${esc(g.t)}</td></tr>`:'')+R.filter(r=>r.g===g).map(r=>`<tr class="r" data-n="${r.n}">${(r.w.f||[r.w.w,'','']).map(t=>`<td>${esc(t)}</td>`).join('')}<td class="k">${esc(r.w.ko||'')}</td><td class="p"><button class="spk" aria-label="듣기">🔊</button></td></tr>`).join('')).join('');
+  allBtn(false);G.forEach(aud)}
+document.addEventListener('click',e=>{const t=e.target.closest('tr.r,#all,#slow');if(!t)return;err('');
+  if(t.id==='slow'){slow=!slow;try{localStorage.setItem('bbi_slow',slow?'1':'0')}catch(_){}setSlow();return}
+  if(!R.length){err('음원 정보를 아직 못 받았어요. 잠깐 뒤에 다시 눌러 주세요.');return}
+  if(t.id==='all'){if(mode==='all'){stop();return}queue=G.slice(1);allBtn(true);playGroup(G[0]);return}
+  const r=R[+t.dataset.n];if(r){queue=[];allBtn(false);play(r.g,r.s,r.e+0.15,'one');hi(r.n)}});
+fetch('../scripts/irr_1.json',{cache:'no-cache'}).then(r=>r.json()).then(d=>{
+  const all=d.shadow||[];G=want.map(id=>all.find(g=>g.id===id)).filter(Boolean);if(!G.length)G=all;
+  return Promise.all(G.map(g=>fetch('../plans/'+g.audio+'.json',{cache:'no-cache'}).then(r=>r.json()).then(p=>{P[g.id]=p}))).then(()=>{
+    G.forEach(g=>g.words.forEach((w,i)=>{const p=P[g.id][i];if(p)R.push({n:R.length,g,w,s:p[0],e:p[1]})}));draw()})})
+  .catch(()=>err('동사표를 못 받았어요. 인터넷을 확인하고 다시 들어와 주세요.'));
+})();
+</script>
+</body></html>
