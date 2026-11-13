@@ -7,7 +7,7 @@ const rd=c=>{const o={};if(!fs.existsSync(D+c))return o;for(const f of fs.readdi
 const SH=Object.fromEntries(Object.entries(rd('sheets')).filter(([k,v])=>DAY.split(',').includes(v.date||k.slice(-10))));
 const out=await p.evaluate(([B,ST,SH,CL,SE])=>{S.books=B;S.students=ST;S.classes=CL;S.settings=SE||{};window.koolQrImg=()=>'x';const R=[];
  for(const sh of Object.values(SH)){const sids=sh.sid?[sh.sid]:Object.values(ST).filter(s=>s.cls===sh.cls&&s.status!=="퇴원").map(s=>s.id);
-  for(const sid of sids){let L;try{L=hwQrList(sh,sid)}catch(e){R.push({sh:sh.id,sid,err:String(e)});continue}
+  for(const sid of sids){let L;try{/* 인쇄(paper)와 똑같이: 반 숙제장이면 ⟦eva,kelly⟧처럼 그 아이 몫인 줄만 (2026-11-13) */const sh2=sh.sid||isIndiv(sh.cls)?sh:{...sh,items:(sh.items||[]).filter(it=>forStu(it,sid))};L=hwQrList(sh2,sid)}catch(e){R.push({sh:sh.id,sid,err:String(e)});continue}
    L.forEach(q=>R.push({sh:sh.id,sid,name:(ST[sid]||{}).krName||'',lab:q.lab,url:q.href||q.url||null,warn:q.warn?String(q.lab):''}))}}
  return R},[rd('books'),rd('students'),SH,rd('classes'),rd('settings')]);
 fs.writeFileSync(OUT,JSON.stringify(out,null,1));console.log('sheets',Object.keys(SH).length,'qr',out.length,'pageErrors',errs.length);await b.close()})();
