@@ -328,8 +328,10 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     const rem = ITEMS.filter(x => !sentOK[itKey(x)]), all = ITEMS.map(itName).map(esc).join(' · ');
     $('doneP').hidden = true; box.hidden = false;
     if (rem.length){
-      box.innerHTML = `<div class="dn-go">계속 학습을 이어가세요!</div><div class="dn-ok sm">✅ ${esc(itName(IT))} 선생님께 보내기 완료!</div>`
-        + `<div class="dn-rem">남은 녹음: <b>${rem.map(itName).map(esc).join(' · ')}</b> (${rem.length}개)</div>`;
+      /* 중간에는 「선생님께 보냈어요」를 절대 안 보여 줘요 — 끝난 줄 알고 나가서 △ (2026-11-16) */
+      $('doneT').textContent = '아직 끝이 아니에요!';
+      box.innerHTML = `<div class="dn-go">계속 학습을 이어가세요!</div>`
+        + `<div class="dn-rem">남은 녹음: <b>${rem.map(itName).map(esc).join(' · ')}</b> (${ITEMS.length - rem.length} / ${ITEMS.length} 완료)</div>`;
       $('more').hidden = false; $('more').textContent = '▶ ' + itName(rem[0]) + ' 이어서 하기'; $('more').onclick = () => open(rem[0]);
       $('fin').hidden = true; $('finHint').hidden = true;
     } else {

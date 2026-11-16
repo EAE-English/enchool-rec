@@ -144,6 +144,7 @@ h2.sec span{font-size:12.5px;font-weight:500;color:var(--muted)}
 a.btn{text-decoration:none;text-align:center}
 a.btn[hidden]{display:none}
 .sentok{color:var(--ok);font-weight:900;font-size:14px}
+.result.mid #sentOk{display:none!important}
 
 .start{position:fixed;inset:0;background:rgba(16,47,94,.75);display:grid;place-items:center;z-index:30;padding:16px}
 .start[hidden]{display:none}
@@ -786,7 +787,9 @@ document.addEventListener('click',function(e){var b=e.target.closest&&e.target.c
 var _h=home;window.home=home=function(){_h();if(QRS()){try{qrGo()}catch(e){}}else{var g=document.getElementById('qrgo');if(g)g.hidden=true}};
 /* 결과 창: 보낸 뒤(원래 버튼이 300ms 뒤에 나옴) 맨 앞에 「다음 숙제」 */
 var s=document.getElementById('sendT');
-if(s)s.addEventListener('click',function(){setTimeout(function(){if(!QRS())return;var T=qrTargets();if(T.length<2)return;var R=T.filter(function(d){return !done(d)}),row=document.getElementById('nextRow');if(!row)return;
+/* 숙제가 남았으면 「✓ 선생님께 보냈어요!」는 절대 안 보여 줘요 (2026-11-16) */var midCk=function(){var bx=document.getElementById('result'),on=false;try{if(QRS()){var T=qrTargets();on=T.length>1&&T.some(function(d){return !done(d)})}}catch(e){}if(bx)bx.classList.toggle('mid',on)};
+if(s)s.addEventListener('click',midCk,true);
+if(s)s.addEventListener('click',function(){setTimeout(function(){midCk();if(!QRS())return;var T=qrTargets();if(T.length<2)return;var R=T.filter(function(d){return !done(d)}),row=document.getElementById('nextRow');if(!row)return;
  if(R.length){var nx=R[0];row.innerHTML='<div class="qg-nxl">계속 학습을 이어가세요! (남은 '+W+' '+R.length+'개)</div><button class="btn pri qg-nx" data-qnx="'+nx.id+'">▶ 다음 숙제: '+esc(nm(nx))+' 시작하기</button>'}
  else row.innerHTML='<div class="qg-nxl" style="color:#1b7a45">🎉 오늘 '+APP+' 숙제 끝! 모두 했어요.</div>';row.hidden=false},420)});
 home();
