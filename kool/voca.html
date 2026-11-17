@@ -639,7 +639,7 @@ function showResult(o){$("#rO").src=OWL[o.owl];$("#rT").textContent=o.title;$("#
 let MID=false;
 function midSet(){let mg=document.getElementById("midGo");if(!mg){mg=document.createElement("div");mg.id="midGo";$("#must").before(mg)}
  MID=false;mg.hidden=true;$("#sendT").classList.remove("midhide");$("#rX").hidden=false;$("#result").classList.remove("mid");
- try{if(!QRS())return;const T=qrTargets(),R=T.filter(t=>!qrDone(t));if(T.length<2||!R.length)return;
+ try{if(!QRS())return;const T=qrTargets(),R=T.filter(t=>!qrDone(t));/* 하나짜리 숙제도: 게임 하나만 하고(오늘의 모험·마스터 전) 나온 결과 창에는 「보냈어요」 안 보여 줘요 (2026-11-17) */if(!R.length)return;
   MID=true;$("#result").classList.add("mid");$("#must").hidden=true;$("#sendT").classList.add("midhide");$("#rX").hidden=true;mg.hidden=false;
   mg.innerHTML=`<div class="mg-t">아직 끝이 아니에요!</div><div class="mg-r">남은 숙제: <b>${R.map(qrNm).map(esc).join(" · ")}</b><span>${T.length-R.length} / ${T.length} 완료</span></div><button class="btn pri lg mg-b" id="midBtn">▶ ${esc(qrNm(R[0]))} 시작하기</button>`;
   $("#midBtn").onclick=()=>{$("#result").hidden=true;COURSE=null;$("#act").hidden=true;home();window.scrollTo({top:0});const c=document.querySelector("[data-course]");if(c)c.click()}}catch(e){}}

@@ -865,7 +865,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
       const ok = () => { reset(); sentOK[IT.id + (MODE === 'rap' ? 'r' : '')] = 1; coinSend(); $('doneCard').hidden = false; $('send').hidden = true; $('again').textContent = '한 번 더 하기';
         $('doneIc').textContent = MODE === 'rap' ? '🎤' : MODE === 'role' ? '🎬' : MODE === 'shadow' ? '🎧' : '📖'; $('doneT').textContent = MODE === 'rap' ? '멋진 랩이었어요!' : MODE === 'role' ? '멋진 연기였어요!' : MODE === 'shadow' ? '원어민처럼 잘 따라 했어요!' : '또박또박 잘 읽었어요!';
         try{ doneMulti(); }catch(e){}
-        /* 쿨본문·쿨톡 중간 녹음: 「보냈어요」 없이 「아직 끝이 아니에요」 + 다음 단계 버튼만 */ if (BACK) { $('doneT').textContent = '아직 끝이 아니에요!'; $('doneP').innerHTML = '녹음 다음 단계가 남았어요.<br>아래 <b>' + $('fin').textContent.replace(/\s*▶$/, '') + '</b> 버튼을 눌러 끝까지 해요.'; $('fin').hidden = false; $('finHint').hidden = true; $('more').hidden = true; }
+        /* 쿨본문·쿨톡 중간 녹음: 「보냈어요」 없이 「아직 끝이 아니에요」 + 다음 단계 버튼만 */ if (BACK) { $('doneT').textContent = '아직 끝이 아니에요!'; $('doneP').innerHTML = '녹음 다음 단계가 남았어요.<br>아래 <b>' + $('fin').textContent.replace(/\s*▶$/, '') + '</b> 버튼을 눌러 끝까지 해요.'; $('fin').hidden = false; $('finHint').hidden = true; $('more').hidden = true; $('doneMulti').hidden = true; }
         $('doneCard').scrollIntoView({block:'center', behavior:'smooth'}); };
       const fail = e => { reset(); showErr('보내기가 안 됐어요. 다시 눌러 주세요. (' + e.message + ')'); };
       /* 🧪 테스트(s=테스트): 보내지 않고 끝 화면만 (2026-11-06) */if (!notTest()) { ok(); $('doneT').textContent += ' (테스트라 선생님께 안 보냈어요)'; return; }
