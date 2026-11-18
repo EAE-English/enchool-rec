@@ -123,6 +123,7 @@
 .cc-toast em{font-style:normal;color:#ffd54a}
 @media (prefers-reduced-motion:reduce){.cc-coin,.cc-coin.got,.cc-coin.bye{animation:none}}
 .cc-sum{margin:12px 0 0;background:#fff7dc;border:1.5px solid #f2c94c;border-radius:14px;padding:10px;color:#7a5600;font-weight:700;font-size:15px;line-height:1.5}.cc-sum b{font-size:22px;color:#132E5E}
+.wtag{font-style:normal;font-size:12px;font-weight:700;margin-left:8px;padding:1px 8px;border-radius:99px;background:#eef2f8;color:#102f5e;vertical-align:1px}.wtag.ex{background:#fff4d6;color:#8a5a00}
 </style>
 </head>
 <script src="https://eae-english.github.io/enchool-rec/tools/tts_aud.js"></script>
@@ -244,6 +245,9 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   const plain = s => String(s).replace(/[\[\]]/g, '');
   const Q = new URLSearchParams(location.search);
   const WONLY = Q.get('w') === '1';
+  /* Day마다 따로: wd=15~16 → 그 Day만 단어만(예문 건너뜀), 나머지 Day는 예문까지 (2026-11-18 선생님 「새로운 단원은 예문까지」 — 겹쳐 나가는 복습 Day는 단어만) */
+  const WSET = new Set((Q.get('wd') || '').split(/[~,.]/).filter(Boolean));
+  const WO = x => WONLY || !!(x && x.kind === 'shadow' && WSET.has(String(x.id || '').split('-')[0]));
   let RAP = Q.get('rap') === '1';   // 불규칙 랩보이스: 비트 깔고 표 보며 랩하듯 읽기 (2026-11-04)   // 단어만 따라 읽기 (예문은 건너뜀 · 2026-10-29)
   let STUDENT = (Q.get('s') || '').trim(); const CLS = Q.get('c') || '', KEY = (Q.get('k') || '').trim(), ME0 = Q.get('me') || '';
   window.addEventListener('error', e => { try{ showErr('화면 오류: ' + (e.message || '') + ' — 이 화면을 캡처해서 선생님께 보내 주세요.'); }catch(_){} });
@@ -311,7 +315,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
       const g = x.kind === 'body' ? 'b' : x.kind === 'shadow' ? 'h' : (x.st || 0);
       if (g !== last){ last = g; h += `<div class="pkh">${g === 'h' ? (RAP ? '<b>🎤 랩보이스 · 묶음을 골라요</b>' : '<b>🎧 따라 읽기</b>') : g === 'b' ? '<b>📖 본문 읽기</b>' : g ? `<b>Step ${g}</b>${PACK.steps && PACK.steps[g] ? ' · ' + esc(PACK.steps[g]) : ''}` : '<b>🎭 대화문 역할극</b>'}</div>`; }
       const done = sentOK[x.id];
-      h += `<button class="pk${done ? ' done' : ''}" data-it="${i}"><b>${esc(x.t)}</b><small>${esc(x.kind === 'shadow' ? (PACK.book === '불규칙 동사표' ? (x.words || []).length + '개 · ' + (x.words || []).slice(0, 6).map(w => (w.f || [w.w])[0]).join(', ') + ((x.words || []).length > 6 ? ' …' : '') : (x.words || []).map(w => w.w).join(', ')) : [x.p, x.sub].filter(Boolean).join(' · '))}</small>${done ? '<span>✓ 보냄</span>' : ''}</button>`;
+      h += `<button class="pk${done ? ' done' : ''}" data-it="${i}"><b>${esc(x.t)}${WSET.size && x.kind === 'shadow' ? `<i class="wtag${WO(x) ? '' : ' ex'}">${WO(x) ? '단어만' : '단어 + 예문'}</i>` : ''}</b><small>${esc(x.kind === 'shadow' ? (PACK.book === '불규칙 동사표' ? (x.words || []).length + '개 · ' + (x.words || []).slice(0, 6).map(w => (w.f || [w.w])[0]).join(', ') + ((x.words || []).length > 6 ? ' …' : '') : (x.words || []).map(w => w.w).join(', ')) : [x.p, x.sub].filter(Boolean).join(' · '))}</small>${done ? '<span>✓ 보냄</span>' : ''}</button>`;
     });
     $('pkList').innerHTML = h;
   }
@@ -364,7 +368,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   function start(x, mode, me){
     MODE = mode; ME = me; HIDE = false; heard = {}; blob = null; COIN.arm(notTest(), '「선생님께 보내기」를 누르면 쌓여요'); if ($('ccSum')) $('ccSum').hidden = true;
     $('rolePick').hidden = true; $('stage').hidden = false; $('bar').hidden = false;
-    $('appName').textContent = mode === 'rap' ? '불규칙 랩보이스' : PACK.book === '불규칙 동사표' && mode === 'shadow' ? '불규칙 쿨보이스' : mode === 'sum' ? '쿨요약 녹음' : mode === 'role' ? '쿨톡 역할극 녹음' : x.kind === 'body' ? '본문 따라 읽기 녹음' : mode === 'shadow' ? (WONLY ? '단어 따라 읽기 녹음' : '따라 읽기 녹음') : '본문 읽기 녹음';
+    $('appName').textContent = mode === 'rap' ? '불규칙 랩보이스' : PACK.book === '불규칙 동사표' && mode === 'shadow' ? '불규칙 쿨보이스' : mode === 'sum' ? '쿨요약 녹음' : mode === 'role' ? '쿨톡 역할극 녹음' : x.kind === 'body' ? '본문 따라 읽기 녹음' : mode === 'shadow' ? (WO(x) ? '단어 따라 읽기 녹음' : '따라 읽기 녹음') : '본문 읽기 녹음';
     $('unit').textContent = PACK.unit || ''; $('title').textContent = x.t + (x.sub ? ' · ' + x.sub : '');
     $('how').innerHTML = mode === 'rap'
       ? `🎤 <b>녹음 시작</b>을 누르면 <b>비트</b>가 나와요. 비트에 맞춰 표를 보면서 <b>원형 - 과거 - 과거분사</b>를 <b>랩하듯</b>읽어요.<br>다 읽으면 <b>다 했어요</b>를 눌러요. 비트도 같이 녹음돼요. 🔈 이어폰 없이 해도 돼요.`
@@ -388,7 +392,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     draw(); window.scrollTo({top:0});
   }
   function lines(){ if (IT.kind === 'body') return bodyLines(IT).map(t => ['', t, '']);
-    if (IT.kind === 'shadow') return (IT.words || []).map(w => [w.w, WONLY ? '' : (w.ex || ''), w.ko || '']);
+    if (IT.kind === 'shadow') return (IT.words || []).map(w => [w.w, WO(IT) ? '' : (w.ex || ''), w.ko || '']);
     return IT.kind === 'dlg' ? IT.L : (IT.lines || String(IT.text || '').split(/(?<=[.!?])\s+/)).map(t => ['', t, '']); }
   function draw(){
     if (MODE === 'rap'){ $('lines').innerHTML = `<div style="text-align:center"><span class="rapg">${esc(IT.t)} · ${(IT.words || []).length}개</span></div><div class="beat" id="beatOn" hidden><i></i>비트 나오는 중 · 랩하듯 읽어요!</div><table class="rap"><tr><th>원형</th><th>과거</th><th>과거분사</th><th>뜻</th></tr>${(IT.words || []).map(w => `${w.g ? `<tr class="gh"><td colspan="4">${esc(w.g)}</td></tr>` : ''}<tr>${(w.f || [w.w, '', '']).map(t => `<td>${esc(t)}</td>`).join('')}<td class="k">${esc(w.ko || '')}</td></tr>`).join('')}</table>`; return; }
@@ -486,7 +490,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
       if (TRK[ck] && SEGS[ck]){ x.audio = ck; AUD = rate(new Audio(TRK[ck])); set('✓ 음원 준비 끝'); return; }
       set('wait'); let gave = false; setTimeout(() => { if (!gave && IT === x && !x.audio){ gave = true; set('음원이 없어서'); } }, 20000);
       clipTrack(clipLines(x)).then(r => { if (gave) return; gave = true; if (!r){ set('음원이 없어서'); return; }
-        TRK[ck] = r.url; if (WA_REC) PCMS[ck] = r.pcm; SEGS[ck] = (WONLY ? r.plan.filter(q => q[3] !== 'e') : r.plan).map(q => [q[0], q[1], 1].concat(q[3] ? [q[3]] : []));
+        TRK[ck] = r.url; if (WA_REC) PCMS[ck] = r.pcm; SEGS[ck] = (WO(x) ? r.plan.filter(q => q[3] !== 'e') : r.plan).map(q => [q[0], q[1], 1].concat(q[3] ? [q[3]] : []));
         x.audio = ck; if (IT === x){ AUD = rate(new Audio(r.url)); set('✓ 음원 준비 끝'); } })
         .catch(() => { if (!gave){ gave = true; set('음원이 없어서'); } });
       return;
@@ -503,7 +507,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
       SEGS[k] = null;
       /* 미리 만들어 둔 나누기 계획(plans/…json: 한국어 뜻은 따라 하지 않고 넘어감)이 있으면 그걸 쓰고, 없으면 여기서 나눔 */
       fetch('plans/' + k + '.json', {cache:'no-cache'}).then(r => r.ok ? r.json() : null).catch(() => null)
-        .then(pl => pl && pl.length ? (SEGS[k] = WONLY ? pl.filter(x => x[3] !== 'e') : pl) : segment(by.buffer.slice(0), wantSegs(x)).then(sg => { SEGS[k] = sg; }))
+        .then(pl => pl && pl.length ? (SEGS[k] = WO(x) ? pl.filter(q => q[3] !== 'e') : pl) : segment(by.buffer.slice(0), wantSegs(x)).then(sg => { SEGS[k] = sg; }))
         .catch(() => { SEGS[k] = []; });
       toWav(by.buffer.slice(0), k).catch(() => null).then(u => { if (u){ try{ URL.revokeObjectURL(mp3); }catch(e){} } TRK[k] = u || mp3; if (IT && IT.audio === k){ AUD = rate(new Audio(TRK[k])); set('✓ 음원 준비 끝'); } });
     }).catch(() => { TRK[k] = 'none'; if (IT && IT.audio === k) set('음원이 아직 없어서 원어민 목소리로 읽어 줘요'); });
@@ -512,7 +516,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
   const SEGS = {};
   /* 따라 말할 시간 = 원어민 소리 길이(속도 반영) + 여유: 짧은 단어는 1초, 문장은 2초 (2026-10-29 선생님 요청) */
   const plusFor = len => len < 1.4 ? 1 : 2;
-  const wantSegs = x => x.kind === 'shadow' ? (x.words || []).reduce((n, w) => n + 1 + (w.ex && !WONLY ? 1 : 0), 0) : bodyLines(x).length;
+  const wantSegs = x => x.kind === 'shadow' ? (x.words || []).reduce((n, w) => n + 1 + (w.ex && !WO(x) ? 1 : 0), 0) : bodyLines(x).length;
   const bodyLines = x => x.lines || String(x.text || '').split(/(?<=[.!?])\s+/).filter(Boolean);
   async function segment(buf, want){
     const ctx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 16000, 16000);
@@ -554,7 +558,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     let i = 0; const my = ++TSEQ;
     /* 끊은 개수가 대본과 맞으면 지금 나오는 단어·문장 칸을 따라가며 보여 줌 */
     const map = [];
-    if (IT.kind === 'shadow') (IT.words || []).forEach((w, k) => { map.push(k); if (w.ex && !WONLY) map.push(k); }); else lines().forEach((_, k) => map.push(k));
+    if (IT.kind === 'shadow') (IT.words || []).forEach((w, k) => { map.push(k); if (w.ex && !WO(IT)) map.push(k); }); else lines().forEach((_, k) => map.push(k));
     const follow = !sg.some(x => x.length > 2) && (map.length === sg.length || (IT.kind === 'shadow' && map.length + 1 === sg.length));
     const off = sg.length - map.length;   // 맨 앞 책 소개 멘트가 하나 더 있을 때
     (function next(){
