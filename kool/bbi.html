@@ -34,6 +34,7 @@ body{margin:0;background:var(--bg);color:#1d2433;font-family:var(--ko);-webkit-t
 .spk{width:36px;height:36px;border-radius:50%;border:0;background:#E8EEF8;color:var(--navy);font-size:15px;cursor:pointer;display:grid;place-items:center;margin:0 auto}
 tr.now .spk{background:var(--navy);color:#fff}
 .gh td{background:var(--gold-soft)!important;color:#7a5200!important;font:800 13.5px var(--en)!important;text-align:left!important;padding:7px 12px!important}
+.tb tr.hd td:first-child{box-shadow:inset 4px 0 0 #2f9e63}.prog{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:10px 14px;margin:0 0 10px;font-size:14px;color:var(--navy);font-weight:700}.prog i{flex:1;height:8px;border-radius:99px;background:#E8EEF8;overflow:hidden;display:block}.prog i b{display:block;height:100%;background:#2f9e63;border-radius:99px;width:0;transition:width .3s}.prog small{font-weight:400;color:var(--muted);font-size:12.5px}.fin{background:#effaf3;border:1.5px solid #9fd5b5;color:#1b7a45;border-radius:14px;padding:12px 14px;margin:0 0 10px;font-size:15px;font-weight:700;text-align:center}.fin button{margin-top:8px;border:0;border-radius:10px;background:var(--navy);color:#fff;font:700 14px var(--ko);padding:9px 16px}.nmrow{display:flex;gap:8px;align-items:center;margin:0 0 10px;font-size:14px}.nmrow input{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;font:700 15px var(--ko)}
 .err{background:#fde8e8;color:#a3261f;border-radius:12px;padding:10px 14px;font-size:14px;margin:10px 0}
 @media(max-width:380px){.tb td{font-size:14.5px}.tb td.k{font-size:12px}}
 </style></head><body>
@@ -41,7 +42,10 @@ tr.now .spk{background:var(--navy);color:#fff}
   <div class="top"><span class="br">ENCHOOLANDSOME ENGLISH</span><h1>📖 삐딱동사</h1><p>불규칙 동사 — 듣고 따라하기</p></div>
   <div class="tabs" id="tabs"></div>
   <div class="bar"><button class="all" id="all">▶ 묶음 전체 듣기</button><button class="slow" id="slow">🐢 천천히</button></div>
-  <p class="tip">🔊(또는 그 줄)를 누르면 그 동사만 들려줘요. 듣고 소리 내어 따라 해 봐요!</p>
+  <p class="tip">🔊(또는 그 줄)를 누르면 그 동사만 들려줘요. 듣고 소리 내어 따라 해 봐요!<br><b>전부 끝까지 들으면</b> 숙제가 끝나요.</p>
+  <div class="nmrow" id="nmrow" hidden><span>이름</span><input id="nm" placeholder="이름을 써요 (예: 김엔쿨)" autocomplete="off"></div>
+  <div class="prog" id="prog" hidden><span id="pgT">들은 동사 0 / 0</span><i><b id="pgB"></b></i></div>
+  <div class="fin" id="fin" hidden></div>
   <div id="err" class="err" hidden></div>
   <table class="tb" id="tb"></table>
 </div>
@@ -50,7 +54,21 @@ tr.now .spk{background:var(--navy);color:#fff}
 /* 삐딱동사 (2026-11-13): ?g=g1,g2 처럼 고른 묶음을 한 표로 합쳐 보여주고, 줄마다 🔊 · 전체 듣기는 묶음을 이어서 */
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 const q=new URLSearchParams(location.search),want=(q.get('g')||'').split(',').map(s=>s.trim()).filter(Boolean);
-let G=[],R=[],A={},P={},mode=null,stopAt=0,rowAt=-1,timer=null,slow=false,curG=null,queue=[];
+let G=[],R=[],A={},P={},mode=null,stopAt=0,rowAt=-1,timer=null,slow=false,curG=null,queue=[],allFrom=0;
+/* 다 들었는지 (2026-11-18 선생님 「삐딱동사 안들어옴」): 줄마다 끝까지 들으면 ✓ · 숙제 묶음을 전부 들으면 학습 기록(쿨톡 탭)에 저절로 보내요 → 수업 기록 QR 숙제 칩. 다 듣기 전에는 「보냈어요」를 보여 주지 않아요 */
+const LOG="https://script.google.com/macros/s/AKfycbwdK8492SzMcrc_hmwGWIquliehqASMrSAhbXJ5D-UyygkmwYvO23LWDzU8O44UrGQD/exec";
+let NAME=(q.get('s')||'').replace(/\s+/g,''),HEARD=new Set(),SENT=false,T0=Date.now(),LISTEN=0,lastT=0;
+const isTest=()=>/^(test|테스트|김정호)$/i.test(NAME);
+function hear(n){if(n<0||HEARD.has(n))return;HEARD.add(n);const r=document.querySelector(`#tb tr.r[data-n="${n}"]`);if(r)r.classList.add('hd');prog()}
+function prog(){if(!R.length)return;$('prog').hidden=false;$('pgT').textContent=`들은 동사 ${HEARD.size} / ${R.length}`;$('pgB').style.width=Math.round(HEARD.size/R.length*100)+'%';if(HEARD.size>=R.length)done()}
+function done(){if(SENT)return;if(!NAME){$('nmrow').hidden=false;$('fin').hidden=false;$('fin').innerHTML='🎉 끝까지 들었어요!<br><small>위에 이름을 쓰고 아래 단추를 눌러요.</small><br><button id="sendB">📮 선생님께 보내기</button>';return}send()}
+function send(){if(SENT)return;NAME=(NAME||$('nm').value||'').replace(/\s+/g,'');if(!NAME){$('nm').focus();return}SENT=true;const sec=Math.round((Date.now()-T0)/1000),ls=Math.round(LISTEN),tm=`${Math.floor(sec/60)}분 ${sec%60}초 · 들은 시간 ${Math.floor(ls/60)}분 ${ls%60}초`;
+  const ua=navigator.userAgent,dev=/iPad|Tablet|Android(?!.*Mobile)/i.test(ua)?'태블릿':/Mobi|iPhone|Android/i.test(ua)?'폰':'PC';
+  if(isTest()){$('fin').hidden=false;$('fin').textContent='🧪 테스트 이름이라 기록하지 않아요.';return}
+  const qv={name:NAME,prac:`삐딱동사 · ${G.map(g=>g.t).join(', ')} · 듣고 따라하기`,lv:'완료',score:`${HEARD.size}/${R.length}`,shown:'0',wrong:'없음',time:tm,dev};
+  const u=LOG+'?a=log&app='+encodeURIComponent('쿨톡')+'&'+Object.entries(qv).map(([k,v])=>k+'='+encodeURIComponent(v)).join('&');
+  const ok=()=>{$('nmrow').hidden=true;$('fin').hidden=false;$('fin').textContent='🎉 끝까지 들었어요! ✓ 선생님께 보냈어요'},fail=()=>{SENT=false;$('fin').hidden=false;$('fin').innerHTML='⚠️ 인터넷이 끊겨서 못 보냈어요.<br><button id="sendB">📮 다시 보내기</button>'};
+  try{fetch(u,{mode:'no-cors',keepalive:true,cache:'no-store',credentials:'omit'}).then(ok).catch(fail)}catch(e){fail()}}
 try{slow=localStorage.getItem('bbi_slow')==='1'}catch(e){}
 function setSlow(){$('slow').classList.toggle('on',slow);Object.values(A).forEach(a=>{a.playbackRate=slow?0.8:1;a.preservesPitch=true;a.webkitPreservesPitch=true})}
 function aud(g){if(!A[g.id]){const a=new Audio();a.preload='auto';A[g.id]=a;/* 통째로 받아 두고 재생 — 어느 서버에서도 원하는 줄로 바로 건너뛰게 */fetch('aud/'+g.audio+'.mp3').then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>{a.src=URL.createObjectURL(b);a.load()}).catch(()=>err('소리를 못 받았어요. 인터넷을 확인하고 다시 들어와 주세요.'));}setSlow();return A[g.id]}
@@ -58,10 +76,11 @@ function err(t){$('err').hidden=!t;$('err').textContent=t||''}
 function hi(n){rowAt=n;document.querySelectorAll('#tb tr.r').forEach(r=>r.classList.toggle('now',+r.dataset.n===n));if(n>=0&&mode==='all'){const r=document.querySelector(`#tb tr.r[data-n="${n}"]`);if(r)r.scrollIntoView({block:'center',behavior:'smooth'})}}
 function allBtn(on){$('all').classList.toggle('on',on);$('all').textContent=on?'■ 멈추기':(G.length>1?'▶ 전체 이어 듣기':'▶ 묶음 전체 듣기')}
 function stop(){clearInterval(timer);timer=null;queue=[];Object.values(A).forEach(a=>{try{a.pause()}catch(e){}});mode=null;hi(-1);allBtn(false)}
-function tick(){const a=A[curG.id];if(!a)return;const t=a.currentTime;
+function tick(){const a=A[curG.id];if(!a)return;const t=a.currentTime;if(!a.paused&&t>lastT&&t-lastT<1)LISTEN+=(t-lastT)/(a.playbackRate||1);lastT=t;
+  if(mode==='all')R.forEach(r=>{if(r.g===curG&&r.s>=allFrom-0.05&&t>=r.e-0.12)hear(r.n)});else if(mode==='one'&&t>=stopAt-0.12)hear(rowAt);
   if(mode==='all'){let k=-1;R.forEach(r=>{if(r.g===curG&&t>=r.s-0.15)k=r.n});if(k>=0&&k!==rowAt)hi(k)}
   if(t>=stopAt||a.ended){clearInterval(timer);timer=null;try{a.pause()}catch(_){}if(mode==='all'&&queue.length){setTimeout(()=>{if(mode==='all')playGroup(queue.shift())},500)}else stop()}}
-function play(g,s,e,m){const a=aud(g);clearInterval(timer);Object.values(A).forEach(x=>{if(x!==a)try{x.pause()}catch(_){}});mode=m;stopAt=e;curG=g;
+function play(g,s,e,m){const a=aud(g);clearInterval(timer);Object.values(A).forEach(x=>{if(x!==a)try{x.pause()}catch(_){}});mode=m;stopAt=e;curG=g;lastT=s;allFrom=s;
   const go=()=>{try{a.currentTime=s}catch(_){}const p=a.play();if(p&&p.catch)p.catch(()=>{err('소리를 켤 수 없어요. 한 번 더 눌러 주세요.');stop()});timer=setInterval(tick,40)};
   if(a.readyState>=1)go();else a.addEventListener('loadedmetadata',go,{once:true})}
 function playGroup(g){const rs=R.filter(r=>r.g===g);if(!rs.length)return stop();play(g,rs[0].s,rs[rs.length-1].e+0.2,'all')}
@@ -69,7 +88,7 @@ function draw(){
   $('tabs').innerHTML=G.map(g=>`<span class="chip">${esc(g.t)} <small>${g.words.length}개</small></span>`).join('')+(G.length>1?`<span class="cnt">모두 ${R.length}개</span>`:'');
   $('tb').innerHTML=`<tr><th>원형</th><th>과거</th><th>과거분사</th><th>뜻</th><th></th></tr>`+G.map(g=>(G.length>1?`<tr class="gh"><td colspan="5">${esc(g.t)}</td></tr>`:'')+R.filter(r=>r.g===g).map(r=>`<tr class="r" data-n="${r.n}">${(r.w.f||[r.w.w,'','']).map(t=>`<td>${esc(t)}</td>`).join('')}<td class="k">${esc(r.w.ko||'')}</td><td class="p"><button class="spk" aria-label="듣기">🔊</button></td></tr>`).join('')).join('');
   allBtn(false);G.forEach(aud)}
-document.addEventListener('click',e=>{const t=e.target.closest('tr.r,#all,#slow');if(!t)return;err('');
+document.addEventListener('click',e=>{if(e.target.closest('#sendB')){send();return}const t=e.target.closest('tr.r,#all,#slow');if(!t)return;err('');
   if(t.id==='slow'){slow=!slow;try{localStorage.setItem('bbi_slow',slow?'1':'0')}catch(_){}setSlow();return}
   if(!R.length){err('음원 정보를 아직 못 받았어요. 잠깐 뒤에 다시 눌러 주세요.');return}
   if(t.id==='all'){if(mode==='all'){stop();return}queue=G.slice(1);allBtn(true);playGroup(G[0]);return}
@@ -77,7 +96,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('tr.r,#all,#slow'
 fetch('../scripts/irr_1.json',{cache:'no-cache'}).then(r=>r.json()).then(d=>{
   const all=d.shadow||[];G=want.map(id=>all.find(g=>g.id===id)).filter(Boolean);if(!G.length)G=all;
   return Promise.all(G.map(g=>fetch('../plans/'+g.audio+'.json',{cache:'no-cache'}).then(r=>r.json()).then(p=>{P[g.id]=p}))).then(()=>{
-    G.forEach(g=>g.words.forEach((w,i)=>{const p=P[g.id][i];if(p)R.push({n:R.length,g,w,s:p[0],e:p[1]})}));draw()})})
+    G.forEach(g=>g.words.forEach((w,i)=>{const p=P[g.id][i];if(p)R.push({n:R.length,g,w,s:p[0],e:p[1]})}));draw();prog()})})
   .catch(()=>err('동사표를 못 받았어요. 인터넷을 확인하고 다시 들어와 주세요.'));
 })();
 </script>
