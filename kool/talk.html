@@ -453,7 +453,7 @@ function diff(typed,ans){const A=norm(typed).split(" ").filter(Boolean),B=norm(a
 let VOICE=null;function pickVoice(){try{const v=speechSynthesis.getVoices().filter(x=>/^en/i.test(x.lang));VOICE=v.find(x=>/US/i.test(x.lang))||v[0]||null}catch(e){}}
 try{speechSynthesis.onvoiceschanged=pickVoice;pickVoice()}catch(e){}
 /* 마지막 소리가 끝까지 나온 뒤에 결과 화면으로 (2026-10-29) */
-function finishSay(){const S0=ST;if(!S0||S0._fs)return;S0._fs=1;const t0=Date.now();(function w(){let on=false;try{on=speechSynthesis.speaking||speechSynthesis.pending||!!(window.TTSA&&TTSA.playing())}catch(e){}if(on&&Date.now()-t0<15000)return setTimeout(w,200);if(ST===S0)setTimeout(()=>{if(ST===S0)finish()},500)})()}
+function finishSay(){const S0=ST;if(!S0||S0._fs)return;S0._fs=1;const t0=Date.now();(function w(){let on=false;try{on=speechSynthesis.speaking||speechSynthesis.pending||!!(window.TTSA&&TTSA.playing())}catch(e){}/* 휴대폰에서 소리 끝 신호가 안 오면 15초 동안 버튼 없이 멈춰 보여요 → 4초까지만 기다려요 (2026-11-19 세림 쿨본문과 같은 문제 · 쿨톡·쿨보카도 같이) */if(on&&Date.now()-t0<4000)return setTimeout(w,200);if(ST===S0)setTimeout(()=>{if(ST===S0)finish()},500)})()}
 function speak(text,who,done){if(window.TTSA&&TTSA.play(text,who,done))return;try{(window.TTSA&&TTSA.stop(),speechSynthesis.cancel());const u=new SpeechSynthesisUtterance(plain(text));u.lang="en-US";if(VOICE)u.voice=VOICE;u.rate=.88;
  u.pitch=/^(G|Linda)$/.test(who||"")?1.25:.85;if(done)u.onend=done;speechSynthesis.speak(u)}catch(e){done&&done()}}
 const isRight=(d,s)=>s===d.L[0][0]?false:true; /* 첫 화자는 왼쪽, 상대는 오른쪽 */
@@ -587,7 +587,7 @@ function mListen(d){let round=1,i=0;ST.total=d.L.length;
   /* 버튼은 지금 문장 바로 아래 (휴대폰마다 '화면 아래 고정'이 대화문 맨 끝으로 밀려서 · 2026-10-31) */
   function rowHTML(){return `<div class="rowb lnrow">${round===1?`<button class="mini" data-sayi="${i}">🔊 다시 듣기</button><button class="btn pri" data-lnext>따라 말했어요 ▶</button>`:
    `<span class="slab" style="align-self:center">우리말을 보고 영어로 말해 본 뒤</span><button class="btn" data-lmem="0">생각 안 났어요</button><button class="btn pri" data-lmem="1">말할 수 있었어요</button>`}</div>`}
-  cnt(round===1?`1단계 듣고 따라 하기 · ${i+1}/${d.L.length}줄`:`2단계 가리고 말하기 · ${i+1}/${d.L.length}줄`);
+  cnt(i>=d.L.length?`2단계 가리고 말하기 · ${d.L.length}/${d.L.length}줄 · 끝! 잠깐만요…`:round===1?`1단계 듣고 따라 하기 · ${i+1}/${d.L.length}줄`:`2단계 가리고 말하기 · ${i+1}/${d.L.length}줄`);
   (st.querySelector(".lnrow")||st.querySelector(".cur"))?.scrollIntoView({block:"center",behavior:"smooth"});
   if(round===1)speak(d.L[i][1],d.L[i][0])}
  ST.onL=(t,v)=>{if(t==="next"){i++;if(i>=d.L.length){round=2;i=0;owl("wizard","이번엔 영어를 가려요! 우리말만 보고 말해 봐.","good")}draw()}

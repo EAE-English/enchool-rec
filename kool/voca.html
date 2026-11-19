@@ -440,7 +440,7 @@ function capsOk(typed,ans){const A=ans.replace(/~/g," ").split(/[\s-]+/).filter(
 let VOICE=null;function pickVoice(){try{const v=speechSynthesis.getVoices().filter(x=>/^en/i.test(x.lang));VOICE=v.find(x=>/US/i.test(x.lang))||v[0]||null}catch(e){}}
 try{speechSynthesis.onvoiceschanged=pickVoice;pickVoice()}catch(e){}
 /* 마지막 소리가 끝까지 나온 뒤에 결과 화면으로 (2026-10-29) */
-function finishSay(){const S0=ST;if(!S0||S0._fs)return;S0._fs=1;const t0=Date.now();(function w(){let on=false;try{on=speechSynthesis.speaking||speechSynthesis.pending||!!window.__audOn||!!(window.TTSA&&TTSA.playing())}catch(e){}if(on&&Date.now()-t0<15000)return setTimeout(w,200);if(ST===S0)setTimeout(()=>{if(ST===S0)finish()},500)})()}
+function finishSay(){const S0=ST;if(!S0||S0._fs)return;S0._fs=1;const t0=Date.now();(function w(){let on=false;try{on=speechSynthesis.speaking||speechSynthesis.pending||!!window.__audOn||!!(window.TTSA&&TTSA.playing())}catch(e){}/* 휴대폰에서 소리 끝 신호가 안 오면 15초 동안 버튼 없이 멈춰 보여요 → 4초까지만 기다려요 (2026-11-19 세림 쿨본문과 같은 문제 · 쿨톡·쿨보카도 같이) */if(on&&Date.now()-t0<4000)return setTimeout(w,200);if(ST===S0)setTimeout(()=>{if(ST===S0)finish()},500)})()}
 function speak(t,slow){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(say(t));u.lang="en-US";if(VOICE)u.voice=VOICE;u.rate=slow?.6:.82;speechSynthesis.speak(u)}catch(e){}}
 function stars(p){const n=p>=.95?3:p>=.8?2:p>=.5?1:0;return "★".repeat(n)+`<span class="off">${"★".repeat(3-n)}</span>`}
 
