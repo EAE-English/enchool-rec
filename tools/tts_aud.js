@@ -28,16 +28,21 @@ window.TTSA = (function () {
       return fetch(BASE + fn).then(function (r) { if (!r.ok) throw new Error('no'); return r.arrayBuffer(); }).then(function (b) { store.put('a|' + fn, { by: b.slice(0) }); return b; });
     }).then(function (b) { var u = URL.createObjectURL(new Blob([b], { type: 'audio/mpeg' })); mem[fn] = u; return u; });
   }
-  function stop() { cur = null; try { if (el) el.pause(); } catch (e) {} }
+  function stop() { cur = null; if (el) el.onloadedmetadata = null; try { if (el) el.pause(); } catch (e) {} }
   function play(t, who, done, rate) {
     var fn = MAP && MAP[key(who, t)];
     if (!fn) return false;
     stop();
     var tok = {}; cur = tok;
-    var fired = false, fin = function () { if (fired) return; fired = true; if (cur === tok) cur = null; if (done) done(); };
+    /* 휴대폰에서 소리 끝 신호(ended)가 안 오거나 음성 받기가 안 끝나면 화면이 멈춰 있던 것 → 지킴이 타이머로 꼭 다음으로 넘어가요 (2026-11-19) */
+    var fired = false, wd = 0, fin = function () { if (fired) return; fired = true; clearTimeout(wd); if (cur === tok) cur = null; if (done) done(); };
+    var guard = function (ms) { clearTimeout(wd); wd = setTimeout(function () { if (cur === tok) { try { if (el) el.pause(); } catch (e) {} } fin(); }, ms); };
+    guard(8000);   // 음성 파일 받기 · 시작까지 최대 8초
     urlOf(fn).then(function (u) {
       if (cur !== tok) return;
-      var a = audio(); a.onended = fin; a.onerror = fin; a.src = u; a.playbackRate = rate || 1;
+      var a = audio(), r = rate || 1; a.onended = fin; a.onerror = fin; a.src = u; a.playbackRate = r;
+      var len = function () { var d = a.duration; guard(d && isFinite(d) ? d / r * 1000 + 2500 : 12000); };
+      a.onloadedmetadata = function () { if (cur === tok) len(); }; len();
       var pr = a.play(); if (pr && pr.catch) pr.catch(fin);
     }).catch(fin);
     return true;

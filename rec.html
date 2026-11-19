@@ -550,11 +550,23 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     el.hidden = false; const bar = el.querySelector('i'); bar.style.transition = 'none'; bar.style.width = '100%';
     requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transition = `width ${sec}s linear`; bar.style.width = '0'; }));
   }
+  /* 소리 끝 신호(ended)가 안 오거나 소리가 멈춰 버리는 폰에서도 꼭 다음으로 넘어가게 지켜봐요 (2026-11-19)
+     끝났거나 · 4초 동안 한 칸도 안 나아가면 끝난 걸로 봐요. alive()가 거짓이면(그만 누름) 조용히 그만둬요. */
+  function endGuard(a, alive, cb){
+    let done = false, last = -1, at = Date.now();
+    const fin = () => { if (done) return; done = true; a.onended = null; cb && cb(); };
+    a.onended = fin;
+    (function w(){ if (done) return; if (!alive()){ done = true; return; }
+      const t = a.currentTime; if (a.ended || (a.duration && t >= a.duration - 0.05)) return fin();
+      if (t !== last){ last = t; at = Date.now(); } else if (Date.now() - at > 4000){ try{ a.pause(); }catch(e){} return fin(); }
+      setTimeout(w, 250); })();
+    return () => { done = true; a.onended = null; };   // 지킴이 끄기
+  }
   function playWithGaps(onDone, tries){
     tries = tries || 0;
     if (SEGS[IT.audio] === null && tries < 40) return setTimeout(() => playWithGaps(onDone, tries + 1), 100);   // 음원 나누는 중이면 잠깐 기다림
     const a = AUD, sg = SEGS[IT.audio];
-    if (!sg || !sg.length){ a.currentTime = 0; a.onended = onDone; a.play().catch(() => ttsShadow(onDone)); return; }
+    if (!sg || !sg.length){ a.currentTime = 0; const off = endGuard(a, () => running || playing, onDone); a.play().catch(() => { off(); ttsShadow(onDone); }); return; }
     let i = 0; const my = ++TSEQ;
     /* 끊은 개수가 대본과 맞으면 지금 나오는 단어·문장 칸을 따라가며 보여 줌 */
     const map = [];
@@ -578,9 +590,11 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
       }
       a.onended = null; a.currentTime = s0;
       a.play().catch(() => {});
+      let lastT = -1, lastAt = Date.now();   // 소리가 멈춰 버리면(3초 동안 그대로) 다음으로 넘어가요 (2026-11-19)
       (function watch(){
         if (!running || my !== TSEQ){ if (my === TSEQ) a.pause(); return; }
-        if (a.currentTime >= e0 || a.ended){
+        const ct = a.currentTime; if (ct !== lastT){ lastT = ct; lastAt = Date.now(); }
+        if (ct >= e0 || a.ended || Date.now() - lastAt > 3000){
           a.pause(); const len = (e0 - s0) / RATE, rep = sg[i][2] !== 0, gap = rep ? len + plusFor(len) : 0.25; i++;   // 한국어 뜻(0)은 따라 하지 않고 바로 다음
           if (!rep){ setTimeout(next, gap * 1000); return; }
           showSay(gap); setTimeout(next, gap * 1000);
@@ -628,7 +642,7 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     if (playing){ playing = false; TSEQ++; (window.TTSA && TTSA.stop(), speechSynthesis.cancel()); if (AUD) AUD.pause(); focus(-1); $('listenAll').textContent = '🔊 원어민 먼저 들어 보기'; return; }
     playing = true; $('listenAll').textContent = '■ 그만 듣기';
     const endL = () => { playing = false; focus(-1); $('listenAll').textContent = '🔊 원어민 먼저 들어 보기'; };
-    if (MODE === 'shadow'){ if (AUD){ AUD.currentTime = 0; AUD.onended = endL; AUD.play().catch(endL); } else ttsShadow(endL); return; }
+    if (MODE === 'shadow'){ if (AUD){ AUD.currentTime = 0; endGuard(AUD, () => playing, endL); AUD.play().catch(endL); } else ttsShadow(endL); return; }
     const L = lines(); let k = 0; const my = ++TSEQ;
     (function nx(){ if (my !== TSEQ) return; if (!playing || k >= L.length){ playing = false; focus(-1); $('listenAll').textContent = '🔊 원어민 먼저 들어 보기'; return; } focus(k, true); say(L[k][1], '', () => { k++; nx(); }); })();
   };
@@ -686,7 +700,8 @@ const COIN_IMG={10:'coin/coin10.webp',30:'coin/coin30.webp',100:'coin/coin100.we
     const my = TSEQ; let fin = false; const end = () => { if (fin) return; fin = true; try{ a.pause(); }catch(e){} setTimeout(onDone, 450); };
     a.onended = end; a.currentTime = p[0];
     a.play().catch(() => { if (!fin){ fin = true; say(IT.L[n][1], IT.L[n][0], onDone); } });
-    (function w(){ if (fin) return; if (!running || my !== TSEQ){ fin = true; try{ a.pause(); }catch(e){} return; } if (a.currentTime >= p[1]) end(); else setTimeout(w, 30); })();
+    let lt = -1, la = Date.now();   // 소리가 멈춰 버리면(3초 동안 그대로) 다음으로 (2026-11-19)
+    (function w(){ if (fin) return; if (!running || my !== TSEQ){ fin = true; try{ a.pause(); }catch(e){} return; } const ct = a.currentTime; if (ct !== lt){ lt = ct; la = Date.now(); } if (ct >= p[1] || Date.now() - la > 3000) end(); else setTimeout(w, 30); })();
     return true;
   }
   const mineIdx = () => IT.L.map((l, k) => l[0] === ME ? k : -1).filter(k => k > -1);

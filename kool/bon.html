@@ -456,7 +456,7 @@ try{speechSynthesis.onvoiceschanged=pickVoice;pickVoice()}catch(e){}
 /* 마지막 소리가 끝까지 나온 뒤에 결과 화면으로 (2026-10-29) */
 function finishSay(){const S0=ST;if(!S0||S0._fs)return;S0._fs=1;const t0=Date.now();(function w(){let on=false;try{on=speechSynthesis.speaking||speechSynthesis.pending||!!(window.TTSA&&TTSA.playing())}catch(e){}/* 휴대폰에서 소리 끝 신호가 안 와서 15초 동안 버튼 없이 멈춰 보이던 것 → 4초까지만 기다려요 (2026-11-19 세림 「다음 내용이 안 나오고 계속 입영작으로 돌아와요」) */if(on&&Date.now()-t0<4000)return setTimeout(w,200);if(ST===S0)setTimeout(()=>{if(ST===S0)finish()},500)})()}
 function speak(text,who,done){if(window.TTSA&&TTSA.play(text,who,done))return;try{(window.TTSA&&TTSA.stop(),speechSynthesis.cancel());const u=new SpeechSynthesisUtterance(plain(text));u.lang="en-US";if(VOICE)u.voice=VOICE;u.rate=.88;
- u.pitch=/^(G|Linda)$/.test(who||"")?1.25:.85;if(done)u.onend=done;speechSynthesis.speak(u)}catch(e){done&&done()}}
+ u.pitch=/^(G|Linda)$/.test(who||"")?1.25:.85;if(done){/* 소리 끝 신호가 안 오는 폰에서도 꼭 다음으로 (2026-11-19) */let f=0;const fin=()=>{if(f)return;f=1;done()};u.onend=fin;u.onerror=fin;setTimeout(fin,Math.min(20000,2500+plain(text).length*110))}speechSynthesis.speak(u)}catch(e){done&&done()}}
 const isRight=(d,s)=>s===d.L[0][0]?false:true; /* 첫 화자는 왼쪽, 상대는 오른쪽 */
 
 /* ───── 저장 (이 기기에서 이름별로) ───── */
