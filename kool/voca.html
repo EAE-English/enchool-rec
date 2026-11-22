@@ -244,7 +244,7 @@ body.qrs h2.sec,body.qrs #books,body.qrs #sets,body.qrs #more,body.qrs #who [dat
 .flash .ph{font-size:17px;color:var(--muted);font-family:"Times New Roman",serif}
 .flash .m{font-size:19px;font-weight:700;color:var(--ink);word-break:keep-all}
 .flash .x{font-size:13.5px;color:var(--muted);word-break:keep-all}
-.flash .hid{min-width:9em;min-height:1.4em;border-radius:8px;background:repeating-linear-gradient(90deg,#d9d4c7 0 10px,#e8e3d6 10px 20px)}
+.duph{display:inline-block;margin:6px auto 2px;padding:5px 12px;border-radius:12px;word-break:keep-all;background:#fff7dc;border:1px solid #e6c76a;color:#102f5e;font-size:14px;font-weight:600}.duph b{font-size:16px;letter-spacing:.03em}.flash .hid.hint{background:#fff;border:1.5px dashed #c9a24a;color:#102f5e;font-weight:800;font-size:20px;padding:2px 12px;letter-spacing:.04em}.prevw{margin:8px auto 0;padding:6px 12px;border-radius:10px;background:#f3f5f9;color:#102f5e;font-size:14px;text-align:center;max-width:26em}.flash .hid{min-width:9em;min-height:1.4em;border-radius:8px;background:repeating-linear-gradient(90deg,#d9d4c7 0 10px,#e8e3d6 10px 20px)}
 .bigsay{width:64px;height:64px;border-radius:50%;border:0;background:var(--navy);color:var(--gold);font-size:26px;display:grid;place-items:center}
 .q{background:var(--bg);border-radius:16px;padding:18px 14px;text-align:center}
 .q .w{font-size:clamp(26px,8vw,36px);font-weight:900;color:var(--navy);word-break:keep-all}
@@ -519,17 +519,29 @@ function wrong(i){markMiss(i);ST.q.push(ST.q.shift());owl("scholar","괜찮아! 
 function nextQ(fn){if(!ST.q.length){finishSay();return}fn()}
 function distract(i,key){const s=set();const pool=shuffle(s.W.map((w,k)=>k).filter(k=>k!==i&&s.W[k][key]!==s.W[i][key]));return shuffle([i,...pool.slice(0,3)])}
 
+/* 뜻이 같은 단어(거절하다, 거부하다 → reject / refuse)는 첫 글자 힌트 「rej…」「ref…」 — 시험지 인쇄와 같은 규칙 (2026-11-22) */
+const dhMean=ko=>new Set(String(ko||"").replace(/\([^)]*\)|\[[^\]]*\]/g,"").split(/[,/;·]|\s~\s/).map(x=>x.replace(/\s+/g,"").replace(/^[~…]+|\.+$/g,"")).filter(Boolean));
+function dupHint(s,i){try{const C=s._dh=s._dh||{};if(i in C)return C[i];const en=k=>say(s.W[k][0]),M=s._dm=s._dm||s.W.map(w=>dhMean(w[2])),sub=(a,b)=>[...a].every(v=>b.has(v)),w=en(i);
+ const same=s.W.map((x,k)=>k).filter(k=>k!==i&&M[i].size&&M[k].size&&en(k).toLowerCase()!==w.toLowerCase()&&(sub(M[i],M[k])||sub(M[k],M[i])));if(!same.length)return C[i]="";
+ let L=1;same.forEach(k=>{const v=en(k);let c=0;while(c<w.length&&c<v.length&&w[c].toLowerCase()===v[c].toLowerCase())c++;L=Math.max(L,c+1)});
+ return C[i]=L<=3&&L<w.length?w.slice(0,L)+"…":firstHint(w)}catch(e){return ""}}
+const firstHint=w=>{w=say(w);return / /.test(w)?`${w[0]}… (${w.split(" ").length}단어)`:`${w[0]}… ${w.replace(/[^A-Za-z]/g,"").length}글자`};
+const dupBox=(s,i)=>{const h=dupHint(s,i);return h?`<div class="duph">💡 뜻이 같은 단어가 있어요 · <b>${esc(h)}</b></div>`:""};
 /* ① 따라쟁이 카드 */
-function gCard(s){let round=1;const all=ST.q.slice();ST.q=all.slice();
+function gCard(s){let round=1,last=-1;const all=ST.q.slice();ST.q=all.slice();
  function draw(){const i=ST.q[0],w=s.W[i];
   if(round===1){$("#stage").innerHTML=bar()+`<div class="flash"><div class="w">${esc(w[0])}</div>${w[1]?`<div class="ph">[${esc(w[1])}]</div>`:""}<div class="m">${esc(w[2])}</div>${w[3]?`<div class="x">${esc(w[3])}</div>`:""}
    <button class="bigsay" data-sayw="${i}" aria-label="다시 듣기">🔊</button></div>
-   <div class="center"><button class="mini" data-slow="${i}">🐢 천천히</button><button class="btn pri lg" data-cnext>따라 했어요 ▶</button></div><p class="again">1바퀴 · 소리를 듣고 2번씩 따라 말해요</p>`;
+   <div class="center"><button class="mini" data-slow="${i}">🐢 천천히</button>${all.length-ST.q.length>0?`<button class="btn" data-cprev>◀ 이전</button>`:""}<button class="btn pri lg" data-cnext>따라 했어요 ▶</button></div><p class="again">1바퀴 · 소리를 듣고 2번씩 따라 말해요</p>`;
    $("#cnt").textContent=`1바퀴 ${all.length-ST.q.length+1}/${all.length}`;speak(w[0]);return}
-  $("#stage").innerHTML=bar()+`<div class="flash"><div class="m">${esc(w[2])}</div><div class="hid" id="hid"></div><div class="x">영어로 소리 내어 말해 본 뒤 눌러요</div></div>
-   <div class="center"><button class="btn" data-cmem="0">모르겠어요</button><button class="btn pri" data-cmem="1">말할 수 있어요</button></div><p class="again">2바퀴 · 모르는 단어는 다시 나와요</p>`}
+  $("#stage").innerHTML=bar()+`<div class="flash"><div class="m">${esc(w[2])}</div>${dupBox(s,i)}<div class="hid" id="hid"></div><div class="x">영어로 소리 내어 말해 본 뒤 눌러요</div></div>
+   <div class="center"><button class="btn" data-cmem="0">모르겠어요</button><button class="btn pri" data-cmem="1">말할 수 있어요</button></div>
+   <div class="center" style="margin-top:8px">${last>-1?`<button class="mini" data-cprev>◀ 이전 단어 보기</button>`:""}<button class="mini" data-chint>💡 첫 글자 보기</button></div><div class="prevw" id="prevw" hidden></div><p class="again">2바퀴 · 모르는 단어는 다시 나와요</p>`}
  ST.cnext=()=>{ST.q.shift();if(!ST.q.length){round=2;ST.q=shuffle(all);owl("scholar","이번엔 뜻만 보고 영어로 말해 봐!")}draw()};
- ST.cmem=v=>{if(ST.lock)return;const i=ST.q[0],w=s.W[i];ST.lock=true;$("#hid").outerHTML=`<div class="w">${esc(w[0])}</div>`;speak(w[0]);
+ ST.cprev=()=>{if(ST.lock)return;if(round===1){const k=all.length-ST.q.length;if(k>0){ST.q.unshift(all[k-1]);draw()}return}
+  if(last<0)return;const p=$("#prevw"),w=s.W[last];if(!p.hidden){p.hidden=true;return}p.innerHTML=`방금 단어 · <b>${esc(w[0])}</b> ${esc(w[2])}`;p.hidden=false;speak(w[0])};
+ ST.chint=()=>{if(ST.lock||round!==2)return;const h=$("#hid");if(h){h.className="hid hint";const i=ST.q[0],w=say(s.W[i][0]),d=dupHint(s,i);h.textContent=d&&!/글자|단어/.test(d)?`${d} ${w.replace(/[^A-Za-z]/g,"").length}글자`:firstHint(w)}};
+ ST.cmem=v=>{if(ST.lock)return;const i=ST.q[0],w=s.W[i];last=i;ST.lock=true;$("#hid").outerHTML=`<div class="w">${esc(w[0])}</div>`;speak(w[0]);
   if(v)right(i);else wrong(i);setTimeout(()=>{ST.lock=false;nextQ(draw)},v?700:1500)};
  draw()}
 
@@ -567,7 +579,7 @@ function gSpell(s){let built=[],pieces=[],tries=0;
 /* ⑥⑦ 쓰기 */
 function gType(s){const m=MODE;
  function draw(){const i=ST.q[0],w=s.W[i];
-  $("#stage").innerHTML=bar()+`<div class="q">${m==="dict"?`<div class="lab">소리를 듣고 써요</div><button class="bigsay" data-sayw="${i}" style="margin:6px auto 0" aria-label="다시 듣기">🔊</button><div style="margin-top:6px;color:var(--muted);font-size:14px">${/ /.test(w[0].replace(/\s*~\s*/g,""))?"숙어예요":`${w[0].replace(/[^A-Za-z]/g,"").length}글자`}</div>`:`<div class="lab">이 뜻의 영어는?</div><div class="m">${esc(w[2])}</div>${/~/.test(w[0])?`<div style="font-size:13px;color:var(--muted)">~ 자리는 빼고 써요</div>`:""}`}</div>
+  $("#stage").innerHTML=bar()+`<div class="q">${m==="dict"?`<div class="lab">소리를 듣고 써요</div><button class="bigsay" data-sayw="${i}" style="margin:6px auto 0" aria-label="다시 듣기">🔊</button><div style="margin-top:6px;color:var(--muted);font-size:14px">${/ /.test(w[0].replace(/\s*~\s*/g,""))?"숙어예요":`${w[0].replace(/[^A-Za-z]/g,"").length}글자`}</div>`:`<div class="lab">이 뜻의 영어는?</div><div class="m">${esc(w[2])}</div>${dupBox(s,i)}${/~/.test(w[0])?`<div style="font-size:13px;color:var(--muted)">~ 자리는 빼고 써요</div>`:""}`}</div>
    <div class="typebox" id="tb"><input id="ti" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="영어로 쓰기" placeholder="영어로 써요"><button class="btn pri" data-tchk>확인</button></div>
    <div class="msg" id="msg"></div><div class="center"><button class="mini" data-slow="${i}">🐢 천천히 듣기</button>${m==="write"?`<button class="mini" data-thint>첫 글자 힌트</button>`:""}</div>`;
   if(m==="dict")speak(w[0]);setTimeout(()=>$("#ti")&&$("#ti").focus(),50)}
@@ -659,6 +671,8 @@ document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)r
  if(b.dataset.sayw!==undefined){speak(s.W[+b.dataset.sayw][0]);return}
  if(b.dataset.slow!==undefined){speak(s.W[+b.dataset.slow][0],true);return}
  if(b.dataset.cnext!==undefined){ST.cnext();return}
+ if(b.dataset.cprev!==undefined){ST.cprev&&ST.cprev();return}
+ if(b.dataset.chint!==undefined){ST.chint&&ST.chint();return}
  if(b.dataset.cmem!==undefined){ST.cmem(b.dataset.cmem==="1");return}
  if(b.dataset.op!==undefined){ST.op(+b.dataset.op,b);return}
  if(b.dataset.onext!==undefined){ST.onext();return}
