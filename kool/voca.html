@@ -386,7 +386,7 @@ const MODES=[
  {id:"pick",n:"④",t:"영어 고르기",s:"영어",how:"뜻을 보고 알맞은 영어를 골라요."},
  {id:"spell",n:"⑤",t:"철자 퍼즐",s:"퍼즐",how:"뜻을 보고 조각을 순서대로 눌러 만들어요. 잘못 놓은 조각은 다시 누르면 빠져요."},
  {id:"dict",n:"⑥",t:"받아쓰기",s:"받쓰",how:"🔊 소리를 듣고 써요. 엔터를 누르면 채점해요."},
- {id:"write",n:"⑦",t:"마스터 테스트",s:"마스터",how:"뜻만 보고 영어를 써요. 단어마다 한 번씩만! 틀린 단어는 끝나고 다시 만나요."}
+ {id:"write",n:"⑦",t:"마스터 테스트",s:"마스터",how:"뜻 보고 영어 쓰기 6 : 영어 보고 뜻 고르기 4로 섞여 나와요. 단어마다 한 번씩만! 틀린 단어는 끝나고 다시 만나요."}
 ];
 const POOL=["meaning","listen","pick","spell","dict"];
 const PASS=0.8;
@@ -511,7 +511,7 @@ function openAct(mode,opt){opt=opt||{};COIN.arm(!isTest());MODE=mode;T0=T0||Date
  const title=opt.review?"↺ 틀린 단어 한 번 더":`${M.n} ${M.t}`;
  $("#act").innerHTML=`<div class="acthead"><div><b>${title}</b><small>${s.t}${COURSE?` · 오늘의 모험 ${COURSE.idx+1}/${COURSE.steps.length+(COURSE.review?1:0)}`:""}</small></div><span class="cnt" id="cnt"></span></div><div class="how">${opt.review?"오늘 틀린 단어만 모았어요. 뜻을 보고 영어로 써요.":M.how}</div>
   <div class="owlbar"><img id="owlimg" src="" alt=""><div class="obub" id="obub"></div></div><div class="stage" id="stage"></div>`;
- owl(mode==="write"&&!opt.review?"knight":"scholar",opt.review?"틀린 단어만 다시! 이번엔 꼭 기억하자!":mode==="write"?"마지막 관문이야! 뜻만 보고 써 보자!":mode==="card"?"소리를 잘 듣고 두 번씩 따라 말해 봐!":mode==="listen"?"귀를 쫑긋! 잘 듣고 골라 봐.":"천천히 해도 괜찮아. 시작!");
+ owl(mode==="write"&&!opt.review?"knight":"scholar",opt.review?"틀린 단어만 다시! 이번엔 꼭 기억하자!":mode==="write"?"마지막 관문이야! 쓰기랑 뜻 고르기가 섞여 나와!":mode==="card"?"소리를 잘 듣고 두 번씩 따라 말해 봐!":mode==="listen"?"귀를 쫑긋! 잘 듣고 골라 봐.":"천천히 해도 괜찮아. 시작!");
  ({card:gCard,meaning:gChoice,listen:gChoice,pick:gChoice,spell:gSpell,dict:gType,write:gType})[mode](s);
  (COURSE?$("#course"):$("#act")).scrollIntoView({behavior:"smooth",block:"start"})}
 function bar(){$("#cnt").textContent=`${ST.done}/${ST.total}`;return `<div class="prog"><i style="width:${Math.round(ST.done/ST.total*100)}%"></i></div>`}
@@ -580,7 +580,15 @@ function gSpell(s){let built=[],pieces=[],tries=0;
 
 /* ⑥⑦ 쓰기 */
 function gType(s){const m=MODE;
- function draw(){const i=ST.q[0],w=s.W[i];
+ /* ⑦ 마스터 테스트 = 쓰기 6 : 뜻 고르기 4 (2026-11-22 선생님 「마스터에 6:4 비율로 쓰는것 6 뜻고르는거 4」) — 틀린 단어 다시 하기는 모두 쓰기 */
+ if(m==="write"&&!ST.review&&!ST.mc&&s.W.length>=4){const L=shuffle(ST.q.slice());ST.mc=new Set(L.slice(0,Math.round(L.length*0.4)))}
+ function drawMc(i,w){const ops=distract(i,2);
+  $("#stage").innerHTML=bar()+`<div class="q"><div class="lab">이 단어의 뜻은?</div><div class="w">${esc(w[0])}</div></div><div class="opts">${ops.map(k=>`<button class="opt" data-op="${k}">${esc(s.W[k][2])}</button>`).join("")}</div><div class="msg" id="msg"></div>`;speak(w[0])}
+ ST.op=(k,el)=>{if(ST.lock)return;const i=ST.q[0],w=s.W[i];ST.lock=true;
+  if(k===i){el.classList.add("good");$("#msg").className="msg good";$("#msg").textContent=`${w[0]} · ${w[2]}`;right(i);setTimeout(()=>{ST.lock=false;nextQ(draw)},800)}
+  else{el.classList.add("bad");const g=document.querySelector(`#stage [data-op="${i}"]`);if(g)g.classList.add("good");markMiss(i);ST.q.shift();ST.done++;$("#msg").className="msg bad";$("#msg").innerHTML=`<span class="ansl">${esc(w[0])} = ${esc(w[2])}</span>`;speak(w[0]);owl("scholar",COURSE?"괜찮아! 틀린 단어에서 다시 만나자.":"괜찮아! 정답을 기억해 두자.","bad");
+   document.querySelectorAll("#stage .opt").forEach(b=>b.disabled=true);$("#msg").insertAdjacentHTML("afterend",`<div class="center"><button class="btn pri" data-onext>다음 ▶</button></div>`)}};
+ function draw(){const i=ST.q[0],w=s.W[i];if(m==="write"&&ST.mc&&ST.mc.has(i)&&!ST.review){drawMc(i,w);return}
   $("#stage").innerHTML=bar()+`<div class="q">${m==="dict"?`<div class="lab">소리를 듣고 써요</div><button class="bigsay" data-sayw="${i}" style="margin:6px auto 0" aria-label="다시 듣기">🔊</button><div style="margin-top:6px;color:var(--muted);font-size:14px">${/ /.test(w[0].replace(/\s*~\s*/g,""))?"숙어예요":`${w[0].replace(/[^A-Za-z]/g,"").length}글자`}</div>`:`<div class="lab">이 뜻의 영어는?</div><div class="m">${esc(w[2])}</div>${dupBox(s,i)}${/~/.test(w[0])?`<div style="font-size:13px;color:var(--muted)">~ 자리는 빼고 써요</div>`:""}`}</div>
    <div class="typebox" id="tb"><input id="ti" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="영어로 쓰기" placeholder="영어로 써요"><button class="btn pri" data-tchk>확인</button></div>
    <div class="msg" id="msg"></div><div class="center"><button class="mini" data-slow="${i}">🐢 천천히 듣기</button>${m==="write"?`<button class="mini" data-thint>첫 글자 힌트</button>`:""}</div>`;
