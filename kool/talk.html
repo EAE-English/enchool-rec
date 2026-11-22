@@ -409,7 +409,7 @@ const COIN=(()=>{
   /* 잘 안 함(0~4일) 10~100원 · 보통(5~9일) ~300원 · 꾸준함(10일+) ~500원 */
   const W=[[[10,45],[30,35],[100,20]],[[10,20],[30,25],[100,30],[200,15],[300,10]],[[30,15],[100,30],[200,25],[300,15],[400,10],[500,5]]];
   const pick=()=>{const L=W[tier()];let r=Math.random()*L.reduce((a,x)=>a+x[1],0);for(const[v,w]of L)if((r-=w)<0)return v;return L[0][0]};
-  let armed=false,hint='「선생님께 보내기」를 누르면 쌓여요';
+  let armed=false,hint='학습을 끝내면 적립돼요';
   function toast(html,ms){const t=document.createElement('div');t.className='cc-toast';t.innerHTML=html;document.body.appendChild(t);setTimeout(()=>t.remove(),ms||3200)}
   function show(){
     if(document.visibilityState!=='visible')return setTimeout(show,4000);
@@ -729,7 +729,7 @@ setInterval(()=>{if(TR.on&&!document.hidden&&Date.now()-TR.last<60000)TR.act++},
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("button");if(!b||!TR.on)return;const d=b.dataset;
  const slow=("cnext" in d)||("lnext" in d);const ans=slow||("cmem" in d)||("op" in d)||("lmem" in d)||("ord" in d)||("pz" in d&&false);if(!ans)return;
  const now=Date.now(),gap=now-TR.lastAns;TR.lastAns=now;TR.n++;
- if(gap<(slow?1500:800)){TR.fast++;TR.streak++;if(TR.streak>=3){TR.streak=0;setTimeout(()=>owl("scholar","앗, 너무 빨라! 소리 끝까지 듣고 천천히 해 보자!","bad"),60)}}else TR.streak=0},true);
+ if(gap<(slow?1500:800)){TR.fast++;TR.streak++;if(TR.streak>=3){TR.streak=0;setTimeout(()=>owl("scholar","앗, 너무 빨라! 소리 끝까지 듣고 천천히 해 보자!","bad"),60)}}else{TR.streak=0;/* 다시 제 속도로 하면 빨간 경고를 초록 칭찬으로 바꿔요 (2026-11-22) */setTimeout(()=>{const o=document.getElementById("obub");if(o&&/너무 빨라/.test(o.textContent))owl("scholar","좋아, 딱 좋은 속도야! 그렇게 하면 돼!","good")},80)}},true);
 function trMin(){const m=Math.floor(TR.act/60),s=TR.act%60;return m?`${m}분 ${s}초`:`${s}초`}
 function trText(){const r=TR.n?TR.fast/TR.n:0;return `실제 학습 ${trMin()} · ${TR.n>=5&&r>=.4?"⚠️ 빠르게 넘김 의심":"✅ 꼼꼼히"} (빠른 넘김 ${TR.fast}/${TR.n})`}
 function openStart(){$("#nm").value=NAME;$("#start").hidden=false;setTimeout(()=>$("#nm").focus(),50)}
