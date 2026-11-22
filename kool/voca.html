@@ -434,7 +434,9 @@ const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(M
 const pickOne=a=>a[Math.floor(Math.random()*a.length)];
 const say=w=>w.replace(/~/g,"").replace(/\s+/g," ").trim();
 const norm=s=>String(s||"").toLowerCase().replace(/[’‘`]/g,"'").replace(/~/g," ").replace(/-/g," ").replace(/[^a-z' ]/g," ").replace(/\s+/g," ").trim();
-const same=(a,b)=>norm(a)===norm(b);
+/* 정답에 고를 수 있는 말이 있으면 어느 쪽으로 써도 맞아요 (2026-11-22): depend on[upon] → depend on / depend upon · keep in touch (with) → with를 써도 안 써도 */
+function ansVars(b){let V=[String(b||"")];for(let g=0;g<6;g++){let ch=false;V=V.flatMap(x=>{let m=x.match(/([A-Za-z'’]+)\s*\[([^\]]*)\]/);if(m){ch=true;return [x.replace(m[0],m[1]),...m[2].split("/").map(y=>x.replace(m[0],y))]}m=x.match(/\(([^)]*)\)/);if(m){ch=true;return /^\d+$/.test(m[1].trim())?[x.replace(m[0]," ")]:[x.replace(m[0]," "),x.replace(m[0]," "+m[1]+" ")]}return [x]});if(!ch)break}return [...new Set(V.map(norm))]}
+const same=(a,b)=>{const n=norm(a);return n===norm(b)||ansVars(b).includes(n)};
 /* 고유명사(대문자로 시작하는 단어)는 쓴 것도 첫 글자가 대문자여야 정답 */
 function capsOk(typed,ans){const A=ans.replace(/~/g," ").split(/[\s-]+/).filter(Boolean),T=typed.trim().split(/[\s-]+/).filter(Boolean);return A.every((w,k)=>!/^[A-Z]/.test(w)||(T[k]&&/^[A-Z]/.test(T[k])))}
 let VOICE=null;function pickVoice(){try{const v=speechSynthesis.getVoices().filter(x=>/^en/i.test(x.lang));VOICE=v.find(x=>/US/i.test(x.lang))||v[0]||null}catch(e){}}
