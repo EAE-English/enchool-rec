@@ -111,7 +111,7 @@ if __name__ == '__main__':
     # 새로 온 아이: 쿨앱(쿨보카·쿨톡·쿨본문) 학생 목록에 없으면 QR이 엉뚱한 책(맨 앞 책)으로 열려요 (2026-11-11 민아 → 워마고등)
     STU = {}
     for app in ('voca.html', 'talk.html', 'bon.html'):
-        m = re.search(r'const STUDENTS=(\{.*?\});', open(R + '/kool/' + app).read()); STU[app] = json.loads(m.group(1)) if m else {}
+        m = re.search(r'const STUDENTS=(\{.*?\});', open(R + '/kool/' + app).read()); STU[app] = json.loads(re.sub(r'/\*.*?\*/', '', m.group(1), flags=re.S)) if m else {}  # 목록 안 JS 주석(/* … */)은 떼고 읽어요 (2026-11-23)
     for u in U:
         p = urllib.parse.urlparse(u); app = p.path.split('/')[-1]
         if app in STU and p.fragment:
