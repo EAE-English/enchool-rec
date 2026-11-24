@@ -1,4 +1,12 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]{display:none!important}</style></head><script>/* 카톡 안 작은 브라우저면 바깥 브라우저로 다시 열기 (소리·마이크가 막혀서 · 2026-10-31) */(function(){try{if(/KAKAOTALK/i.test(navigator.userAgent)&&!/[?&#]noext/.test(location.href)){location.href="kakaotalk://web/openExternal?url="+encodeURIComponent(location.href)}}catch(e){}})();</script><script src="https://eae-english.github.io/enchool-rec/tools/tts_aud.js"></script><body><title>쿨본문</title>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]{display:none!important}</style></head><script>/* 오늘 숙제 「끝」은 이번 숙제 때 끝낸 것만 (2026-11-24 선생님 「한번 한 것 계속 내는데 왜 자꾸 했다고 나와?」 — 륜진·지우)
+   마스터(또는 오늘의 모험)를 끝낸 날을 r.dd에 적어 두고, 숙제장 QR 주소의 ?d=숙제장 날짜 이후에 끝낸 것만 「했어요」로 봐요.
+   ?d가 없는 예전 QR은 최근 4일 안에 끝낸 것만 봐요. */
+function kdYmd(t){t=t||new Date();return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0")}
+function kdToday(){return kdYmd()}
+function kdQ(){try{var d=(new URLSearchParams(location.search).get("d")||"").replace(/\D/g,"");return d.length===8?d.slice(0,4)+"-"+d.slice(4,6)+"-"+d.slice(6):""}catch(e){return ""}}
+function kdOk(r){var dd=String((r&&r.dd)||""),q=kdQ();if(q)return dd>=q;var t=new Date();t.setDate(t.getDate()-4);return dd>=kdYmd(t)}
+</script>
+<script>/* 카톡 안 작은 브라우저면 바깥 브라우저로 다시 열기 (소리·마이크가 막혀서 · 2026-10-31) */(function(){try{if(/KAKAOTALK/i.test(navigator.userAgent)&&!/[?&#]noext/.test(location.href)){location.href="kakaotalk://web/openExternal?url="+encodeURIComponent(location.href)}}catch(e){}})();</script><script src="https://eae-english.github.io/enchool-rec/tools/tts_aud.js"></script><body><title>쿨본문</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Gaegu:wght@400;700&display=swap">
 <style>
@@ -520,7 +528,7 @@ function openAct(mode,opt){opt=opt||{};COIN.arm(!isTest());MODE=mode;if(!COURSE)
 function cnt(t){$("#cnt").textContent=t}
 function bubble(d,i,body,cls){const [s,en,ko]=d.L[i];return `<div class="ln${isRight(d,s)?" r":""}${cls?" "+cls:""}" data-i="${i}"><span class="sp">${esc(s)}</span><div class="bub">${body}</div></div>`}
 function finish(){const d=dlg(),M=MODES.find(m=>m.id===MODE),r=rec(d.id);const pct=ST.total?ST.ok/ST.total:1,pass=pct>=PASS;
- if(!ST.review){r.last=MODE;r.runs++;if(pass&&!r.passed.includes(MODE))r.passed.push(MODE);r.tried=r.tried||[];if(!r.tried.includes(MODE))r.tried.push(MODE)}save(P);
+ if(!ST.review){r.last=MODE;r.runs++;if(pass&&!r.passed.includes(MODE))r.passed.push(MODE);if(pass&&MODE==="write")try{r.dd=kdToday()}catch(e){}r.tried=r.tried||[];if(!r.tried.includes(MODE))r.tried.push(MODE)}save(P);
  if(COURSE){courseStep(pct);return}
  const sec=Math.round((Date.now()-T0)/1000),tm=`${Math.floor(sec/60)}분 ${sec%60}초`;
  $("#rO").src=OWL[pass?(isM(r)?"knight":"wizard"):"scholar"];$("#rS").innerHTML=stars(pct);
@@ -568,7 +576,7 @@ function courseStep(pct){const c=COURSE,M=MN(MODE);
  const nx=c.steps[c.idx];owl(MODE==="write"?"knight":"wizard",MODE==="write"?"통째로 마스터 끝! 대단해!":"클리어! 다음 게임 가자!","good");
  $("#stage").innerHTML=`<div class="clearpanel"><img src="${MODE==="write"?OWL.knight:OWL.wizard}" alt=""><h3>${M.n} ${M.t} 끝!</h3><div class="stars">${stars(pct)}</div><p>${ST.recDone?"🎙 녹음으로 완료했어요":`처음에 맞힘 ${ST.ok}/${ST.total}`}</p>
   <button class="btn pri lg nextb" data-cstep style="margin-top:8px">${nextLab()}</button></div>`;cnt("끝!")}
-function endCourse(){const c=COURSE,d=dlg(),r=rec(d.id);r.courses=(r.courses||0)+1;save(P);
+function endCourse(){const c=COURSE,d=dlg(),r=rec(d.id);r.courses=(r.courses||0)+1;try{r.dd=kdToday()}catch(e){}save(P);
  const test=c.res.find(x=>x.m==="write")||(c.free&&c.res.length?{ok:c.res.reduce((a,x)=>a+x.ok,0),n:Math.max(1,c.res.reduce((a,x)=>a+x.n,0)),fr:1}:{ok:0,n:1}),pct=test.ok/test.n,mast=isM(r),sec=Math.round((Date.now()-T0)/1000),tm=`${Math.floor(sec/60)}분 ${sec%60}초`;
  const sumTxt=c.res.filter(x=>x.m!=="review").map(x=>`${MN(x.m).s} ${x.ok}/${x.n}`).join(" · ");
  $("#rO").src=OWL[mast?"knight":pct>=PASS?"wizard":"scholar"];$("#rS").innerHTML=stars(pct);$("#rT").textContent=c.free?"선택 학습 끝! 멋져!":mast&&pct>=PASS?"이 본문 마스터!":"오늘의 모험 완료!";
@@ -785,7 +793,7 @@ var BON=/bon\.html/.test(location.pathname),W=BON?'본문':'대화문',APP=BON?'
 var css=document.createElement('style');
 css.textContent='#qrgo{text-align:center;background:#fff;border:2px solid var(--gold,#f2c94c);border-radius:16px;padding:14px 14px 16px;margin:0 2px 12px}#qrgo .qg-go{font-size:24px;font-weight:800;color:#c0392b;line-height:1.3}#qrgo .qg-ok{font-size:16px;font-weight:800;color:var(--navy,#102f5e);margin-top:4px}#qrgo .qg-ok.big{font-size:22px}#qrgo .qg-rem{font-size:14px;color:var(--navy,#102f5e);margin-top:6px}#qrgo .qg-rem b{color:#c0392b}#qrgo .qg-btn{width:100%;margin-top:12px}body:not(.qrs) #qrgo{display:none}#nextRow .qg-nx{width:100%;font-size:17px;padding:12px}#nextRow .qg-nxl{width:100%;text-align:center;font-weight:800;color:#c0392b;font-size:16px;margin-bottom:4px}';
 document.head.appendChild(css);
-var done=function(d){var r=rec(d.id);return isM(r)||(r.courses||0)>0};
+var done=function(d){var r=rec(d.id);return (isM(r)||(r.courses||0)>0)&&kdOk(r)};
 var nm=function(d){return d.t||d.id};
 window.qrPick=qrPick=function(){if(COURSE)return;var T=qrTargets();if(!T.length)return;var cur=T.find(function(d){return d.id===CUR});
  if(!cur||done(cur)){var nx=T.find(function(d){return !done(d)});if(nx)CUR=nx.id;else if(!cur)CUR=T[0].id}};
@@ -845,4 +853,5 @@ home();
   var m=t.dataset.ftog,i=FS.indexOf(m);if(i>-1)FS.splice(i,1);else FS.push(m);renderCourse()},true);
  try{if(document.body.classList.contains('qrs'))qrBar()}catch(e){}
 })();
-</script></body></html>
+</script>
+</body></html>

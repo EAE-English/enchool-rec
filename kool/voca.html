@@ -1,4 +1,12 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]{display:none!important}</style></head><script>/* 카톡 안 작은 브라우저면 바깥 브라우저로 다시 열기 (소리·마이크가 막혀서 · 2026-10-31) */(function(){try{if(/KAKAOTALK/i.test(navigator.userAgent)&&!/[?&#]noext/.test(location.href)){location.href="kakaotalk://web/openExternal?url="+encodeURIComponent(location.href)}}catch(e){}})();</script><script src="https://eae-english.github.io/enchool-rec/tools/tts_aud.js"></script><body><title>쿨보카</title>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]{display:none!important}</style></head><script>/* 오늘 숙제 「끝」은 이번 숙제 때 끝낸 것만 (2026-11-24 선생님 「한번 한 것 계속 내는데 왜 자꾸 했다고 나와?」 — 륜진·지우)
+   마스터(또는 오늘의 모험)를 끝낸 날을 r.dd에 적어 두고, 숙제장 QR 주소의 ?d=숙제장 날짜 이후에 끝낸 것만 「했어요」로 봐요.
+   ?d가 없는 예전 QR은 최근 4일 안에 끝낸 것만 봐요. */
+function kdYmd(t){t=t||new Date();return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0")}
+function kdToday(){return kdYmd()}
+function kdQ(){try{var d=(new URLSearchParams(location.search).get("d")||"").replace(/\D/g,"");return d.length===8?d.slice(0,4)+"-"+d.slice(4,6)+"-"+d.slice(6):""}catch(e){return ""}}
+function kdOk(r){var dd=String((r&&r.dd)||""),q=kdQ();if(q)return dd>=q;var t=new Date();t.setDate(t.getDate()-4);return dd>=kdYmd(t)}
+</script>
+<script>/* 카톡 안 작은 브라우저면 바깥 브라우저로 다시 열기 (소리·마이크가 막혀서 · 2026-10-31) */(function(){try{if(/KAKAOTALK/i.test(navigator.userAgent)&&!/[?&#]noext/.test(location.href)){location.href="kakaotalk://web/openExternal?url="+encodeURIComponent(location.href)}}catch(e){}})();</script><script src="https://eae-english.github.io/enchool-rec/tools/tts_aud.js"></script><body><title>쿨보카</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Gaegu:wght@400;700&display=swap">
 <style>
@@ -460,7 +468,7 @@ function pickBook(){mineLoad();const q=findBook(QRBOOK);if(q){/* QR로 들어오
  if(BKPICK&&BK){useBook(BK);return}const L=myBooks();const b=MINE.length?L.find(x=>x.id===MINE[MINE.length-1]):(SCODE?BOOKS[0]:(BOOKS.find(x=>x.id===LATEST)||BOOKS[0]));useBook(b||BOOKS[0]);if(SCODE&&b)mineAdd(b.id)}
 function readHash(){const parts=(location.hash||"").replace(/^#/,"").toLowerCase().split(/[.\-]/).filter(Boolean);if(!parts.length||parts.some(x=>!/^[a-z0-9_]+$/.test(x)))return false;let hit=false;
  /* 학생 코드를 못 찾으면(폰에 옛날 화면이 남아 있을 때) 한 번만 새로 받아요 — 선생님 미리보기로 열리던 문제 (2026-11-11 민아) */
- if(!STUDENTS[parts[0]]&&parts.length>1&&!BOOKS.some(x=>x.id===parts[0])){try{const k="wd_rl_"+parts[0];if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,"1");location.replace(location.pathname+"?v="+Date.now()+location.hash);return false}}catch(e){}}
+ if(!STUDENTS[parts[0]]&&parts.length>1&&!BOOKS.some(x=>x.id===parts[0])){try{const k="wd_rl_"+parts[0];if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,"1");location.replace(location.pathname+"?v="+Date.now()+((location.search.match(/[?&]d=(\d{8})/)||[])[1]?"&d="+location.search.match(/[?&]d=(\d{8})/)[1]:"")+location.hash);return false}}catch(e){}}
  if(STUDENTS[parts[0]]){SCODE=parts[0];NAME=STUDENTS[parts[0]];try{localStorage.setItem("wd_nm",NAME)}catch(e){}hit=true;parts.shift()}
  QRSET=null;QRSETS=[];QRBOOK=null;QRMORE=[];parts.forEach(x=>{if(/^s[1-9]$/.test(x)){QRSETS.push(x);QRSET=QRSET||x;return}else if(!QRBOOK)QRBOOK=x;else QRMORE.push(x)});return hit}
 function load(){try{return JSON.parse(localStorage.getItem("wd_"+NAME)||"{}")}catch(e){return {}}}
@@ -634,14 +642,14 @@ function finishStep(pct){const c=COURSE,s=set(),M=MN(MODE);
  $("#stage").innerHTML=`<div class="clearpanel"><img src="${MODE==="write"?OWL.knight:OWL.wizard}" alt=""><h3>${M.n} ${M.t} 클리어!</h3><div class="stars">${stars(pct)}</div><p>한 번에 맞힘 ${ST.ok}/${ST.total}</p>
   <button class="btn pri lg nextb" data-cstep style="margin-top:8px">${nx?`다음: ${MN(nx).n} ${MN(nx).t} ▶`:c.miss.size&&!c.review?`다음: ↺ 틀린 단어 ${c.miss.size}개 ▶`:"다음: 🏆 결과 보기 ▶"}</button></div>`;
  $("#cnt").textContent="클리어!";if(last&&!c.miss.size){}}
-function endCourse(){const c=COURSE,s=set(),r=rec(s.id);r.courses=(r.courses||0)+1;/* 마스터 테스트 80% 미만이어도 틀린 단어 재시험까지 끝내면 마스터로 기록 → QR 여러 세트면 다음 세트로 (2026-11-09) */if(c&&c.res.some(x=>x.m==="write")&&!r.passed.includes("write"))r.passed.push("write");save();
+function endCourse(){const c=COURSE,s=set(),r=rec(s.id);r.courses=(r.courses||0)+1;/* 마스터 테스트 80% 미만이어도 틀린 단어 재시험까지 끝내면 마스터로 기록 → QR 여러 세트면 다음 세트로 (2026-11-09) */if(c&&c.res.some(x=>x.m==="write")&&!r.passed.includes("write"))r.passed.push("write");if(c&&c.res.some(x=>x.m==="write"))try{r.dd=kdToday()}catch(e){}save();
  showResult(courseRes());
  COURSE=null;$("#act").hidden=true;home()}
 
 /* ───── 끝 ───── */
 let SENT=false,warned=false;
 function finish(){if(ST.fin)return;ST.fin=true;const s=set(),r=rec(s.id);const pct=ST.total?ST.ok/ST.total:1,pass=pct>=PASS;
- if(!ST.review){r.last=MODE;r.runs++;if(pass&&!r.passed.includes(MODE))r.passed.push(MODE);r.tried=r.tried||[];if(!r.tried.includes(MODE))r.tried.push(MODE)}save();
+ if(!ST.review){r.last=MODE;r.runs++;if(pass&&!r.passed.includes(MODE))r.passed.push(MODE);if(pass&&MODE==="write")try{r.dd=kdToday()}catch(e){}r.tried=r.tried||[];if(!r.tried.includes(MODE))r.tried.push(MODE)}save();
  if(COURSE){finishStep(pct);return}
  const M=MN(MODE),sec=Math.round((Date.now()-ST.t0)/1000),tm=`${Math.floor(sec/60)}분 ${sec%60}초`;const miss=[...ST.missed].map(i=>s.W[i][0]);const mastered=isM(r);
  showResult({owl:mastered?"knight":pass?"wizard":"scholar",title:pass?(mastered?`${s.t} 마스터!`:`${M.n} ${M.t} 클리어!`):"조금만 더!",pct,
@@ -721,7 +729,7 @@ function openStart(){$("#nm").value=NAME;$("#start").hidden=false;setTimeout(()=
 /* QR로 들어오면 목록 없이 오늘 숙제 모험만 · Day 여러 개면 하나 끝낼 때마다 다음 Day (2026-11-05 예원) */
 const QRS=()=>!!SCODE&&!!QRBOOK;let QB=null;
 function qrTargets(){const L=[QRBOOK,...QRMORE].map(findBook).filter((b,i,A)=>b&&A.indexOf(b)===i),T=[];L.forEach(b=>b.sets.forEach(x=>{if(!QRSETS.length||QRSETS.includes(x.id)||!b.sets.some(y=>QRSETS.includes(y.id)))T.push([b,x.id])}));return T}
-const qrDone=([b,id])=>{const r=P[b.pre+id];return !!(r&&(r.passed||[]).includes("write"))};
+const qrDone=([b,id])=>{const r=P[b.pre+id];return !!(r&&(r.passed||[]).includes("write")&&kdOk(r))};
 const _pickAll=pickBook;pickBook=function(){_pickAll();if(!QRS())return;if(COURSE&&QB){useBook(QB);return}const T=qrTargets();if(!T.length)return;
  const cur=T.find(([b,id])=>b===QB&&id===CUR),nx=(cur&&!qrDone(cur))?cur:(T.find(t=>!qrDone(t))||cur||T[0]);useBook(nx[0]);CUR=nx[1];QB=nx[0]};
 function qrBar(){const T=qrTargets(),i=Math.max(0,T.findIndex(([b,id])=>b===BK&&id===CUR)),done=T.filter(qrDone).length;let el=document.getElementById("qrbar");if(!el){el=document.createElement("div");el.id="qrbar";$("#course").before(el)}
@@ -821,4 +829,5 @@ window.speak=function(t,slow){const c=pick(t);if(!c)return tts(t,slow);const k=c
   var m=t.dataset.ftog,i=FS.indexOf(m);if(i>-1)FS.splice(i,1);else FS.push(m);renderCourse()},true);
  try{if(document.body.classList.contains('qrs'))qrBar()}catch(e){}
 })();
-</script></body></html>
+</script>
+</body></html>
