@@ -190,7 +190,7 @@
     const o=document.createElement("div");o.className="bmo";
     o.innerHTML=`<div class="bmo-bar"><div class="bmo-bi"><button type="button" class="bmo-x">✕ 닫기</button><div class="bmo-tt"><b>${esc(x.t)}</b><span>${esc(D.nm||"")} · ${esc(B.bk||"")} · ${esc(x.R)}</span></div><div class="bmo-dt"><b>${esc(x.lab)}</b><span>${esc(x.fd||"")}</span></div></div></div>
       <div class="bmo-in"><div class="bmo-sw"><button type="button" data-s="f" class="on">📄 앞장 · 문제</button><button type="button" data-s="b">✅ 뒷장 · 정답</button></div>
-      <div id="bmf"><div class="bmo-tip">${x.rv?`<b>지금까지 외운 ${Q.length}문장 전체 복습</b> · 할 수 있는 만큼 써 보고 정답으로 채점해요`:`본문을 외운 뒤 <b>책을 보지 않고</b> 공책이나 종이에 써 보세요 · 밑줄 하나 = 단어 하나`}<br>다 쓰면 「뒷장 · 정답」으로 채점! 한 문제씩 보려면 문제를 눌러요.</div>
+      <div id="bmf"><div class="bmo-tip">${x.w?`<b>${esc(x.w)} 다시 쓰기 · ${Q.length}문장</b> · 책을 보지 않고 써 보고 정답으로 채점해요`:x.rv?`<b>지금까지 외운 ${Q.length}문장 전체 복습</b> · 할 수 있는 만큼 써 보고 정답으로 채점해요`:`본문을 외운 뒤 <b>책을 보지 않고</b> 공책이나 종이에 써 보세요 · 밑줄 하나 = 단어 하나`}<br>다 쓰면 「뒷장 · 정답」으로 채점! 한 문제씩 보려면 문제를 눌러요.</div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">${Q.map((q,n)=>card(q,n+1,0)).join("")}</div></div>
       <div id="bmb" hidden><div class="bmo-tip">틀린 단어는 빨간 펜으로 고치고, 틀린 문장은 한 번 더 써 보세요.</div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">${Q.map((q,n)=>card(q,n+1,1)).join("")}</div>
