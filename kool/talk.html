@@ -816,6 +816,11 @@ home();
   +'#qrbar.fin .qf-s{font-size:15px;color:#5b6474;margin:0}'
   +'#course .btn.go.qf-off{pointer-events:none;background:#cfd4dc;border-color:#cfd4dc;color:#fff;box-shadow:none}'
   +'#course .path.pick [data-ftog]:not(.on) .st{background:#fff;border:2px solid #9fb3cf;color:#102f5e;opacity:1}#course .path.pick [data-ftog]:not(.on) small{color:#102f5e;opacity:1}#course .path.pick [data-ftog]{opacity:1}'
+  +'#course .path.pick [data-ftog].boss:not(.on){position:relative}#course .path.pick [data-ftog].boss:not(.on) .st{border-color:#e2b400;background:#fff8dc;animation:qfPulse 1.3s ease-in-out infinite}'
+  +'#course .path.pick [data-ftog].boss:not(.on)::before{content:"추천";position:absolute;top:-20px;left:50%;transform:translateX(-50%);background:#d64545;color:#fff;font-size:12px;font-weight:900;border-radius:999px;padding:1px 8px;white-space:nowrap}'
+  +'#course .path.pick [data-ftog].boss:not(.on)::after{content:"👆";position:absolute;bottom:-30px;left:50%;font-size:24px;line-height:1;animation:qfTap 1s ease-in-out infinite}'
+  +'#course .path.pick:has([data-ftog]){padding-top:22px;padding-bottom:30px}'
+  +'@keyframes qfPulse{0%,100%{box-shadow:0 0 0 0 rgba(226,180,0,.65)}60%{box-shadow:0 0 0 11px rgba(226,180,0,0)}}@keyframes qfTap{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-8px)}}'
   +'#course .pickhint.qf-h{font-size:15px;color:#102f5e;line-height:1.55;background:#f3f6fb;border-radius:12px;padding:10px 12px}#course .pickhint.qf-h small{display:block;margin-top:4px;font-size:13.5px;color:#8a5a00;font-weight:700}';
  document.head.appendChild(css);
  var run=function(){try{return !!COURSE}catch(e){return false}};
